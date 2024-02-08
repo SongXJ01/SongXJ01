@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>SongXJ&#39;s 博客</title>
+  <icon>https://www.gravatar.com/avatar/d7ef22269828b8e682eac7581036b129</icon>
+  
+  <link href="https://songxj01.gitee.io/atom.xml" rel="self"/>
+  
+  <link href="https://songxj01.gitee.io/"/>
+  <updated>2022-10-06T12:07:59.773Z</updated>
+  <id>https://songxj01.gitee.io/</id>
+  
+  <author>
+    <name>SongXJ</name>
+    <email>songxj01@126.com</email>
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>互联网应用开发实践：需求分析与数据库设计</title>
+    <link href="https://songxj01.gitee.io/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9A%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/"/>
+    <id>https://songxj01.gitee.io/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9A%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/</id>
+    <published>2022-09-29T04:06:01.000Z</published>
+    <updated>2022-10-06T12:07:59.773Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;在本文中将分析一个用于新生开学分配寝室的“&lt;strong&gt;宿舍秒杀&lt;/strong&gt;”系统。从用户故事开始&lt;strong&gt;探索需求&lt;/strong&gt;，进而分析得到系统的主要功能和非功能性需求。最后，根据需求分析设计数据库，数据库的设计原则是尽可能的方便之后的需求拓展和修改。</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="互联网应用开发实践" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/"/>
+    
+    
+    <category term="互联网应用开发实践" scheme="https://songxj01.gitee.io/tags/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/"/>
+    
+    <category term="MySQL" scheme="https://songxj01.gitee.io/tags/MySQL/"/>
+    
+    <category term="SpringBoot" scheme="https://songxj01.gitee.io/tags/SpringBoot/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>算法题：LeetCode (1094) 拼车【一题搞懂差分数组】</title>
+    <link href="https://songxj01.gitee.io/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9ALeetCode%20(1094)%20%E6%8B%BC%E8%BD%A6%E3%80%90%E4%B8%80%E9%A2%98%E6%90%9E%E6%87%82%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84%E3%80%91/"/>
+    <id>https://songxj01.gitee.io/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9ALeetCode%20(1094)%20%E6%8B%BC%E8%BD%A6%E3%80%90%E4%B8%80%E9%A2%98%E6%90%9E%E6%87%82%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84%E3%80%91/</id>
+    <published>2022-09-27T01:09:36.000Z</published>
+    <updated>2022-09-29T04:41:47.136Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;题目描述&quot;&gt;&lt;a href=&quot;#题目描述&quot; class=&quot;headerlink&quot; title=&quot;题目描述&quot;&gt;&lt;/a&gt;题目描述&lt;/h1&gt;&lt;p&gt;车上最初有 &lt;code&gt;capacity&lt;/code&gt; 个空座位，车只能向一个方向行驶，给定整数</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="算法题" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E7%AE%97%E6%B3%95%E9%A2%98/"/>
+    
+    
+    <category term="算法题" scheme="https://songxj01.gitee.io/tags/%E7%AE%97%E6%B3%95%E9%A2%98/"/>
+    
+    <category term="Java" scheme="https://songxj01.gitee.io/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>算法题：最长回文子串</title>
+    <link href="https://songxj01.gitee.io/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9A%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2/"/>
+    <id>https://songxj01.gitee.io/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9A%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2/</id>
+    <published>2022-09-21T16:20:01.000Z</published>
+    <updated>2022-09-21T16:10:31.556Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;问题描述&quot;&gt;&lt;a href=&quot;#问题描述&quot; class=&quot;headerlink&quot; title=&quot;问题描述&quot;&gt;&lt;/a&gt;问题描述&lt;/h1&gt;&lt;p&gt;给你一个字符串 &lt;code&gt;s&lt;/code&gt;，找到 &lt;code&gt;s&lt;/code&gt; 中最长的回文子串。&lt;/p&gt;
+&lt;h1</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="算法题" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E7%AE%97%E6%B3%95%E9%A2%98/"/>
+    
+    
+    <category term="算法题" scheme="https://songxj01.gitee.io/tags/%E7%AE%97%E6%B3%95%E9%A2%98/"/>
+    
+    <category term="Java" scheme="https://songxj01.gitee.io/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>互联网应用开发实践：MySQL数据库部署与操作</title>
+    <link href="https://songxj01.gitee.io/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9AMySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/"/>
+    <id>https://songxj01.gitee.io/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9AMySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/</id>
+    <published>2022-09-21T13:06:01.000Z</published>
+    <updated>2022-09-21T14:46:28.375Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;基础环境&quot;&gt;&lt;a href=&quot;#基础环境&quot; class=&quot;headerlink&quot; title=&quot;基础环境&quot;&gt;&lt;/a&gt;基础环境&lt;/h1&gt;&lt;p&gt;本次的实验环境是&lt;code&gt;CentOS 7.9&lt;/code&gt;</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="互联网应用开发实践" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/"/>
+    
+    
+    <category term="互联网应用开发实践" scheme="https://songxj01.gitee.io/tags/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/"/>
+    
+    <category term="MySQL" scheme="https://songxj01.gitee.io/tags/MySQL/"/>
+    
+    <category term="SpringBoot" scheme="https://songxj01.gitee.io/tags/SpringBoot/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>BUG日志：宝塔CentOS安装Docker失败（2022.9.13）</title>
+    <link href="https://songxj01.gitee.io/2022/BUG%E6%97%A5%E5%BF%97%EF%BC%9A%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5%EF%BC%882022.9.13%EF%BC%89/"/>
+    <id>https://songxj01.gitee.io/2022/BUG%E6%97%A5%E5%BF%97%EF%BC%9A%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5%EF%BC%882022.9.13%EF%BC%89/</id>
+    <published>2022-09-14T02:55:01.000Z</published>
+    <updated>2022-09-14T02:59:47.133Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;报错内容&quot;&gt;&lt;a href=&quot;#报错内容&quot; class=&quot;headerlink&quot; title=&quot;报错内容&quot;&gt;&lt;/a&gt;报错内容&lt;/h1&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td</summary>
+        
+      
+    
+    
+    
+    <category term="BUG日志" scheme="https://songxj01.gitee.io/categories/BUG%E6%97%A5%E5%BF%97/"/>
+    
+    
+    <category term="BUG" scheme="https://songxj01.gitee.io/tags/BUG/"/>
+    
+    <category term="CentOS" scheme="https://songxj01.gitee.io/tags/CentOS/"/>
+    
+    <category term="Docker" scheme="https://songxj01.gitee.io/tags/Docker/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>算法题：最大连续子序列和</title>
+    <link href="https://songxj01.gitee.io/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9A%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%AD%90%E5%BA%8F%E5%88%97%E5%92%8C/"/>
+    <id>https://songxj01.gitee.io/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9A%E6%9C%80%E5%A4%A7%E8%BF%9E%E7%BB%AD%E5%AD%90%E5%BA%8F%E5%88%97%E5%92%8C/</id>
+    <published>2022-09-07T16:19:01.000Z</published>
+    <updated>2022-09-08T10:57:14.481Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;问题描述&quot;&gt;&lt;a href=&quot;#问题描述&quot; class=&quot;headerlink&quot; title=&quot;问题描述&quot;&gt;&lt;/a&gt;问题描述&lt;/h1&gt;&lt;p&gt;求取数组中最大连续子序列和，例如给定数组为$A={1， 3， -2， 4， -5}$， 则最大连续子序列和为 6，即</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="算法题" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E7%AE%97%E6%B3%95%E9%A2%98/"/>
+    
+    
+    <category term="C++" scheme="https://songxj01.gitee.io/tags/C/"/>
+    
+    <category term="算法题" scheme="https://songxj01.gitee.io/tags/%E7%AE%97%E6%B3%95%E9%A2%98/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>程序人生：我为什么要编程？</title>
+    <link href="https://songxj01.gitee.io/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E6%88%91%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%BC%96%E7%A8%8B%EF%BC%9F/"/>
+    <id>https://songxj01.gitee.io/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E6%88%91%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%BC%96%E7%A8%8B%EF%BC%9F/</id>
+    <published>2021-08-22T16:29:02.000Z</published>
+    <updated>2021-08-22T16:32:17.135Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;我似乎又一次理解了编程的意义，但我明白未来的某一天，我一定还会问自己同样的问题 ——</summary>
+        
+      
+    
+    
+    
+    <category term="程序人生" scheme="https://songxj01.gitee.io/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/"/>
+    
+    
+    <category term="程序人生" scheme="https://songxj01.gitee.io/tags/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>程序人生：如何成为一名优秀的全栈工程师</title>
+    <link href="https://songxj01.gitee.io/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%88%90%E4%B8%BA%E4%B8%80%E5%90%8D%E4%BC%98%E7%A7%80%E7%9A%84%E5%85%A8%E6%A0%88%E5%B7%A5%E7%A8%8B%E5%B8%88/"/>
+    <id>https://songxj01.gitee.io/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%88%90%E4%B8%BA%E4%B8%80%E5%90%8D%E4%BC%98%E7%A7%80%E7%9A%84%E5%85%A8%E6%A0%88%E5%B7%A5%E7%A8%8B%E5%B8%88/</id>
+    <published>2021-08-19T16:35:02.000Z</published>
+    <updated>2021-08-22T16:29:25.071Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;对性能影响有着深入理解的技术通才&lt;/li&gt;
+&lt;li&gt;掌握多种技能，并能利用多种技能独立完成产品的人&lt;/li&gt;
+&lt;li&gt;一位资深开发工程师、架构师，以及具有敏捷开发技能的程序员&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+</summary>
+        
+      
+    
+    
+    
+    <category term="程序人生" scheme="https://songxj01.gitee.io/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/"/>
+    
+    
+    <category term="程序人生" scheme="https://songxj01.gitee.io/tags/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>程序人生：“写作”与“写代码”</title>
+    <link href="https://songxj01.gitee.io/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E2%80%9C%E5%86%99%E4%BD%9C%E2%80%9D%E4%B8%8E%E2%80%9C%E5%86%99%E4%BB%A3%E7%A0%81%E2%80%9D/"/>
+    <id>https://songxj01.gitee.io/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E2%80%9C%E5%86%99%E4%BD%9C%E2%80%9D%E4%B8%8E%E2%80%9C%E5%86%99%E4%BB%A3%E7%A0%81%E2%80%9D/</id>
+    <published>2021-08-18T14:27:02.000Z</published>
+    <updated>2021-08-18T16:22:36.071Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;p&gt;&amp;emsp;&amp;emsp;前不久在网站中读到一篇文章，讲述的是写作与作曲的关系。对于大部分程序员来说，作曲似乎离我们比较遥远，可是写作却始终与我们的工作、生活紧密相连，比如在我们的工作中要编写各种文档、做项目计划，而在生活中，我们也可能会写自己的博客或是日记。&lt;/p</summary>
+        
+      
+    
+    
+    
+    <category term="程序人生" scheme="https://songxj01.gitee.io/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/"/>
+    
+    
+    <category term="程序人生" scheme="https://songxj01.gitee.io/tags/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>后端技术栈：优秀的项目代码是怎么分层的</title>
+    <link href="https://songxj01.gitee.io/2021/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9A%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/"/>
+    <id>https://songxj01.gitee.io/2021/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9A%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/</id>
+    <published>2021-08-17T05:59:02.000Z</published>
+    <updated>2021-08-31T15:35:21.355Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;p&gt;&lt;img src=&quot;/images/loading.gif&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="后端技术栈" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88/"/>
+    
+    
+    <category term="后端" scheme="https://songxj01.gitee.io/tags/%E5%90%8E%E7%AB%AF/"/>
+    
+    <category term="项目架构" scheme="https://songxj01.gitee.io/tags/%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>前端技术栈：Vue 双向绑定</title>
+    <link href="https://songxj01.gitee.io/2021/%E5%89%8D%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9AVue-%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A/"/>
+    <id>https://songxj01.gitee.io/2021/%E5%89%8D%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9AVue-%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A/</id>
+    <published>2021-08-17T05:59:02.000Z</published>
+    <updated>2021-08-19T01:28:33.595Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h2 id=&quot;MVVM模式&quot;&gt;&lt;a href=&quot;#MVVM模式&quot; class=&quot;headerlink&quot; title=&quot;MVVM模式&quot;&gt;&lt;/a&gt;MVVM模式&lt;/h2&gt;&lt;p&gt;&amp;emsp;&amp;emsp;说到 Vue 的双向绑定首先联系到的就是</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="前端技术栈" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E5%89%8D%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88/"/>
+    
+    
+    <category term="Vue" scheme="https://songxj01.gitee.io/tags/Vue/"/>
+    
+    <category term="前端" scheme="https://songxj01.gitee.io/tags/%E5%89%8D%E7%AB%AF/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>算法分析与设计：动态规划（空间复杂度优化）</title>
+    <link href="https://songxj01.gitee.io/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%EF%BC%88%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%BC%98%E5%8C%96%EF%BC%89/"/>
+    <id>https://songxj01.gitee.io/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%EF%BC%88%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%BC%98%E5%8C%96%EF%BC%89/</id>
+    <published>2021-08-16T05:59:02.000Z</published>
+    <updated>2021-08-19T01:27:59.376Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h2 id=&quot;背包问题&quot;&gt;&lt;a href=&quot;#背包问题&quot; class=&quot;headerlink&quot; title=&quot;背包问题&quot;&gt;&lt;/a&gt;背包问题&lt;/h2&gt;&lt;h4 id=&quot;Problem-Description&quot;&gt;&lt;a href=&quot;#Problem-Description&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="算法分析与设计" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1/"/>
+    
+    
+    <category term="背包问题" scheme="https://songxj01.gitee.io/tags/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/"/>
+    
+    <category term="最小硬币问题" scheme="https://songxj01.gitee.io/tags/%E6%9C%80%E5%B0%8F%E7%A1%AC%E5%B8%81%E9%97%AE%E9%A2%98/"/>
+    
+    <category term="动态规划" scheme="https://songxj01.gitee.io/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>算法分析与设计：7大排序算法大汇总（C++）</title>
+    <link href="https://songxj01.gitee.io/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A7%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E5%A4%A7%E6%B1%87%E6%80%BB%EF%BC%88C++%EF%BC%89/"/>
+    <id>https://songxj01.gitee.io/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A7%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E5%A4%A7%E6%B1%87%E6%80%BB%EF%BC%88C++%EF%BC%89/</id>
+    <published>2021-01-09T05:59:02.000Z</published>
+    <updated>2021-08-19T01:28:07.233Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://baike.baidu.com/item/%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/4602306?fr=aladdin&quot;&gt;冒泡排序&lt;/a&gt;（Bubble</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="算法分析与设计" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1/"/>
+    
+    
+    <category term="排序算法" scheme="https://songxj01.gitee.io/tags/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/"/>
+    
+    <category term="C++" scheme="https://songxj01.gitee.io/tags/C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>操作系统原理：C语言 threads多线程 实现单机聊天系统</title>
+    <link href="https://songxj01.gitee.io/2020/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%EF%BC%9AC%E8%AF%AD%E8%A8%80%20threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/"/>
+    <id>https://songxj01.gitee.io/2020/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%EF%BC%9AC%E8%AF%AD%E8%A8%80%20threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/</id>
+    <published>2020-04-24T05:59:02.000Z</published>
+    <updated>2021-08-19T01:28:31.708Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;p&gt;&amp;emsp;&amp;emsp;这个实验会建立一个全双工系统（Full-Duplex），实现两个管道同时收发消息。在程序中会涉及到3个文件，2个管道，2个进程，4个线程。线程之间的拓扑图如下：&lt;br&gt;&lt;img src=&quot;/images/loading.gif&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="操作系统原理" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/"/>
+    
+    
+    <category term="Pipe管道" scheme="https://songxj01.gitee.io/tags/Pipe%E7%AE%A1%E9%81%93/"/>
+    
+    <category term="单机聊天系统" scheme="https://songxj01.gitee.io/tags/%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/"/>
+    
+    <category term="C语言" scheme="https://songxj01.gitee.io/tags/C%E8%AF%AD%E8%A8%80/"/>
+    
+    <category term="多线程" scheme="https://songxj01.gitee.io/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Python：Matplotlib 绘制 3D曲面图</title>
+    <link href="https://songxj01.gitee.io/2020/Python%EF%BC%9AMatplotlib%20%E7%BB%98%E5%88%B6%203D%E6%9B%B2%E9%9D%A2%E5%9B%BE/"/>
+    <id>https://songxj01.gitee.io/2020/Python%EF%BC%9AMatplotlib%20%E7%BB%98%E5%88%B6%203D%E6%9B%B2%E9%9D%A2%E5%9B%BE/</id>
+    <published>2020-04-13T05:59:02.000Z</published>
+    <updated>2021-08-19T01:27:55.815Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;p&gt;Matplotlib 是 Python 的绘图库，它与 NumPy 一起使用，可以基本上实现 MATLAB 的绘图和计算功能，而且效率更高，速度更快。&lt;/p&gt;
+&lt;p&gt;今天主要说一下关于 Matplotlib</summary>
+        
+      
+    
+    
+    
+    <category term="技术笔记" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="Python" scheme="https://songxj01.gitee.io/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/Python/"/>
+    
+    
+    <category term="Python" scheme="https://songxj01.gitee.io/tags/Python/"/>
+    
+    <category term="Matplotlib" scheme="https://songxj01.gitee.io/tags/Matplotlib/"/>
+    
+  </entry>
+  
+</feed>

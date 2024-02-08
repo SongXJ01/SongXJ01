@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="学习,技术,随笔,摄影,生活" />
+       
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>操作系统原理：C语言 threads多线程 实现单机聊天系统 |  SongXJ&#39;s 博客</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/songxj.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's 博客" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-操作系统原理：C语言 threads多线程实现单机聊天系统"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  操作系统原理：C语言 threads多线程 实现单机聊天系统
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2020/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%EF%BC%9AC%E8%AF%AD%E8%A8%80%20threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/" class="article-date">
+  <time datetime="2020-04-24T05:59:02.000Z" itemprop="datePublished">2020-04-24</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a> / <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86/">操作系统原理</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">2.8k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">12 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <hr>
+<p>&emsp;&emsp;这个实验会建立一个全双工系统（Full-Duplex），实现两个管道同时收发消息。在程序中会涉及到3个文件，2个管道，2个进程，4个线程。线程之间的拓扑图如下：<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/20200424124332193.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70" alt="通信示意图"><br>【完整代码附在文章最后】</p>
+<hr>
+<h2 id="创建连通管道"><a href="#创建连通管道" class="headerlink" title="创建连通管道"></a>创建连通管道</h2><p>&emsp;&emsp;首先创建<code>fifo_create.c</code>文件来事先创建2个管道，分别为A发送B接收、A接收B发送。使用<code>mkfifo()</code>语句创建管道，分别标识为“A2B”、“B2A”。<br>访问权限为<code>0644</code>，第一位0不算，从左至右三个数字分别代表<code>rw-</code> <code>r--</code> <code>r--</code>对应转化为的二进制<code>110</code> <code>100</code> <code>100</code>。十进制第1个数字代表<strong>文件所有者</strong>的权限，十进制第2个数字代表<strong>同组用户</strong>的权限，十进制第3个数字代表<strong>其他用户</strong>的权限。<br>之后验证<code>mkfifo()</code>的返回值，验证管道是否创建成功。如果创建成功，当前目录下回多出来“A2B”、“B2A”两个文件。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> A2B = mkfifo(<span class="string">&quot;A2B&quot;</span>, <span class="number">0644</span>);</span><br><span class="line">	<span class="keyword">int</span> B2A = mkfifo(<span class="string">&quot;B2A&quot;</span>, <span class="number">0644</span>);</span><br><span class="line">	<span class="keyword">if</span> (A2B == <span class="number">-1</span>)	</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Falled to create the FIFO of A2B!\n&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (B2A == <span class="number">-1</span>)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Falled to create the FIFO of B2A!\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="创建2个进程4个线程"><a href="#创建2个进程4个线程" class="headerlink" title="创建2个进程4个线程"></a>创建2个进程4个线程</h2><h3 id="连接标记符"><a href="#连接标记符" class="headerlink" title="连接标记符"></a>连接标记符</h3><p>&emsp;&emsp;创建<code>A.c</code>和<code>B.c</code>两个文件，在两个文件中均创建<code>send</code>和<code>receive</code>两个线程。因为两个文件类似，这里以<code>A.c</code>为例，<code>B.c</code>同理。<br>在<code>A.c</code>中首先定义一个全局变量，用来标记两个管道是否连接，如果均连接成功，则<code>flag=1</code>，有任意一个管道断开则<code>flag=0</code> 。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//全局变量，标记是否连接，两个管道中有一个断开，则flag变为0</span></span><br><span class="line"><span class="keyword">int</span> flag = <span class="number">1</span>;	</span><br></pre></td></tr></table></figure>
+<h3 id="发送消息"><a href="#发送消息" class="headerlink" title="发送消息"></a>发送消息</h3><p>&emsp;&emsp;通过<code>send</code>函数实现发送消息。在管道连通之前，即在<code>open</code>语句等待管道连通。这里<code>open</code>语句使用只写的方式进行打开，如果管道连接成功，程序继续向下运行。<br>定义一个循环进行消息的多次发送，使用<code>fgets()</code>语句从指定的标准输入流<code>stdin</code>中读取一行，并把它存储在<code>buf</code>所指向的字符串内，多余的长度使用<code>\0</code>填充，而且<code>fgets()</code>语句包含换行符，所以在之后的<code>receive</code>函数中打印的时候不需要再添加换行符。<br>之后使用<code>write</code>语句将储存在<code>buf</code>中的全部字符串写入到刚才打开的<code>A2B</code>管道中。然后进行判断，如果刚才输入的是“88”则将标识符<code>flag</code>变成0，并打印下线提示，break出循环。如果输入的不是“88”，则在命令行打印<code>[A]:</code>，等待下一次输入。<br>最后关闭管道，退出线程。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//A给B发送消息</span></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">send</span><span class="params">()</span> </span>&#123;	</span><br><span class="line">	<span class="keyword">char</span> buf[<span class="number">1024</span>];</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Waiting...\n&quot;</span>);</span><br><span class="line">	<span class="keyword">int</span> fd = open(<span class="string">&quot;A2B&quot;</span>, O_WRONLY);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Connected!\n===============================================\n&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (fd == <span class="number">-1</span>)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Open fifo error!\n&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[A]:&quot;</span>);</span><br><span class="line">	<span class="keyword">while</span> (flag == <span class="number">1</span>)&#123;</span><br><span class="line">		fgets(buf, <span class="number">1023</span>, <span class="built_in">stdin</span>);</span><br><span class="line">		write(fd, buf, <span class="number">1023</span>);</span><br><span class="line">		<span class="keyword">if</span> (buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span> &amp;&amp; buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span>) &#123;</span><br><span class="line">			flag = <span class="number">0</span>;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;You have been offline.\n&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (flag == <span class="number">1</span>) </span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;[A]:&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	close(fd);</span><br><span class="line">	pthread_exit(<span class="literal">NULL</span>);	<span class="comment">//退出线程</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="接收消息"><a href="#接收消息" class="headerlink" title="接收消息"></a>接收消息</h3><p>&emsp;&emsp;通过<code>receive</code>函数实现接收消息的功能。在管道连通之前，即<code>open</code>语句等待管道连通。这里<code>open</code>语句使用只读的方式进行打开，如果管道连接成功，程序继续向下运行。因为在本实验中两个通道一定是同时连接的，在<code>send</code>函数中已经打印连接成功的提示，所以在<code>receive</code>中就没有重复打印。<br>定义一个循环进行消息的多次接收，使用<code>read</code>语句将管道中的字符串全部储存在<code>buf</code>中，之后在末尾加上一个<code>\0</code>，表示字符串的结束。<br>然后进行判断，如果刚才接收到的是“88”则将标识符<code>flag</code>变成0，打印对方的最后一句话，同时打印对方已经下线的提示，break出循环。如果输入的不是“88”，则在命令行打印对方输入的内容后继续打印<code>[A]:</code>，等待下一次输入。<br>在打印接收到的对方消息时需要先在前面加上4个退格符，删除之前输入的<code>[A]:</code>这四个字符。另外要使用<code>fflush(stdout);</code>语句强制刷新标准输出缓冲区。<br>最后关闭管道，退出线程。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//A接收B发来的消息</span></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">receive</span><span class="params">()</span> </span>&#123;	</span><br><span class="line">	<span class="keyword">char</span> buf[<span class="number">1024</span>];</span><br><span class="line">	<span class="keyword">int</span> fd = open(<span class="string">&quot;B2A&quot;</span>, O_RDONLY);</span><br><span class="line">	<span class="keyword">if</span> (fd == <span class="number">-1</span>)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Open fifo error!\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (flag == <span class="number">1</span>)&#123;</span><br><span class="line">		read(fd, buf, <span class="number">1023</span>);</span><br><span class="line">		<span class="comment">//如果对方发“88”则断开连接，退出进程</span></span><br><span class="line">		<span class="keyword">if</span> (buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span> &amp;&amp; buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span>) &#123;</span><br><span class="line">			flag = <span class="number">0</span>;</span><br><span class="line">			<span class="built_in">memset</span>(buf + <span class="number">1023</span>, <span class="string">&#x27;\0&#x27;</span>, <span class="number">1</span>);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;\b\b\b\b[B]:%s&quot;</span>, buf);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;Person B have been offline.\n&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);	<span class="comment">//强制刷新输出缓冲区</span></span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span>(flag == <span class="number">1</span>)&#123;</span><br><span class="line">			<span class="built_in">memset</span>(buf + <span class="number">1023</span>, <span class="string">&#x27;\0&#x27;</span>, <span class="number">1</span>);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;\b\b\b\b[B]:%s&quot;</span>, buf);<span class="comment">//删除之前输入的[X]:这四个字符</span></span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;[A]:&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);	<span class="comment">//强制刷新输出缓冲区</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	close(fd);</span><br><span class="line">	pthread_exit(<span class="literal">NULL</span>);	<span class="comment">//退出线程</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="双线程"><a href="#双线程" class="headerlink" title="双线程"></a>双线程</h3><p>&emsp;&emsp;在主函数中建立两个线程，并分别调用<code>send</code>和<code>receive</code>两个函数，并等待它们退出。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">pthread_t</span> tid1, tid2;	<span class="comment">//线程ID</span></span><br><span class="line">	<span class="keyword">pthread_attr_t</span> attr;	<span class="comment">//线程属性</span></span><br><span class="line">	pthread_attr_init(&amp;attr); <span class="comment">//设置默认线程属性</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//执行两个线程分别进行收发</span></span><br><span class="line">	pthread_create(&amp;tid1, &amp;attr, send, <span class="literal">NULL</span>);</span><br><span class="line">	pthread_create(&amp;tid2, &amp;attr, receive, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//等待两个线程</span></span><br><span class="line">	pthread_join(tid1, <span class="literal">NULL</span>);</span><br><span class="line">	pthread_join(tid2, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="程序运行过程截图"><a href="#程序运行过程截图" class="headerlink" title="程序运行过程截图"></a>程序运行过程截图</h2><ol>
+<li><p>等待连接<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/20200424131613716.png#pic_center" alt="等待连接"></p>
+</li>
+<li><p>管道连接成功<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/20200424131447920.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70#pic_center" alt="管道连接成功"></p>
+</li>
+<li><p>进行全工聊天<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/20200424131630580.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70#pic_center" alt="进行全工聊天"></p>
+</li>
+<li><p>聊天结束<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/20200424131654614.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70#pic_center" alt="聊天结束"></p>
+</li>
+</ol>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>&emsp;&emsp;本次实验结合了<strong>多线程</strong>和<strong>管道连接</strong>的知识，实现了一个简单的单机聊天功能。在本次实验中有以下几个需要注意的地方：</p>
+<h3 id="fgets-的特点："><a href="#fgets-的特点：" class="headerlink" title="fgets() 的特点："></a>fgets() 的特点：</h3><ul>
+<li><code>gets()</code>和<code>fgets()</code>都可以读取空格。</li>
+<li><code>gets()</code>读取一行，不能设定读取容量，这一行有多少便读取多少，有可能会发生内存溢出。然而<code>fgets()</code>有三个参数，它是从 stream 流中读取 size 个字符存储到字符指针变量 s 所指向的内存空间。它的返回值是一个指针，指向字符串中第一个字符的地址。</li>
+<li>在本实验中<code>fgets() </code>函数的读取大小均为1023，基本上满足了普通聊天的需要。<code>fgets()</code> 函数的size参数如果小于字符串的长度，那么字符串将会被截取；如果size大于字符串的长度则多余的部分系统会自动用 <code>\0</code> 填充。</li>
+<li><code>fgets() </code>函数会读取换行符，所以在receive接收后，打印时不需要再添加换行符。</li>
+</ul>
+<h3 id="fflush-强制刷新缓冲区："><a href="#fflush-强制刷新缓冲区：" class="headerlink" title="fflush()强制刷新缓冲区："></a>fflush()强制刷新缓冲区：</h3><p>&emsp;&emsp;在本实验中使用<code>fflush()</code>和<code>stdout</code>、<code>stdin</code>结合，可以将标准输入输出流中的数据强制刷新在命令行中。特别是在打印完接收的数据后，再次打印<code>[A]:</code>等待输入的字符串时，如果不进行强制刷新，这个字符串不会立刻显示在命令行中，而是跟随下一次的输入或输出结果同时显示。</p>
+<h3 id="“-b”退格："><a href="#“-b”退格：" class="headerlink" title="“\b”退格："></a>“\b”退格：</h3><p>&emsp;&emsp;因为每次打印完聊天消息后，都需要继续打印<code>[A]:</code> 等待输入，而如果未进行输入而是接收了对方的消息，那么<code>[A]:</code>这个字符串就多余了，需要使用4个<code>\b</code>删除。</p>
+<hr>
+<h2 id="实验的不足之处"><a href="#实验的不足之处" class="headerlink" title="实验的不足之处"></a>实验的不足之处</h2><ul>
+<li>本实验在判断字符串是否为“88”时，使用的方法比较笨，同时比较两个字符完成的，其实可以使用<code>strcmp</code>函数直接对两个字符串进行比较。</li>
+<li>本实验的最后还有一个小bug，就是在<code>A</code>输入“88”之后，两个程序不能立刻退出，而是需要在<code>B</code>上输入一个回车后才能退出，<code>B</code>对<code>A</code>发送消息情况同样。这个bug我试了很多方法都不能很好的解决，希望路过的大佬提供建议。</li>
+</ul>
+<hr>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><h3 id="fifo-create-c"><a href="#fifo-create-c" class="headerlink" title="fifo_create.c"></a>fifo_create.c</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> A2B = mkfifo(<span class="string">&quot;A2B&quot;</span>, <span class="number">0644</span>);</span><br><span class="line">	<span class="keyword">int</span> B2A = mkfifo(<span class="string">&quot;B2A&quot;</span>, <span class="number">0644</span>);</span><br><span class="line">	<span class="keyword">if</span> (A2B == <span class="number">-1</span>)	</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Falled to create the FIFO of A2B!\n&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (B2A == <span class="number">-1</span>)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Falled to create the FIFO of B2A!\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="A-c"><a href="#A-c" class="headerlink" title="A.c"></a>A.c</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//全局变量，标记是否连接，两个管道中有一个断开，则flag变为0</span></span><br><span class="line"><span class="keyword">int</span> flag = <span class="number">1</span>;	</span><br><span class="line"></span><br><span class="line"><span class="comment">//A给B发送消息</span></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">send</span><span class="params">()</span> </span>&#123;	</span><br><span class="line">	<span class="keyword">char</span> buf[<span class="number">1024</span>];</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Waiting...\n&quot;</span>);</span><br><span class="line">	<span class="keyword">int</span> fd = open(<span class="string">&quot;A2B&quot;</span>, O_WRONLY);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Connected!\n===============================================\n&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (fd == <span class="number">-1</span>)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Open fifo error!\n&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[A]:&quot;</span>);</span><br><span class="line">	<span class="keyword">while</span> (flag == <span class="number">1</span>)&#123;</span><br><span class="line">		fgets(buf, <span class="number">1023</span>, <span class="built_in">stdin</span>);</span><br><span class="line">		write(fd, buf, <span class="number">1023</span>);</span><br><span class="line">		<span class="keyword">if</span> (buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span> &amp;&amp; buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span>) &#123;</span><br><span class="line">			flag = <span class="number">0</span>;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;You have been offline.\n&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (flag == <span class="number">1</span>) </span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;[A]:&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	close(fd);</span><br><span class="line">	pthread_exit(<span class="literal">NULL</span>);	<span class="comment">//退出线程</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//A接收B发来的消息</span></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">receive</span><span class="params">()</span> </span>&#123;	</span><br><span class="line">	<span class="keyword">char</span> buf[<span class="number">1024</span>];</span><br><span class="line">	<span class="keyword">int</span> fd = open(<span class="string">&quot;B2A&quot;</span>, O_RDONLY);</span><br><span class="line">	<span class="keyword">if</span> (fd == <span class="number">-1</span>)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Open fifo error!\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (flag == <span class="number">1</span>)&#123;</span><br><span class="line">		read(fd, buf, <span class="number">1023</span>);</span><br><span class="line">		<span class="comment">//如果对方发“88”则断开连接，退出进程</span></span><br><span class="line">		<span class="keyword">if</span> (buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span> &amp;&amp; buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span>) &#123;</span><br><span class="line">			flag = <span class="number">0</span>;</span><br><span class="line">			<span class="built_in">memset</span>(buf + <span class="number">1023</span>, <span class="string">&#x27;\0&#x27;</span>, <span class="number">1</span>);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;\b\b\b\b[B]:%s&quot;</span>, buf);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;Person B have been offline.\n&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);	<span class="comment">//强制刷新输出缓冲区</span></span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span>(flag == <span class="number">1</span>)&#123;</span><br><span class="line">			<span class="built_in">memset</span>(buf + <span class="number">1023</span>, <span class="string">&#x27;\0&#x27;</span>, <span class="number">1</span>);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;\b\b\b\b[B]:%s&quot;</span>, buf);<span class="comment">//删除之前输入的[X]:这四个字符</span></span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;[A]:&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);	<span class="comment">//强制刷新输出缓冲区</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	close(fd);</span><br><span class="line">	pthread_exit(<span class="literal">NULL</span>);	<span class="comment">//退出线程</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">pthread_t</span> tid1, tid2;	<span class="comment">//线程ID</span></span><br><span class="line">	<span class="keyword">pthread_attr_t</span> attr;	<span class="comment">//线程属性</span></span><br><span class="line">	pthread_attr_init(&amp;attr); <span class="comment">//设置默认线程属性</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//执行两个线程分别进行收发</span></span><br><span class="line">	pthread_create(&amp;tid1, &amp;attr, send, <span class="literal">NULL</span>);</span><br><span class="line">	pthread_create(&amp;tid2, &amp;attr, receive, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//等待两个线程</span></span><br><span class="line">	pthread_join(tid1, <span class="literal">NULL</span>);</span><br><span class="line">	pthread_join(tid2, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="B-c"><a href="#B-c" class="headerlink" title="B.c"></a>B.c</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> flag = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//B给A发送消息</span></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">send</span><span class="params">()</span> </span>&#123;	</span><br><span class="line">	<span class="keyword">char</span> buf[<span class="number">1024</span>];</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Waiting...\n&quot;</span>);</span><br><span class="line">	<span class="keyword">int</span> fd = open(<span class="string">&quot;B2A&quot;</span>, O_WRONLY);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Connected!\n===============================================\n&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (fd == <span class="number">-1</span>)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Open fifo error!\n&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[B]:&quot;</span>);</span><br><span class="line">	<span class="keyword">while</span> (flag == <span class="number">1</span>)&#123;</span><br><span class="line">		fgets(buf, <span class="number">1023</span>, <span class="built_in">stdin</span>);		</span><br><span class="line">		write(fd, buf, <span class="number">1023</span>);</span><br><span class="line">		<span class="keyword">if</span> (buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span> &amp;&amp; buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span>) &#123;</span><br><span class="line">			flag = <span class="number">0</span>;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;You have been offline.\n&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (flag == <span class="number">1</span>) </span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;[B]:&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	close(fd);</span><br><span class="line">	pthread_exit(<span class="literal">NULL</span>);	<span class="comment">//退出线程</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// B接收A发来的消息</span></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">receive</span><span class="params">()</span> </span>&#123;	</span><br><span class="line">	<span class="keyword">char</span> buf[<span class="number">1024</span>];</span><br><span class="line">	<span class="keyword">int</span> fd = open(<span class="string">&quot;A2B&quot;</span>, O_RDONLY);</span><br><span class="line">	<span class="keyword">if</span> (fd == <span class="number">-1</span>)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Open fifo error!\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (flag == <span class="number">1</span>) &#123;</span><br><span class="line">		read(fd, buf, <span class="number">1023</span>);</span><br><span class="line">		<span class="keyword">if</span> (buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span> &amp;&amp; buf[<span class="number">0</span>] == <span class="string">&#x27;8&#x27;</span>) &#123;</span><br><span class="line">			flag = <span class="number">0</span>;</span><br><span class="line">			<span class="built_in">memset</span>(buf + <span class="number">1023</span>, <span class="string">&#x27;\0&#x27;</span>, <span class="number">1</span>);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;\b\b\b\b[A]:%s&quot;</span>, buf);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;Person A have been offline.\n&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (flag == <span class="number">1</span>) &#123;</span><br><span class="line">			<span class="built_in">memset</span>(buf + <span class="number">1023</span>, <span class="string">&#x27;\0&#x27;</span>, <span class="number">1</span>);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;\b\b\b\b[A]:%s&quot;</span>, buf);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;[B]:&quot;</span>);</span><br><span class="line">			fflush(<span class="built_in">stdout</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	close(fd);</span><br><span class="line">	pthread_exit(<span class="literal">NULL</span>);	<span class="comment">//退出线程</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">pthread_t</span> tid1, tid2;	<span class="comment">//线程ID</span></span><br><span class="line">	<span class="keyword">pthread_attr_t</span> attr;	<span class="comment">//线程属性</span></span><br><span class="line">	pthread_attr_init(&amp;attr); <span class="comment">//设置默认线程属性</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//执行两个线程</span></span><br><span class="line">	pthread_create(&amp;tid1, &amp;attr, send, <span class="literal">NULL</span>);</span><br><span class="line">	pthread_create(&amp;tid2, &amp;attr, receive, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//等待两个线程</span></span><br><span class="line">	pthread_join(tid1, <span class="literal">NULL</span>);</span><br><span class="line">	pthread_join(tid2, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="/images/loading.gif" data-original="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2020/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%EF%BC%9AC%E8%AF%AD%E8%A8%80%20threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Pipe%E7%AE%A1%E9%81%93/" rel="tag">Pipe管道</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/" rel="tag">单机聊天系统</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A7%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E5%A4%A7%E6%B1%87%E6%80%BB%EF%BC%88C++%EF%BC%89/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            算法分析与设计：7大排序算法大汇总（C++）
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2020/Python%EF%BC%9AMatplotlib%20%E7%BB%98%E5%88%B6%203D%E6%9B%B2%E9%9D%A2%E5%9B%BE/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Python：Matplotlib 绘制 3D曲面图</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "tahglBYerISh7wrhyXMEH6UV-gzGzoHsz",
+    app_key: "G2qOYTyMGB3F79hHhg6LARHs",
+    path: window.location.pathname,
+    avatar: "mp",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2023
+        <i class="ri-heart-fill heart_icon"></i> SongXJ
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1280220642&amp;web_id=1280220642'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/loading.gif" data-original="/images/songxj.svg" alt="SongXJ&#39;s 博客"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影记忆</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友情链接</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">博主简介</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/loading.gif" data-original="/images/money_alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/loading.gif" data-original="/images/money_wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+ 
+<script src="/js/clickLove.js"></script>
+ 
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
+    
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载swiper')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
+<style></style><!-- hexo injector body_end end --><script>
+            window.imageLazyLoadSetting = {
+                isSPA: true,
+                preloadRatio: 3,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var e=n.imageLazyLoadSetting.isSPA,i=n.imageLazyLoadSetting.preloadRatio||1,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){e&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,a=0;a<r.length;a++)0<=(t=(t=r[a]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(n.innerHeight*i||document.documentElement.clientHeight*i)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},t.src!==i&&(n.src=i)}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+
+</html>
