@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /home/
+Allow: /archives/
+Allow: /tags/
+Allow: /photos/
+Allow: /tags/
+Disallow: /friends/
+Disallow: /js/
+Disallow: /css/
+Disallow: /fonts/
+Disallow: /vendors/
+Disallow: /fancybox/
+
+Sitemap: http://songxj01.gitee.io/sitemap.xml
+Sitemap: http://songxj01.gitee.io/baidusitemap.xml

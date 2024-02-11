@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="学习,技术,随笔,摄影,生活" />
+       
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>宿舍秒杀系统的需求分析与数据库设计 |  SongXJ&#39;s Blog</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/songxj.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    </head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-宿舍秒杀系统的需求分析与数据库设计"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  宿舍秒杀系统的需求分析与数据库设计
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" class="article-date">
+  <time datetime="2023-09-29T04:06:01.000Z" itemprop="datePublished">2023-09-29</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a> / <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/">互联网应用开发实践</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">1.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">4 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>&emsp;&emsp;在本文中将分析一个用于新生开学分配寝室的“<strong>宿舍秒杀</strong>”系统。从用户故事开始<strong>探索需求</strong>，进而分析得到系统的主要功能和非功能性需求。最后，根据需求分析设计数据库，数据库的设计原则是尽可能的方便之后的需求拓展和修改。</p>
+<hr>
+<p><br/><br/></p>
+<h1 id="用户故事"><a href="#用户故事" class="headerlink" title="用户故事"></a>用户故事</h1><p>&emsp;&emsp;用户故事一般是产品经理初次描述给自己和开发人员看的，然后产品负责人要依据用户故事设计原型，原型在客户那里通过后，然后再在用户故事里面添加附件。用户故事不会一开始就很清晰，甚至可能不会有特专业术语。</p>
+<h2 id="学生"><a href="#学生" class="headerlink" title="学生"></a>学生</h2><ul>
+<li>作为<code>学生</code>，我想要<code>在系统里登录，并获取验证码</code>，以便于<code>登录到自己的账号中进行宿舍选取</code>。</li>
+<li>作为<code>学生</code>，我想要<code>查询剩余宿舍的信息</code>，以便于<code>及时选择或更换寝室志愿</code>。</li>
+<li>作为<code>学生</code>，我想要<code>查询宿舍的基本信息（楼号、寝室人数、是否为上下铺、寝室朝向）</code>，以便于<code>选择自己志愿的寝室</code>。</li>
+<li>作为<code>学生</code>，我想要<code>核对我的个人信息</code>，以便于<code>在分寝室的时候不会出现错误</code>。</li>
+<li>作为<code>学生</code>，我想要<code>可以组队抢寝室</code>，以便于<code>在分寝室的时候不会出现错误</code>。</li>
+<li>作为<code>学生</code>，我想要<code>可以创建组队</code>或<code>加入队伍</code>，以便于<code>进行组队抢宿舍</code>。</li>
+<li>作为<code>学生</code>，我想要<code>在系统里预先选择要抢的宿舍，到点提交</code>，以便于<code>在第一时间抢宿舍</code>。</li>
+<li>作为<code>学生</code>，我想要<code>查看寝室的选取结果（包括分到的寝室号，室友的相关信息）</code>，以便于<code>及时联系到室友</code>。</li>
+</ul>
+<h2 id="寝管"><a href="#寝管" class="headerlink" title="寝管"></a>寝管</h2><ul>
+<li>作为<code>寝管</code>，我想要<code>修改每个寝室的床位信息</code>，以便于<code>管理寝室信息</code>。</li>
+<li>作为<code>寝管</code>，我想要<code>按照寝室顺序导出名单</code>，以便于<code>在报到时让领钥匙的同学签字</code>。</li>
+<li>作为<code>寝管</code>，我想要<code>查询并修改床位的可用状态</code>，以便于<code>对损坏的床位进行申请报修</code>。</li>
+</ul>
+<h2 id="管理员"><a href="#管理员" class="headerlink" title="管理员"></a>管理员</h2><ul>
+<li>作为<code>管理员</code>，我想要<code>学生核对他们的个人信息</code>，以便于<code>在分寝室的时候不会出现错误</code>。</li>
+<li>作为<code>管理员</code>，我想要<code>对学生设置标签</code>，以便于<code>后期规定按照某一标签（如班级、专业）进行分寝室</code>。</li>
+<li>作为<code>管理员</code>，我想要<code>系统支持2000人左右的同时访问</code>，以便于<code>满足学生可以在一个时间点同时抢寝室</code>。</li>
+<li>作为<code>管理员</code>，我想要<code>防止有同学使用脚本去抢寝室</code>，以便于<code>保证系统的安全性</code>。</li>
+</ul>
+<p><br/><br/></p>
+<h1 id="需求分析"><a href="#需求分析" class="headerlink" title="需求分析"></a>需求分析</h1><h2 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h2><ul>
+<li>学生核对个人基本信息</li>
+<li>查询宿舍基本信息（如，宿舍人数等）</li>
+<li>查询宿舍空床位信息</li>
+<li>学生可以被设置标签（如班级）</li>
+<li>根据标签设置可选房间列表（如列表为空，则可选所有满足条件的宿舍）</li>
+<li>学生可以组队选宿舍（1-4人）</li>
+<li>查看订单处理结果</li>
+<li>管理员可以管理宿舍信息</li>
+<li>管理员可以编辑宿舍床位的状态（如床位不可用）</li>
+<li>管理员可以导出相关的数据</li>
+</ul>
+<h2 id="非功能性需求"><a href="#非功能性需求" class="headerlink" title="非功能性需求"></a>非功能性需求</h2><ul>
+<li>支持2000人并发</li>
+<li>防止脚本</li>
+</ul>
+<p><br/><br/></p>
+<h1 id="数据库设计"><a href="#数据库设计" class="headerlink" title="数据库设计"></a>数据库设计</h1><h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p>&emsp;&emsp;考虑到后期需求可能会发生变动，因此在数据库设计的时候最大程度降低了表与表之间的关联程度。数据库中有两个核心主体——<code>bed</code>（床位信息）、<code>student</code>（学生信息）。</p>
+<ul>
+<li>与<strong>床位信息</strong>相关的表有：<code>dorm</code>（宿舍信息）、<code>house</code>（宿舍楼信息）、<code>bed_type</code>（床铺类型信息）。</li>
+<li>与<strong>学生信息</strong>相关的表有：<code>class</code>（班级信息）、<code>major</code>（专业信息）、<code>stu_contact_info</code>（学生联络信息表）。其中年级信息作为一个属性考虑在班级信息内。</li>
+</ul>
+<p>&emsp;&emsp;对于<strong>学生</strong>和<strong>床位</strong>的关系，单独建立了一个关联表 <code>rel_bed_stu</code>。该表使用“学号+时间戳”的方式作为主键，记录学生床位的分配信息。除此之外，还设计了 <code>config</code> 表储存系统相关配置信息，<code>admin</code> 表储存管理员相关信息。</p>
+<h2 id="数据库表结构"><a href="#数据库表结构" class="headerlink" title="数据库表结构"></a>数据库表结构</h2><h3 id="床位信息表：bed"><a href="#床位信息表：bed" class="headerlink" title="床位信息表：bed"></a>床位信息表：bed</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%BA%8A%E4%BD%8D%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="床位信息表"></p>
+<h3 id="寝室信息表：dorm"><a href="#寝室信息表：dorm" class="headerlink" title="寝室信息表：dorm"></a>寝室信息表：dorm</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%AF%9D%E5%AE%A4%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="寝室信息表"></p>
+<h3 id="楼号信息表：house"><a href="#楼号信息表：house" class="headerlink" title="楼号信息表：house"></a>楼号信息表：house</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E6%A5%BC%E5%8F%B7%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="楼号信息表"></p>
+<h3 id="床位类型表：bed-type"><a href="#床位类型表：bed-type" class="headerlink" title="床位类型表：bed_type"></a>床位类型表：bed_type</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%BA%8A%E4%BD%8D%E7%B1%BB%E5%9E%8B%E8%A1%A8.png" alt="床位类型表"></p>
+<h3 id="学生信息表：student"><a href="#学生信息表：student" class="headerlink" title="学生信息表：student"></a>学生信息表：student</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="学生信息表"></p>
+<h3 id="学生联系方式表：stu-contact-info"><a href="#学生联系方式表：stu-contact-info" class="headerlink" title="学生联系方式表：stu_contact_info"></a>学生联系方式表：stu_contact_info</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%AD%A6%E7%94%9F%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F%E8%A1%A8.png" alt="学生联系方式表"></p>
+<h3 id="班级信息表：class"><a href="#班级信息表：class" class="headerlink" title="班级信息表：class"></a>班级信息表：class</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E7%8F%AD%E7%BA%A7%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="班级信息表"></p>
+<h3 id="专业信息表：major"><a href="#专业信息表：major" class="headerlink" title="专业信息表：major"></a>专业信息表：major</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E4%B8%93%E4%B8%9A%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="专业信息表"></p>
+<h3 id="学生-床位关系表：rel-bed-stu"><a href="#学生-床位关系表：rel-bed-stu" class="headerlink" title="学生-床位关系表：rel_bed_stu"></a>学生-床位关系表：rel_bed_stu</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%AD%A6%E7%94%9F%E5%BA%8A%E4%BD%8D%E5%85%B3%E7%B3%BB%E8%A1%A8.png" alt="学生床位关系表"></p>
+<h3 id="订单表：order"><a href="#订单表：order" class="headerlink" title="订单表：order"></a>订单表：order</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E8%AE%A2%E5%8D%95%E8%A1%A8.png" alt="订单表"></p>
+<h3 id="管理员信息表：admin"><a href="#管理员信息表：admin" class="headerlink" title="管理员信息表：admin"></a>管理员信息表：admin</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E7%AE%A1%E7%90%86%E5%91%98%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="管理员信息表"></p>
+<h3 id="配置表：config"><a href="#配置表：config" class="headerlink" title="配置表：config"></a>配置表：config</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E9%85%8D%E7%BD%AE%E8%A1%A8.png" alt="配置表"></p>
+<h2 id="数据库模型图"><a href="#数据库模型图" class="headerlink" title="数据库模型图"></a>数据库模型图</h2><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A8%A1%E5%9E%8B%E5%9B%BE.png" alt="数据库模型图"></p>
+<p><br/><br/><br/><br/></p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2023/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/" rel="tag">互联网应用开发实践</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" rel="tag">数据库设计</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90/" rel="tag">需求分析</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2024/%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5%E6%B1%87%E6%80%BB/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            稀疏矩阵汇总
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">MySQL数据库部署与操作</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "tahglBYerISh7wrhyXMEH6UV-gzGzoHsz",
+    app_key: "G2qOYTyMGB3F79hHhg6LARHs",
+    path: window.location.pathname,
+    avatar: "mp",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2024
+        <i class="ri-heart-fill heart_icon"></i> SongXJ
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1280220642&amp;web_id=1280220642'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s Blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影记忆</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友情链接</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">博主简介</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/money_alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/money_wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+ 
+<script src="/js/clickLove.js"></script>
+ 
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>
