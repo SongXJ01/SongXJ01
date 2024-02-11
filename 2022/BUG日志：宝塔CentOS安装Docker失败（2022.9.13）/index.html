@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>BUG日志：宝塔CentOS安装Docker失败（2022.9.13） |  SongXJ&#39;s 博客</title>
+      <title>BUG日志：宝塔CentOS安装Docker失败（2022.9.13） |  SongXJ&#39;s 程序空间</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/images/songxj.ico" />
@@ -44,8 +44,7 @@
           font-size: 1.6rem;
         }
       </style>
-    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's 博客" type="application/atom+xml">
-</head>
+    </head>
   </html>
 </html>
 
@@ -117,8 +116,8 @@
 
 <hr>
 <h1 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h1><h2 id="1-卸载已经安装的-Docker"><a href="#1-卸载已经安装的-Docker" class="headerlink" title="1. 卸载已经安装的 Docker"></a>1. 卸载已经安装的 Docker</h2><p>如果已经安装了未运行成功的 Docker，错误如下图所示，那么请将这个 Docker 卸载。</p>
-<p><img src="/images/loading.gif" data-original="/images/bug_docker_1.png" alt="错误页面"></p>
-<h2 id="2-在-etc-docker-路径下创建-daemon-配置文件"><a href="#2-在-etc-docker-路径下创建-daemon-配置文件" class="headerlink" title="2. 在 /etc/docker 路径下创建 daemon 配置文件"></a>2. 在 <code>/etc/docker</code> 路径下创建 daemon 配置文件</h2><p><img src="/images/loading.gif" data-original="/images/bug_docker_2.png" alt="daemon 配置文件"></p>
+<p><img src="/images/bug_docker_1.png" alt="错误页面"></p>
+<h2 id="2-在-etc-docker-路径下创建-daemon-配置文件"><a href="#2-在-etc-docker-路径下创建-daemon-配置文件" class="headerlink" title="2. 在 /etc/docker 路径下创建 daemon 配置文件"></a>2. 在 <code>/etc/docker</code> 路径下创建 daemon 配置文件</h2><p><img src="/images/bug_docker_2.png" alt="daemon 配置文件"></p>
 <p>在 <code>daemon.json</code> 文件中提前配置好 Docker 的镜像源，即将下面这段代码粘贴到 <code>daemon.json</code> 文件中。 <code>daemon.conf</code> 文件此时保持空即可。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;https://docker.mirrors.ustc.edu.cn&quot;</span>]&#125;</span><br></pre></td></tr></table></figure>
 
@@ -195,7 +194,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="/images/loading.gif" data-original="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2022/BUG%E6%97%A5%E5%BF%97%EF%BC%9A%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5%EF%BC%882022.9.13%EF%BC%89/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2022/BUG%E6%97%A5%E5%BF%97%EF%BC%9A%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5%EF%BC%882022.9.13%EF%BC%89/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -284,7 +283,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2019-2023
+        2019-2024
         <i class="ri-heart-fill heart_icon"></i> SongXJ
       </li>
     </ul>
@@ -337,7 +336,7 @@
 <nav class="navbar">
   
   <div class="logo">
-    <a href="/"><img src="/images/loading.gif" data-original="/images/songxj.svg" alt="SongXJ&#39;s 博客"></a>
+    <a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s 程序空间"></a>
   </div>
   
   <ul class="nav nav-main">
@@ -404,13 +403,13 @@
   <div class="reward-box">
     
     <div class="reward-item">
-      <img class="reward-img" src="/images/loading.gif" data-original="/images/money_alipay.jpg">
+      <img class="reward-img" src="/images/money_alipay.jpg">
       <span class="reward-type">支付宝</span>
     </div>
     
     
     <div class="reward-item">
-      <img class="reward-img" src="/images/loading.gif" data-original="/images/money_wechat.png">
+      <img class="reward-img" src="/images/money_wechat.png">
       <span class="reward-type">微信</span>
     </div>
     
@@ -665,21 +664,6 @@
     
 
   </div>
-<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
-    
-    var parent = document.getElementById('recent-posts');
-    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
-    console.log('已挂载swiper')
-    parent.insertAdjacentHTML("afterbegin",child)}
-     </script>
-<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
-<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
-<style></style><!-- hexo injector body_end end --><script>
-            window.imageLazyLoadSetting = {
-                isSPA: true,
-                preloadRatio: 3,
-                processImages: null,
-            };
-        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var e=n.imageLazyLoadSetting.isSPA,i=n.imageLazyLoadSetting.preloadRatio||1,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){e&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,a=0;a<r.length;a++)0<=(t=(t=r[a]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(n.innerHeight*i||document.documentElement.clientHeight*i)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},t.src!==i&&(n.src=i)}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</body>
 
 </html>

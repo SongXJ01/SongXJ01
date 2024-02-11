@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>互联网应用开发实践：MySQL数据库部署与操作 |  SongXJ&#39;s 博客</title>
+      <title>互联网应用开发实践：MySQL数据库部署与操作 |  SongXJ&#39;s 程序空间</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/images/songxj.ico" />
@@ -44,8 +44,7 @@
           font-size: 1.6rem;
         }
       </style>
-    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's 博客" type="application/atom+xml">
-</head>
+    </head>
   </html>
 </html>
 
@@ -156,13 +155,13 @@
 <li><code>mysql</code>：刚才设置的MySQL的容器名称，如果刚才修改容器名称的话，一定记得要在这里修改。</li>
 </ul>
 <p>安装完成后，通过 <code>公网IP:8080</code> 即可访问如下页面，初始账号为 root，密码为刚才设置的<code>MYSQL_ROOT_PASSWORD=</code>后面的内容（<code>123456</code>）</p>
-<p><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/b7053c795ab3491b8eee4921f262c3e1.png" alt="PHPMyAdmin"></p>
+<p><img src="https://img-blog.csdnimg.cn/b7053c795ab3491b8eee4921f262c3e1.png" alt="PHPMyAdmin"></p>
 <h3 id="可能会遇到的问题"><a href="#可能会遇到的问题" class="headerlink" title="可能会遇到的问题"></a>可能会遇到的问题</h3><h4 id="※-无法访问phpMyAdmin"><a href="#※-无法访问phpMyAdmin" class="headerlink" title="※ 无法访问phpMyAdmin"></a>※ 无法访问phpMyAdmin</h4><p>这种情况大多数是因为防火墙（或服务器的安全组规则）导致的。因为刚才自定义的 <code>8080</code> 端口在服务器中是默认不开放的，所以要配置服务器的安全组，将其开放。</p>
-<p><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/d3d51fad39944b11aa8c943a3dfe2bec.png" alt="腾讯云开放安全组"></p>
-<h2 id="3-创建账户与数据库"><a href="#3-创建账户与数据库" class="headerlink" title="3. 创建账户与数据库"></a>3. 创建账户与数据库</h2><p> 新建一个项目账户（dorm），如下图所示。<br> <img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/14152f1d046542989532d639349df20f.png" alt="新增项目用户"></p>
+<p><img src="https://img-blog.csdnimg.cn/d3d51fad39944b11aa8c943a3dfe2bec.png" alt="腾讯云开放安全组"></p>
+<h2 id="3-创建账户与数据库"><a href="#3-创建账户与数据库" class="headerlink" title="3. 创建账户与数据库"></a>3. 创建账户与数据库</h2><p> 新建一个项目账户（dorm），如下图所示。<br> <img src="https://img-blog.csdnimg.cn/14152f1d046542989532d639349df20f.png" alt="新增项目用户"></p>
 <p><strong>【注意】：在项目中尽量不要使用root用户管理项目，而是单独创建以该项目名称为命名的数据库账户，并建立同名的数据库进行管理。</strong></p>
-<h2 id="4-本地MySQL的安装与操作"><a href="#4-本地MySQL的安装与操作" class="headerlink" title="4. 本地MySQL的安装与操作"></a>4. 本地MySQL的安装与操作</h2><p>本人使用的是M1的Mac环境，因此对应安装了M1版本的Docker和MySQL，具体步骤和①两步类似，所以这里就不再赘述。<br>本地是数据库管理软件我使用的的是免费开源的数据库管理软件“Sequel Ace”，它具有数据库管理软件的基本功能，在AppStore中就可以搜索到，而且是完全免费的。<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/52f48f403f2541829f30f9cd724df2c6.png" alt="Sequel Ace"></p>
-<p><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/a71c82eae5e34b7c81e4903bee355d94.png" alt="设计数据库"></p>
+<h2 id="4-本地MySQL的安装与操作"><a href="#4-本地MySQL的安装与操作" class="headerlink" title="4. 本地MySQL的安装与操作"></a>4. 本地MySQL的安装与操作</h2><p>本人使用的是M1的Mac环境，因此对应安装了M1版本的Docker和MySQL，具体步骤和①两步类似，所以这里就不再赘述。<br>本地是数据库管理软件我使用的的是免费开源的数据库管理软件“Sequel Ace”，它具有数据库管理软件的基本功能，在AppStore中就可以搜索到，而且是完全免费的。<br><img src="https://img-blog.csdnimg.cn/52f48f403f2541829f30f9cd724df2c6.png" alt="Sequel Ace"></p>
+<p><img src="https://img-blog.csdnimg.cn/a71c82eae5e34b7c81e4903bee355d94.png" alt="设计数据库"></p>
 <hr>
 <h1 id="SpringBoot-连接-MySQL"><a href="#SpringBoot-连接-MySQL" class="headerlink" title="SpringBoot 连接 MySQL"></a>SpringBoot 连接 MySQL</h1><h2 id="1-porm-xml-文件"><a href="#1-porm-xml-文件" class="headerlink" title="1. porm.xml 文件"></a>1. porm.xml 文件</h2><p>在 porm.xml 文件中的<code>&lt;dependencies&gt;</code>中添加 JDBC 的依赖。</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-jdbc<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
@@ -178,8 +177,8 @@
 
 
 <h2 id="4-本地测试"><a href="#4-本地测试" class="headerlink" title="4. 本地测试"></a>4. 本地测试</h2><p>本地测试结果如下：</p>
-<p><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/83e83c0d7bc7418d9339125fb953b8f0.png" alt="本地测试"></p>
-<h2 id="5-打包-jar-包"><a href="#5-打包-jar-包" class="headerlink" title="5. 打包 jar 包"></a>5. 打包 jar 包</h2><p><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/35232358d53e4284a21aee68cca1e37a.png" alt="打jar包"></p>
+<p><img src="https://img-blog.csdnimg.cn/83e83c0d7bc7418d9339125fb953b8f0.png" alt="本地测试"></p>
+<h2 id="5-打包-jar-包"><a href="#5-打包-jar-包" class="headerlink" title="5. 打包 jar 包"></a>5. 打包 jar 包</h2><p><img src="https://img-blog.csdnimg.cn/35232358d53e4284a21aee68cca1e37a.png" alt="打jar包"></p>
 <h2 id="6-本地开发环境连接服务器Docker"><a href="#6-本地开发环境连接服务器Docker" class="headerlink" title="6. 本地开发环境连接服务器Docker"></a>6. 本地开发环境连接服务器Docker</h2><p>连接Docker宿主机，修改Docker服务文件</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi  /lib/systemd/system/docker.service</span><br></pre></td></tr></table></figure>
 
@@ -191,9 +190,9 @@
 <p>重启Docker服务</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart docker.service</span><br></pre></td></tr></table></figure>
 
-<p>开放宿主机安全组中的 2375 端口<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/5dfe7ed57de24940b246c6ee476a8f68.png" alt="开放宿主机安全组中的2375端口"></p>
-<p>在IDEA中安装Docker插件。<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/8642aee2e39341cd97b613ada050be4b.png" alt="Docker插件"></p>
-<p>在Docker插件中连接宿主机服务器<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/1fdc292a3b2d45cbb0e89c9fc641a926.png" alt="配置Docker"></p>
+<p>开放宿主机安全组中的 2375 端口<br><img src="https://img-blog.csdnimg.cn/5dfe7ed57de24940b246c6ee476a8f68.png" alt="开放宿主机安全组中的2375端口"></p>
+<p>在IDEA中安装Docker插件。<br><img src="https://img-blog.csdnimg.cn/8642aee2e39341cd97b613ada050be4b.png" alt="Docker插件"></p>
+<p>在Docker插件中连接宿主机服务器<br><img src="https://img-blog.csdnimg.cn/1fdc292a3b2d45cbb0e89c9fc641a926.png" alt="配置Docker"></p>
 <h2 id="7-Docker-在本地创建（build）并运行（run）镜像"><a href="#7-Docker-在本地创建（build）并运行（run）镜像" class="headerlink" title="7. Docker 在本地创建（build）并运行（run）镜像"></a>7. Docker 在本地创建（build）并运行（run）镜像</h2><ul>
 <li><p>创建镜像</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t dorm_sys:1.0.0 . </span><br></pre></td></tr></table></figure></li>
@@ -215,7 +214,7 @@
 
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 10110:8090 --name dorm_sys registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br></pre></td></tr></table></figure>
 
-<p>在线测试：<br><img src="/images/loading.gif" data-original="https://img-blog.csdnimg.cn/f654f14147ae41d1983fa47a2003bf89.png" alt="在线测试"></p>
+<p>在线测试：<br><img src="https://img-blog.csdnimg.cn/f654f14147ae41d1983fa47a2003bf89.png" alt="在线测试"></p>
  
       <!-- reward -->
       
@@ -286,7 +285,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="/images/loading.gif" data-original="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9AMySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9AMySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -375,7 +374,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2019-2023
+        2019-2024
         <i class="ri-heart-fill heart_icon"></i> SongXJ
       </li>
     </ul>
@@ -428,7 +427,7 @@
 <nav class="navbar">
   
   <div class="logo">
-    <a href="/"><img src="/images/loading.gif" data-original="/images/songxj.svg" alt="SongXJ&#39;s 博客"></a>
+    <a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s 程序空间"></a>
   </div>
   
   <ul class="nav nav-main">
@@ -495,13 +494,13 @@
   <div class="reward-box">
     
     <div class="reward-item">
-      <img class="reward-img" src="/images/loading.gif" data-original="/images/money_alipay.jpg">
+      <img class="reward-img" src="/images/money_alipay.jpg">
       <span class="reward-type">支付宝</span>
     </div>
     
     
     <div class="reward-item">
-      <img class="reward-img" src="/images/loading.gif" data-original="/images/money_wechat.png">
+      <img class="reward-img" src="/images/money_wechat.png">
       <span class="reward-type">微信</span>
     </div>
     
@@ -756,21 +755,6 @@
     
 
   </div>
-<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
-    
-    var parent = document.getElementById('recent-posts');
-    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
-    console.log('已挂载swiper')
-    parent.insertAdjacentHTML("afterbegin",child)}
-     </script>
-<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
-<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
-<style></style><!-- hexo injector body_end end --><script>
-            window.imageLazyLoadSetting = {
-                isSPA: true,
-                preloadRatio: 3,
-                processImages: null,
-            };
-        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var e=n.imageLazyLoadSetting.isSPA,i=n.imageLazyLoadSetting.preloadRatio||1,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){e&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,a=0;a<r.length;a++)0<=(t=(t=r[a]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(n.innerHeight*i||document.documentElement.clientHeight*i)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},t.src!==i&&(n.src=i)}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body>
+</body>
 
 </html>
