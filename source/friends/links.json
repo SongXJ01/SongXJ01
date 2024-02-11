@@ -3,30 +3,30 @@
 		"name": "GitHub",
 		"site": "https://github.com/SongXJ01",
 		"info": "SongXJ's GitHub",
-		"avatar": "https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/github.png"
+		"avatar": "/images/others/github.png"
 	},
 	{
 		"name": "Gitee",
 		"site": "https://gitee.com/songxj01",
 		"info": "SongXJ's Gitee",
-		"avatar": "https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/gitee.png"
+		"avatar": "/images/others/gitee.png"
 	},
     {
         "name": "CSDN",
 		"site": "https://blog.csdn.net/SongXJ_01",
 		"info": "SongXJ's CSDN",
-		"avatar": "/images/csdn.png"
+		"avatar": "/images/others/csdn.png"
     },
     {
         "name": "LeFlacon's Blog",
 		"site": "https://leflacon.top/",
 		"info": "一个超级优秀、超级亲和的博主",
-		"avatar": "/images/LeFlacon.png"
+		"avatar": "/images/others/LeFlacon.png"
     },
     {
         "name": "Michael_Wang's Blog",
 		"site": "https://djwangweijie.github.io/",
 		"info": "全能杰哥~",
-		"avatar": "/images/Michael_Wang.png"
+		"avatar": "/images/others/Michael_Wang.png"
     }
 ]
