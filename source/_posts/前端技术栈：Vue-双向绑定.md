@@ -18,8 +18,8 @@ MVVM 模式是通过以下三个核心组件组成：
  -    **V：** View - 定义屏幕中 View 的结构，布局和外观；
  -    **VM：** ViewModel - 扮演“View”和“Model”之间的使者，帮忙处理 View 的全部业务逻辑。
 
+![vue数据双向绑定原理](/images/前端技术栈_Vue双向绑定/vue数据双向绑定原理.png)
 
-![vue数据双向绑定原理](https://img-blog.csdnimg.cn/20210717223311920.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70)
 
 -----
 
@@ -41,7 +41,9 @@ var vm = new Vue({
 });
 ```
 输出：
-![输出](https://img-blog.csdnimg.cn/20210717224229988.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70)
+![输出](/images/前端技术栈_Vue双向绑定/输出.png)
+
+
 可以看到属性`a`有两个相对应的`get`和`set`方法，为什么会多出这两个方法呢？因为 Vue 是通过 `Object.defineProperty()` 来实现数据劫持的。
 
 
@@ -78,11 +80,13 @@ console.log(Book.name);  // 《vue权威指南》
 
 ### 思路分析
 &emsp;&emsp;实现 **MVVM**主要包含两个方面，数据变化更新视图，视图变化更新数据：
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210717225216190.png)
+![MVVM](/images/前端技术栈_Vue双向绑定/MVVM.png)
+
 &emsp;&emsp;关键点在于 data 如何更新 view，因为 view 更新 data 其实可以通过事件监听即可，比如 input 标签监听 input 事件就可以实现了。
 
 &emsp;&emsp;数据更新视图的重点是如何知道数据变了，只要知道数据变了，那么接下去的事都好处理。如何知道数据变了，其实上文我们已经给出答案了，就是通过`Object.defineProperty( )`对属性设置一个 set 函数，当数据改变了就会来触发这个函数，所以我们只要将一些需要更新的方法放在这里面就可以实现 data 更新 view 了。
-![defineProperty](https://img-blog.csdnimg.cn/20210717225438862.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70)
+![defineProperty](/images/前端技术栈_Vue双向绑定/defineProperty.png)
+
 
 ----
 
@@ -98,8 +102,8 @@ console.log(Book.name);  // 《vue权威指南》
 3. 实现一个**解析器 Compile**，可以扫描和解析每个节点的相关指令，并根据初始化模板数据以及初始化相应的订阅器。
 
 **流程图如下：**
+![双向绑定流程图](/images/前端技术栈_Vue双向绑定/双向绑定流程图.png)
 
-![双向绑定流程图](https://img-blog.csdnimg.cn/20210717225804989.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70)
 
 -----
 
@@ -293,6 +297,9 @@ Dep.prototype = {
 <input v-model="sth" />
 <input v-bind:value="sth" v-on:input="sth = $event.target.value" />
 ```
+
+<br/><br/>
+
 
 ----
 参考来源：

@@ -11,7 +11,8 @@ categories:
 ----
 
 &emsp;&emsp;这个实验会建立一个全双工系统（Full-Duplex），实现两个管道同时收发消息。在程序中会涉及到3个文件，2个管道，2个进程，4个线程。线程之间的拓扑图如下：
-![通信示意图](https://img-blog.csdnimg.cn/20200424124332193.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70)
+![通信示意图](/images/操作系统原理_C语言threads多线程实现单机聊天系统/通信示意图.png)
+
 【完整代码附在文章最后】
 
 ----
@@ -82,10 +83,10 @@ void* send() {
 ```
 ### 接收消息
 &emsp;&emsp;通过`receive`函数实现接收消息的功能。在管道连通之前，即`open`语句等待管道连通。这里`open`语句使用只读的方式进行打开，如果管道连接成功，程序继续向下运行。因为在本实验中两个通道一定是同时连接的，在`send`函数中已经打印连接成功的提示，所以在`receive`中就没有重复打印。
-定义一个循环进行消息的多次接收，使用`read`语句将管道中的字符串全部储存在`buf`中，之后在末尾加上一个`\0`，表示字符串的结束。
-然后进行判断，如果刚才接收到的是“88”则将标识符`flag`变成0，打印对方的最后一句话，同时打印对方已经下线的提示，break出循环。如果输入的不是“88”，则在命令行打印对方输入的内容后继续打印`[A]:`，等待下一次输入。
-在打印接收到的对方消息时需要先在前面加上4个退格符，删除之前输入的`[A]:`这四个字符。另外要使用`fflush(stdout);`语句强制刷新标准输出缓冲区。
-最后关闭管道，退出线程。
+&emsp;&emsp;定义一个循环进行消息的多次接收，使用`read`语句将管道中的字符串全部储存在`buf`中，之后在末尾加上一个`\0`，表示字符串的结束。
+&emsp;&emsp;然后进行判断，如果刚才接收到的是“88”则将标识符`flag`变成0，打印对方的最后一句话，同时打印对方已经下线的提示，break出循环。如果输入的不是“88”，则在命令行打印对方输入的内容后继续打印`[A]:`，等待下一次输入。
+&emsp;&emsp;在打印接收到的对方消息时需要先在前面加上4个退格符，删除之前输入的`[A]:`这四个字符。另外要使用`fflush(stdout);`语句强制刷新标准输出缓冲区。
+&emsp;&emsp;最后关闭管道，退出线程。
 
 ```c
 //A接收B发来的消息
@@ -140,15 +141,17 @@ int main(){
 ---
 ## 程序运行过程截图
 1. 等待连接
-![等待连接](https://img-blog.csdnimg.cn/20200424131613716.png#pic_center)
+![等待连接](/images/操作系统原理_C语言threads多线程实现单机聊天系统/等待连接.png)
+
 
 2. 管道连接成功
-![管道连接成功](https://img-blog.csdnimg.cn/20200424131447920.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70#pic_center)
+![管道连接成功](/images/操作系统原理_C语言threads多线程实现单机聊天系统/管道连接成功.png)
+
 3. 进行全工聊天
-![进行全工聊天](https://img-blog.csdnimg.cn/20200424131630580.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70#pic_center)
+![进行全工聊天](/images/操作系统原理_C语言threads多线程实现单机聊天系统/进行全工聊天.png)
 
 4. 聊天结束
-![聊天结束](https://img-blog.csdnimg.cn/20200424131654614.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1NvbmdYSl8wMQ==,size_16,color_FFFFFF,t_70#pic_center)
+![聊天结束](/images/操作系统原理_C语言threads多线程实现单机聊天系统/聊天结束.png)
 
 ---
 ## 总结

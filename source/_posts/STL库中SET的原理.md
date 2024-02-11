@@ -21,14 +21,14 @@ struct Person {
     string name;
 };
 ```
-当我们直接插入到 `std::set<Person>` 中时，会报 complier error 的错误，因此简单补写一个比较运算符重载，如下：
+&emsp;&emsp;当我们直接插入到 `std::set<Person>` 中时，会报 complier error 的错误，因此简单补写一个比较运算符重载，如下：
 
 ```cpp
 bool operator<(const Person &lhs, const Person &rhs) {
     return lhs.age < rhs.age;
 }
 ```
-OK，编译起来没有问题，但是我们运行测试一下下面的 `find` 操作就会发现问题
+&emsp;&emsp;OK，编译起来没有问题，但是我们运行测试一下下面的 `find` 操作就会发现问题
 
 ```cpp
 #include <iostream>
@@ -65,9 +65,9 @@ int main() {
  
 ![运行结果](/images/STL库中SET的原理/运行结果.png)
 
-明明不在 `set` 中的 **ID-2000** 的 `Person` 也可以被找到。造成这个结果的原因是我们所提供的 `operator<() `，当`Person` `p1`、`p2`，在 `p1<p2` 与 `p2<p2` 都不成立时，`find` 就会判断 `p1` 和 `p2` 是同一个 `Person` ，因此会造成这样的错误结果。
+&emsp;&emsp;明明不在 `set` 中的 **ID-2000** 的 `Person` 也可以被找到。造成这个结果的原因是我们所提供的 `operator<() `，当`Person` `p1`、`p2`，在 `p1<p2` 与 `p2<p2` 都不成立时，`find` 就会判断 `p1` 和 `p2` 是同一个 `Person` ，因此会造成这样的错误结果。
 
-**解决方案**就是补充完整我们的比较运算符重载，**完整代码如下**：
+&emsp;&emsp;**解决方案**就是补充完整我们的比较运算符重载，**完整代码如下**：
 
 ```cpp
 #include <iostream>
