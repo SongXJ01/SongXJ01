@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>互联网应用开发实践：需求分析与数据库设计 |  SongXJ&#39;s 程序空间</title>
+      <title>宿舍秒杀系统的需求分析与数据库设计 |  SongXJ&#39;s Blog</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/images/songxj.ico" />
@@ -56,7 +56,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-互联网应用开发实践：需求分析与数据库设计"
+  id="post-宿舍秒杀系统的需求分析与数据库设计"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -67,7 +67,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  互联网应用开发实践：需求分析与数据库设计
+  宿舍秒杀系统的需求分析与数据库设计
 </h1>
  
 
@@ -75,8 +75,8 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9A%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" class="article-date">
-  <time datetime="2022-09-29T04:06:01.000Z" itemprop="datePublished">2022-09-29</time>
+      <a href="/2023/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" class="article-date">
+  <time datetime="2023-09-29T04:06:01.000Z" itemprop="datePublished">2023-09-29</time>
 </a> 
   <div class="article-category">
     <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a> / <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/">互联网应用开发实践</a>
@@ -111,10 +111,10 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p>在本文中将分析一个用于新生开学分配寝室的“<strong>宿舍秒杀</strong>”系统。从用户故事开始<strong>探索需求</strong>，进而分析得到系统的主要功能和非功能性需求。最后，根据需求分析设计数据库，数据库的设计原则是尽可能的方便之后的需求拓展和修改。</p>
+  <p>&emsp;&emsp;在本文中将分析一个用于新生开学分配寝室的“<strong>宿舍秒杀</strong>”系统。从用户故事开始<strong>探索需求</strong>，进而分析得到系统的主要功能和非功能性需求。最后，根据需求分析设计数据库，数据库的设计原则是尽可能的方便之后的需求拓展和修改。</p>
 <hr>
 <p><br/><br/></p>
-<h1 id="用户故事"><a href="#用户故事" class="headerlink" title="用户故事"></a>用户故事</h1><p>用户故事一般是产品经理初次描述给自己和开发人员看的，然后产品负责人要依据用户故事设计原型，原型在客户那里通过后，然后再在用户故事里面添加附件。用户故事不会一开始就很清晰，甚至可能不会有特专业术语。</p>
+<h1 id="用户故事"><a href="#用户故事" class="headerlink" title="用户故事"></a>用户故事</h1><p>&emsp;&emsp;用户故事一般是产品经理初次描述给自己和开发人员看的，然后产品负责人要依据用户故事设计原型，原型在客户那里通过后，然后再在用户故事里面添加附件。用户故事不会一开始就很清晰，甚至可能不会有特专业术语。</p>
 <h2 id="学生"><a href="#学生" class="headerlink" title="学生"></a>学生</h2><ul>
 <li>作为<code>学生</code>，我想要<code>在系统里登录，并获取验证码</code>，以便于<code>登录到自己的账号中进行宿舍选取</code>。</li>
 <li>作为<code>学生</code>，我想要<code>查询剩余宿舍的信息</code>，以便于<code>及时选择或更换寝室志愿</code>。</li>
@@ -154,25 +154,26 @@
 <li>防止脚本</li>
 </ul>
 <p><br/><br/></p>
-<h1 id="数据库设计"><a href="#数据库设计" class="headerlink" title="数据库设计"></a>数据库设计</h1><h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p>考虑到后期需求可能会发生变动，因此在数据库设计的时候最大程度降低了表与表之间的关联程度。数据库中有两个核心主体——<code>bed</code>（床位信息）、<code>student</code>（学生信息）。</p>
+<h1 id="数据库设计"><a href="#数据库设计" class="headerlink" title="数据库设计"></a>数据库设计</h1><h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p>&emsp;&emsp;考虑到后期需求可能会发生变动，因此在数据库设计的时候最大程度降低了表与表之间的关联程度。数据库中有两个核心主体——<code>bed</code>（床位信息）、<code>student</code>（学生信息）。</p>
 <ul>
 <li>与<strong>床位信息</strong>相关的表有：<code>dorm</code>（宿舍信息）、<code>house</code>（宿舍楼信息）、<code>bed_type</code>（床铺类型信息）。</li>
 <li>与<strong>学生信息</strong>相关的表有：<code>class</code>（班级信息）、<code>major</code>（专业信息）、<code>stu_contact_info</code>（学生联络信息表）。其中年级信息作为一个属性考虑在班级信息内。</li>
 </ul>
-<p>对于<strong>学生</strong>和<strong>床位</strong>的关系，单独建立了一个关联表<code>rel_bed_stu</code>。该表使用“学号+时间戳”的方式作为主键，记录学生床位的分配信息。除此之外，还设计了<code>config</code>表储存系统相关配置信息，<code>admin</code>表储存管理员相关信息。</p>
-<h2 id="数据库表结构"><a href="#数据库表结构" class="headerlink" title="数据库表结构"></a>数据库表结构</h2><h3 id="床位信息表：bed"><a href="#床位信息表：bed" class="headerlink" title="床位信息表：bed"></a>床位信息表：bed</h3><p><img src="https://img-blog.csdnimg.cn/c29903f5c25444469d80cadcfd796c0a.png" alt="床位信息表"></p>
-<h3 id="寝室信息表：dorm"><a href="#寝室信息表：dorm" class="headerlink" title="寝室信息表：dorm"></a>寝室信息表：dorm</h3><p><img src="https://img-blog.csdnimg.cn/7b2e70dba99349d2beeed96af7cde30c.png" alt="寝室信息表"></p>
-<h3 id="楼号信息表：house"><a href="#楼号信息表：house" class="headerlink" title="楼号信息表：house"></a>楼号信息表：house</h3><p><img src="https://img-blog.csdnimg.cn/573b2af5e7a3447ca44eeb9d2e4dc8c3.png" alt="楼号信息表"></p>
-<h3 id="床位类型表：bed-type"><a href="#床位类型表：bed-type" class="headerlink" title="床位类型表：bed_type"></a>床位类型表：bed_type</h3><p><img src="https://img-blog.csdnimg.cn/64e505da4dc14fceb9455ebf97c8f4ac.png" alt="床位类型表"></p>
-<h3 id="学生信息表：student"><a href="#学生信息表：student" class="headerlink" title="学生信息表：student"></a>学生信息表：student</h3><p><img src="https://img-blog.csdnimg.cn/330c4e35692842ce97534642f80c8db9.png" alt="学生信息表"></p>
-<h3 id="学生联系方式表：stu-contact-info"><a href="#学生联系方式表：stu-contact-info" class="headerlink" title="学生联系方式表：stu_contact_info"></a>学生联系方式表：stu_contact_info</h3><p><img src="https://img-blog.csdnimg.cn/a1e9190e810543e8a33a4df5729b4883.png" alt="学生联系方式表"></p>
-<h3 id="班级信息表：class"><a href="#班级信息表：class" class="headerlink" title="班级信息表：class"></a>班级信息表：class</h3><p><img src="https://img-blog.csdnimg.cn/06ecbb5f8f6a450d867604c74a491fae.png" alt="班级信息表"></p>
-<h3 id="专业信息表：major"><a href="#专业信息表：major" class="headerlink" title="专业信息表：major"></a>专业信息表：major</h3><p><img src="https://img-blog.csdnimg.cn/194a4b42121c46d78b4b694d9257ed93.png" alt="专业信息表"></p>
-<h3 id="学生-床位关系表：rel-bed-stu"><a href="#学生-床位关系表：rel-bed-stu" class="headerlink" title="学生-床位关系表：rel_bed_stu"></a>学生-床位关系表：rel_bed_stu</h3><p><img src="https://img-blog.csdnimg.cn/7d78655bce8e469c8f67bde7b16c8513.png" alt="学生床位关系表"></p>
-<h3 id="订单表：order"><a href="#订单表：order" class="headerlink" title="订单表：order"></a>订单表：order</h3><p><img src="https://img-blog.csdnimg.cn/77f63e67b31f4eb7aec4cadc1293b815.png" alt="订单表"></p>
-<h3 id="管理员信息表：admin"><a href="#管理员信息表：admin" class="headerlink" title="管理员信息表：admin"></a>管理员信息表：admin</h3><p><img src="https://img-blog.csdnimg.cn/e3ac3b94b8454fb0bdd0ca037e454c7b.png" alt="管理员信息表"></p>
-<h3 id="配置表：config"><a href="#配置表：config" class="headerlink" title="配置表：config"></a>配置表：config</h3><p><img src="https://img-blog.csdnimg.cn/18e8bd47c6d14275b797378634ba502f.png" alt="配置表"></p>
-<h2 id="数据库模型图"><a href="#数据库模型图" class="headerlink" title="数据库模型图"></a>数据库模型图</h2><p><img src="https://img-blog.csdnimg.cn/6701e51bc3704eabb8c8f3c80c3f262c.png" alt="数据库模型图"></p>
+<p>&emsp;&emsp;对于<strong>学生</strong>和<strong>床位</strong>的关系，单独建立了一个关联表 <code>rel_bed_stu</code>。该表使用“学号+时间戳”的方式作为主键，记录学生床位的分配信息。除此之外，还设计了 <code>config</code> 表储存系统相关配置信息，<code>admin</code> 表储存管理员相关信息。</p>
+<h2 id="数据库表结构"><a href="#数据库表结构" class="headerlink" title="数据库表结构"></a>数据库表结构</h2><h3 id="床位信息表：bed"><a href="#床位信息表：bed" class="headerlink" title="床位信息表：bed"></a>床位信息表：bed</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%BA%8A%E4%BD%8D%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="床位信息表"></p>
+<h3 id="寝室信息表：dorm"><a href="#寝室信息表：dorm" class="headerlink" title="寝室信息表：dorm"></a>寝室信息表：dorm</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%AF%9D%E5%AE%A4%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="寝室信息表"></p>
+<h3 id="楼号信息表：house"><a href="#楼号信息表：house" class="headerlink" title="楼号信息表：house"></a>楼号信息表：house</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E6%A5%BC%E5%8F%B7%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="楼号信息表"></p>
+<h3 id="床位类型表：bed-type"><a href="#床位类型表：bed-type" class="headerlink" title="床位类型表：bed_type"></a>床位类型表：bed_type</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%BA%8A%E4%BD%8D%E7%B1%BB%E5%9E%8B%E8%A1%A8.png" alt="床位类型表"></p>
+<h3 id="学生信息表：student"><a href="#学生信息表：student" class="headerlink" title="学生信息表：student"></a>学生信息表：student</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="学生信息表"></p>
+<h3 id="学生联系方式表：stu-contact-info"><a href="#学生联系方式表：stu-contact-info" class="headerlink" title="学生联系方式表：stu_contact_info"></a>学生联系方式表：stu_contact_info</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%AD%A6%E7%94%9F%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F%E8%A1%A8.png" alt="学生联系方式表"></p>
+<h3 id="班级信息表：class"><a href="#班级信息表：class" class="headerlink" title="班级信息表：class"></a>班级信息表：class</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E7%8F%AD%E7%BA%A7%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="班级信息表"></p>
+<h3 id="专业信息表：major"><a href="#专业信息表：major" class="headerlink" title="专业信息表：major"></a>专业信息表：major</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E4%B8%93%E4%B8%9A%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="专业信息表"></p>
+<h3 id="学生-床位关系表：rel-bed-stu"><a href="#学生-床位关系表：rel-bed-stu" class="headerlink" title="学生-床位关系表：rel_bed_stu"></a>学生-床位关系表：rel_bed_stu</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E5%AD%A6%E7%94%9F%E5%BA%8A%E4%BD%8D%E5%85%B3%E7%B3%BB%E8%A1%A8.png" alt="学生床位关系表"></p>
+<h3 id="订单表：order"><a href="#订单表：order" class="headerlink" title="订单表：order"></a>订单表：order</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E8%AE%A2%E5%8D%95%E8%A1%A8.png" alt="订单表"></p>
+<h3 id="管理员信息表：admin"><a href="#管理员信息表：admin" class="headerlink" title="管理员信息表：admin"></a>管理员信息表：admin</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E7%AE%A1%E7%90%86%E5%91%98%E4%BF%A1%E6%81%AF%E8%A1%A8.png" alt="管理员信息表"></p>
+<h3 id="配置表：config"><a href="#配置表：config" class="headerlink" title="配置表：config"></a>配置表：config</h3><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E9%85%8D%E7%BD%AE%E8%A1%A8.png" alt="配置表"></p>
+<h2 id="数据库模型图"><a href="#数据库模型图" class="headerlink" title="数据库模型图"></a>数据库模型图</h2><p><img src="/images/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A8%A1%E5%9E%8B%E5%9B%BE.png" alt="数据库模型图"></p>
+<p><br/><br/><br/><br/></p>
  
       <!-- reward -->
       
@@ -243,12 +244,12 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9A%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2023/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/" rel="tag">SpringBoot</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/" rel="tag">互联网应用开发实践</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/" rel="tag">互联网应用开发实践</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" rel="tag">数据库设计</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90/" rel="tag">需求分析</a></li></ul>
 
     </footer>
   </div>
@@ -266,9 +267,9 @@
       </a>
     
     
-      <a href="/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9ALeetCode%20(1094)%20%E6%8B%BC%E8%BD%A6%E3%80%90%E4%B8%80%E9%A2%98%E6%90%9E%E6%87%82%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84%E3%80%91/" class="article-nav-link">
+      <a href="/2023/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">算法题：LeetCode (1094) 拼车【一题搞懂差分数组】</div>
+        <div class="article-nav-title">MySQL数据库部署与操作</div>
       </a>
     
   </nav>
@@ -385,7 +386,7 @@
 <nav class="navbar">
   
   <div class="logo">
-    <a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s 程序空间"></a>
+    <a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s Blog"></a>
   </div>
   
   <ul class="nav nav-main">

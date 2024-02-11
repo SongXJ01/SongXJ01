@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>BUG日志：宝塔CentOS安装Docker失败（2022.9.13） |  SongXJ&#39;s 程序空间</title>
+      <title>BUG日志：宝塔CentOS安装Docker失败（2022.9.13） |  SongXJ&#39;s Blog</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/images/songxj.ico" />
@@ -116,8 +116,8 @@
 
 <hr>
 <h1 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h1><h2 id="1-卸载已经安装的-Docker"><a href="#1-卸载已经安装的-Docker" class="headerlink" title="1. 卸载已经安装的 Docker"></a>1. 卸载已经安装的 Docker</h2><p>如果已经安装了未运行成功的 Docker，错误如下图所示，那么请将这个 Docker 卸载。</p>
-<p><img src="/images/bug_docker_1.png" alt="错误页面"></p>
-<h2 id="2-在-etc-docker-路径下创建-daemon-配置文件"><a href="#2-在-etc-docker-路径下创建-daemon-配置文件" class="headerlink" title="2. 在 /etc/docker 路径下创建 daemon 配置文件"></a>2. 在 <code>/etc/docker</code> 路径下创建 daemon 配置文件</h2><p><img src="/images/bug_docker_2.png" alt="daemon 配置文件"></p>
+<p><img src="/images/BUG%E6%97%A5%E5%BF%97_%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5/bug_docker_1.png" alt="错误页面"></p>
+<h2 id="2-在-etc-docker-路径下创建-daemon-配置文件"><a href="#2-在-etc-docker-路径下创建-daemon-配置文件" class="headerlink" title="2. 在 /etc/docker 路径下创建 daemon 配置文件"></a>2. 在 <code>/etc/docker</code> 路径下创建 daemon 配置文件</h2><p><img src="/images/BUG%E6%97%A5%E5%BF%97_%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5/bug_docker_2.png" alt="daemon 配置文件"></p>
 <p>在 <code>daemon.json</code> 文件中提前配置好 Docker 的镜像源，即将下面这段代码粘贴到 <code>daemon.json</code> 文件中。 <code>daemon.conf</code> 文件此时保持空即可。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;https://docker.mirrors.ustc.edu.cn&quot;</span>]&#125;</span><br></pre></td></tr></table></figure>
 
@@ -207,11 +207,11 @@
    
   <nav class="article-nav">
     
-      <a href="/2022/%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5%EF%BC%9AMySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/" class="article-nav-link">
+      <a href="/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9A%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            互联网应用开发实践：MySQL数据库部署与操作
+            算法题：最长回文子串
           
         </div>
       </a>
@@ -336,7 +336,7 @@
 <nav class="navbar">
   
   <div class="logo">
-    <a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s 程序空间"></a>
+    <a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s Blog"></a>
   </div>
   
   <ul class="nav nav-main">
