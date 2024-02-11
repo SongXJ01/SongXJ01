@@ -120,7 +120,7 @@
 <p>下文中会多次提到稀疏矩阵的向量内积（SpMV，Sparse Matrix-vector Product）操作，在此强调定义并复习一下其具体的过程。假设 $A \in \mathbb{R}^{m \times n}$，以及 $x \in \mathbb{R}^{n}$，$y&#x3D;Ax$ 即为 SpMV 运算，其计算结果是一个长度为 $m$ 的向量，按照正常的稠密矩阵的算法需要进行 $mn^2$ 次乘法，且需要 $x$ 中的每个元素都需要被重复检索 $m$ 次。<br>若 $A$ 是一个 CSR 格式的稀疏矩阵，我们只需要计算矩阵 $A$ 中非零元所在行即可；<br>若 $A$ 是一个 CSC 格式的稀疏矩阵，我们只需要检索矩阵 $A$ 中非零元所在列索引对应的 $x[i]$ 即可；<br>若 $A$ 是一个 ELL 格式的稀疏矩阵，其使用两个矩阵分别存储非零元素的列索引和对应的数值。在进行 SpMV 运算时，ELL 格式可以通过并行计算同时访问每一行的非零元素和对应的向量元素，减少了数据依赖性，提高了计算效率。</p>
 </blockquote>
 <p><br/><br/></p>
-<h1 id="COO，Coordinate"><a href="#COO，Coordinate" class="headerlink" title="COO，Coordinate"></a>COO，Coordinate</h1><p>COO（Coordinate）通过使用三个数组来表示矩阵的非零元素的坐标和对应的值，从而实现高效的存储和操作。其中，数组 row 存储行坐标，数组 col 存储列坐标，数组 data 存储对应的值。COO 格式适用于具有任意分布的非零元素的稀疏矩阵，但在稀疏性较高且需要频繁访问的情况下可能效率较低，因为元素的访问需要通过遍历数组来找到特定位置的元素。</p>
+<h1 id="COO，Coordinate"><a href="#COO，Coordinate" class="headerlink" title="COO，Coordinate"></a>COO，Coordinate</h1><p>&emsp;&emsp;COO（Coordinate）通过使用三个数组来表示矩阵的非零元素的坐标和对应的值，从而实现高效的存储和操作。其中，数组 row 存储行坐标，数组 col 存储列坐标，数组 data 存储对应的值。COO 格式适用于具有任意分布的非零元素的稀疏矩阵，但在稀疏性较高且需要频繁访问的情况下可能效率较低，因为元素的访问需要通过遍历数组来找到特定位置的元素。</p>
 <h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><ul>
 <li><code>row</code>：行索引数组</li>
 <li><code>col</code>：列索引数组</li>
@@ -203,7 +203,7 @@
 <ul>
 <li>不能直接进行算数运算和行列切片。</li>
 </ul>
-<h1 id="CSR，Compress-Sparse-Row"><a href="#CSR，Compress-Sparse-Row" class="headerlink" title="CSR，Compress Sparse Row"></a>CSR，Compress Sparse Row</h1><p>CSR是在COO的基础上将行进行压缩，它通过将矩阵的行存储为一组压缩行，并使用两个数组来表示非零元素的值和对应的列索引，从而实现高效的存储和操作。该格式在处理稀疏矩阵时具有较高的空间效率和访问效率，特别适用于以行为主导的操作，如矩阵向量乘法和稀疏矩阵的求解。</p>
+<h1 id="CSR，Compress-Sparse-Row"><a href="#CSR，Compress-Sparse-Row" class="headerlink" title="CSR，Compress Sparse Row"></a>CSR，Compress Sparse Row</h1><p>&emsp;&emsp;CSR是在COO的基础上将行进行压缩，它通过将矩阵的行存储为一组压缩行，并使用两个数组来表示非零元素的值和对应的列索引，从而实现高效的存储和操作。该格式在处理稀疏矩阵时具有较高的空间效率和访问效率，特别适用于以行为主导的操作，如矩阵向量乘法和稀疏矩阵的求解。</p>
 <h2 id="属性-1"><a href="#属性-1" class="headerlink" title="属性"></a>属性</h2><ul>
 <li><code>indptr</code>：行指针偏移数组</li>
 <li><code>indices</code>：列索引数组</li>
@@ -301,7 +301,7 @@
 <li>列切片操作较慢（列切片考虑 CSC）；</li>
 <li>转换成其他稀疏矩阵的结构时效率较低（可以考虑 LIL 或 DOK）。</li>
 </ul>
-<h1 id="CSC，Compressed-Sparse-Column"><a href="#CSC，Compressed-Sparse-Column" class="headerlink" title="CSC，Compressed Sparse Column"></a>CSC，Compressed Sparse Column</h1><p>CSC（Compressed Sparse Column）和 CSR 的原理相同，只是矩阵按列压缩存储。它通过将矩阵的列存储为一组压缩列，并使用两个数组来表示非零元素的值和对应的行索引，从而实现高效的存储和操作。该格式在处理稀疏矩阵时具有较高的空间效率和访问效率，特别适用于以列为主导的操作，如矩阵向量乘法和 LU 分解。</p>
+<h1 id="CSC，Compressed-Sparse-Column"><a href="#CSC，Compressed-Sparse-Column" class="headerlink" title="CSC，Compressed Sparse Column"></a>CSC，Compressed Sparse Column</h1><p>&emsp;&emsp;CSC（Compressed Sparse Column）和 CSR 的原理相同，只是矩阵按列压缩存储。它通过将矩阵的列存储为一组压缩列，并使用两个数组来表示非零元素的值和对应的行索引，从而实现高效的存储和操作。该格式在处理稀疏矩阵时具有较高的空间效率和访问效率，特别适用于以列为主导的操作，如矩阵向量乘法和 LU 分解。</p>
 <h2 id="属性-2"><a href="#属性-2" class="headerlink" title="属性"></a>属性</h2><ul>
 <li><code>indptr</code>：列指针偏移数组</li>
 <li><code>indices</code>：行索引数组</li>
@@ -401,7 +401,7 @@
 <li>行切片操作较慢（行切片考虑 CSR）；</li>
 <li>转换成其他稀疏矩阵的结构时效率较低（可以考虑 LIL 或 DOK）。</li>
 </ul>
-<h1 id="LIL，Row-based-List-of-Lists-sparse"><a href="#LIL，Row-based-List-of-Lists-sparse" class="headerlink" title="LIL，Row-based List of Lists sparse"></a>LIL，Row-based List of Lists sparse</h1><p>LIL（Row-based List of Lists sparse）使用链表的方式按行存储矩阵的非零元素。每一行都由一个链表表示，链表中的节点存储了非零元素的值和对应的列索引。</p>
+<h1 id="LIL，Row-based-List-of-Lists-sparse"><a href="#LIL，Row-based-List-of-Lists-sparse" class="headerlink" title="LIL，Row-based List of Lists sparse"></a>LIL，Row-based List of Lists sparse</h1><p>&emsp;&emsp;LIL（Row-based List of Lists sparse）使用链表的方式按行存储矩阵的非零元素。每一行都由一个链表表示，链表中的节点存储了非零元素的值和对应的列索引。</p>
 <h2 id="属性-3"><a href="#属性-3" class="headerlink" title="属性"></a>属性</h2><ul>
 <li><code>rows</code>：行索引数组</li>
 <li><code>data</code>：数据数组</li>
@@ -470,7 +470,7 @@
 <li>进行 SpMV 运算操作较慢（可以考虑 CSR&#x2F;CSC ）；</li>
 <li>当矩阵很大时，考虑使用 COO。</li>
 </ul>
-<h1 id="DIA，DIAgonal-storage"><a href="#DIA，DIAgonal-storage" class="headerlink" title="DIA，DIAgonal storage"></a>DIA，DIAgonal storage</h1><p>DIA（Sparse matrix with DIAgonal storage）通过仅存储对角线元素和每个对角线的偏移量来实现压缩存储。</p>
+<h1 id="DIA，DIAgonal-storage"><a href="#DIA，DIAgonal-storage" class="headerlink" title="DIA，DIAgonal storage"></a>DIA，DIAgonal storage</h1><p>&emsp;&emsp;DIA（DIAgonal storage）通过仅存储对角线元素和每个对角线的偏移量来实现压缩存储。</p>
 <h2 id="属性-4"><a href="#属性-4" class="headerlink" title="属性"></a>属性</h2><ul>
 <li><code>data</code>：数据数组，每一行代表对角线，列代表元素所在列；</li>
 <li><code>offsets</code>：对角线偏移量数组，其存储了每条非零对角线基于主对角线的偏移量，在主对角线下方则为负值，在主对角线上方则为正值。</li>
@@ -543,7 +543,7 @@
 </tr>
 </tbody></table>
 <h2 id="性质-5"><a href="#性质-5" class="headerlink" title="性质"></a>性质</h2><p>MSR 相比 CSR 在存储上更加紧凑，可以节省存储空间。</p>
-<h1 id="BSR，Block-Sparse-Row"><a href="#BSR，Block-Sparse-Row" class="headerlink" title="BSR，Block Sparse Row"></a>BSR，Block Sparse Row</h1><p>BSR（Block Sparse Row）是一种用于特殊稀疏矩阵的存储方式。这类矩阵的特点是矩阵可以均匀分块，并且非零矩阵元素恰好位于某些块上。BSR 格式可以通过类似于 CSR 格式的方式对矩阵进行压缩存储，不同之处在于存储的不再是单个矩阵元素，而是矩阵的一个子块。</p>
+<h1 id="BSR，Block-Sparse-Row"><a href="#BSR，Block-Sparse-Row" class="headerlink" title="BSR，Block Sparse Row"></a>BSR，Block Sparse Row</h1><p>&emsp;&emsp;BSR（Block Sparse Row）是一种用于特殊稀疏矩阵的存储方式。这类矩阵的特点是矩阵可以均匀分块，并且非零矩阵元素恰好位于某些块上。BSR 格式可以通过类似于 CSR 格式的方式对矩阵进行压缩存储，不同之处在于存储的不再是单个矩阵元素，而是矩阵的一个子块。</p>
 <h2 id="属性-6"><a href="#属性-6" class="headerlink" title="属性"></a>属性</h2><ul>
 <li><code>indptr</code>：行指针偏移数组</li>
 <li><code>indices</code>：列索引数组</li>
@@ -702,7 +702,7 @@
 <ul>
 <li>适用范围有限。</li>
 </ul>
-<h1 id="ELL，ELLPACK"><a href="#ELL，ELLPACK" class="headerlink" title="ELL，ELLPACK"></a>ELL，ELLPACK</h1><p>ELL（ELLPACK）是一种用于稀疏矩阵存储和操作的格式，它通过将非零元素按行对齐存储在一个二维数组中，同时在每行中保留对应的列索引，实现高效的空间和访问效率。</p>
+<h1 id="ELL，ELLPACK"><a href="#ELL，ELLPACK" class="headerlink" title="ELL，ELLPACK"></a>ELL，ELLPACK</h1><p>&emsp;&emsp;ELL（ELLPACK）是一种用于稀疏矩阵存储和操作的格式，它通过将非零元素按行对齐存储在一个二维数组中，同时在每行中保留对应的列索引，实现高效的空间和访问效率。</p>
 <h2 id="属性-7"><a href="#属性-7" class="headerlink" title="属性"></a>属性</h2><ul>
 <li><code>indices</code>：列索引矩阵</li>
 <li><code>data</code>：数据矩阵</li>
@@ -812,7 +812,7 @@
 <ul>
 <li>因为行数是固定的，所以修改较为困难。</li>
 </ul>
-<h1 id="Hybrid（ELL-COO）混合存储"><a href="#Hybrid（ELL-COO）混合存储" class="headerlink" title="Hybrid（ELL + COO）混合存储"></a>Hybrid（ELL + COO）混合存储</h1><p>为了解决 ELL 中某一行特别多，造成其他行的浪费，那么把这些多出来的元素用 COO 单独存储。</p>
+<h1 id="Hybrid（ELL-COO）混合存储"><a href="#Hybrid（ELL-COO）混合存储" class="headerlink" title="Hybrid（ELL + COO）混合存储"></a>Hybrid（ELL + COO）混合存储</h1><p>&emsp;&emsp;为了解决 ELL 中某一行特别多，造成其他行的浪费，那么把这些多出来的元素用 COO 单独存储。</p>
 <h2 id="属性-8"><a href="#属性-8" class="headerlink" title="属性"></a>属性</h2><p><strong>ELL部分：</strong></p>
 <ul>
 <li><code>indices</code>：列索引矩阵</li>
@@ -1044,9 +1044,9 @@
   <nav class="article-nav">
     
     
-      <a href="/2023/%E5%AE%BF%E8%88%8D%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" class="article-nav-link">
+      <a href="/2023/STL%E5%BA%93%E4%B8%ADSET%E7%9A%84%E5%8E%9F%E7%90%86/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">宿舍秒杀系统的需求分析与数据库设计</div>
+        <div class="article-nav-title">STL库中SET的原理</div>
       </a>
     
   </nav>

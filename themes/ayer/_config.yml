@@ -12,7 +12,7 @@ menu:
 # https://github.com/mattboldt/typed.js
 subtitle:
   enable: true # 是否开启动效
-  text: 以代码为画笔，绘就世界的无限可能———— # 显示的文字
+  text: 以代码为画笔，绘就世界的无限可能 ——— # 显示的文字
   text2:
   text3:
   startDelay: 0 # 延迟时间

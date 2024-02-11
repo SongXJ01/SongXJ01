@@ -42,10 +42,12 @@ categories:
 **差分数组**：差分数组主要的适用场景是对原始数组进行频繁的区间增减操作，这个时候适用差分数组能够快速的完成，同时能够快速获得更新后的数组各个位置的值。
 
 以`trips = [[2,1,5],[3,3,7]], capacity = 4`为例，数组变化如下：
-![乘客情况](https://img-blog.csdnimg.cn/957eee57452244079f9c3c4e59decfe7.png)
+![乘客情况](/images/算法题_拼车/乘客情况.png)
+
 
 使用差分数组修改上图所示的数组，结果如下：
-![修改为差分数组](https://img-blog.csdnimg.cn/cb8fac0528974384adb983ca78083d3c.png)
+![修改为差分数组](/images/算法题_拼车/修改为差分数组.png)
+
 
 <br /> <br /> 
 # 代码（Java）
@@ -72,3 +74,4 @@ public class LeetCode_1094_carPooling {
 
 ```
 
+<br/><br/><br/><br/>
