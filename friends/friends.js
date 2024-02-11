@@ -13,7 +13,7 @@ link = {
             site=data[i].site;
             info=data[i].info;
             avatar=data[i].avatar;
-            li+='<div class="card">'+'<img class="ava" src="/images/loading.gif" data-original="'+avatar+'"/><div class="card-header"><div><a href="'+site+'" target="_blank">'+name+'</a></div><div class="info">'+info+'</div></div></div>';
+            li+='<div class="card">'+'<img class="ava" src="'+avatar+'"/><div class="card-header"><div><a href="'+site+'" target="_blank">'+name+'</a></div><div class="info">'+info+'</div></div></div>';
         }
         $(".link-navigation").append(li);
     }
