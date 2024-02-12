@@ -7,7 +7,9 @@ categories:
 - BUG日志
 ---
 
-# 报错内容
+
+
+报错内容
 
 ```bash
 Traceback (most recent call last):
@@ -20,7 +22,7 @@ public.PanelError: 面板运行时发生错误: Traceback (most recent call last
     for con in self.__docker.containers.list(all=True):
 AttributeError: 'NoneType' object has no attribute 'containers'
 ```
-
+<!--more-->
 
 ---
 

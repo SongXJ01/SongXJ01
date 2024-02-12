@@ -96,7 +96,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">4 分钟</span>
+            <span class="post-count">5 分钟</span>
         </span>
     </span>
 </div>
@@ -111,9 +111,9 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <hr>
-<p>Matplotlib 是 Python 的绘图库，它与 NumPy 一起使用，可以基本上实现 MATLAB 的绘图和计算功能，而且效率更高，速度更快。</p>
-<p>今天主要说一下关于 Matplotlib 绘制三维图像，并实现一个可以多次使用的<strong>函数模板</strong>，直接复制调用即可使用。</p>
+  <p>&emsp;&emsp;Matplotlib 是 Python 的绘图库，它与 NumPy 一起使用，可以基本上实现 MATLAB 的绘图和计算功能，而且效率更高，速度更快。今天主要说一下关于 Matplotlib 绘制三维图像，并实现一个可以多次使用的<strong>函数模板</strong>，直接复制调用即可使用。</p>
+<span id="more"></span>
+
 <hr>
 <h2 id="1-导入模块包"><a href="#1-导入模块包" class="headerlink" title="1. 导入模块包"></a>1. 导入模块包</h2><p><code>numpy</code>和<code>matplotlib</code>是两个常规的基本模块。因为实现的是三维绘图，所以需要另外一个模块<code>Axes3D</code>，这是是 Matplotlib 里面专门用来画三维图的工具包。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br></pre></td></tr></table></figure>
@@ -257,7 +257,7 @@
     app_key: "G2qOYTyMGB3F79hHhg6LARHs",
     path: window.location.pathname,
     avatar: "mp",
-    placeholder: "给我的文章加点评论吧~",
+    placeholder: "欢迎交流讨论 ......",
     recordIP: true,
   });
   const infoEle = document.querySelector("#vcomments .info");
@@ -365,6 +365,10 @@
     </li>
     
     <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影空间</a>
+    </li>
+    
+    <li class="nav-item">
       <a class="nav-item-link" href="/categories">分类</a>
     </li>
     
@@ -377,15 +381,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/photos">光影记忆</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友情链接</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/about">博主简介</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -398,10 +394,6 @@
         <i class="ri-search-line"></i>
       </a>
       
-      
-      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-        <i class="ri-rss-line"></i>
-      </a>
       
     </li>
   </ul>

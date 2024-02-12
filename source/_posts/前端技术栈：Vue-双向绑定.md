@@ -7,18 +7,21 @@ categories:
 - 前端技术栈
 ---
 
------
+
 
 ## MVVM模式
 
 &emsp;&emsp;说到 Vue 的双向绑定首先联系到的就是 MVVM（Model-View-ViewModel）模式了，如下图所示，当视图发生改变的时候传递给 VM，再让数据得到更新，当数据发生改变的时候传给 VM，使得视图发生改变。
 
+<!--more-->
+
 MVVM 模式是通过以下三个核心组件组成：
  - **M：** Model - 包含了业务和验证逻辑的数据模型；
- -    **V：** View - 定义屏幕中 View 的结构，布局和外观；
- -    **VM：** ViewModel - 扮演“View”和“Model”之间的使者，帮忙处理 View 的全部业务逻辑。
+ - **V：** View - 定义屏幕中 View 的结构，布局和外观；
+ - **VM：** ViewModel - 扮演“View”和“Model”之间的使者，帮忙处理 View 的全部业务逻辑。
 
 ![vue数据双向绑定原理](/images/前端技术栈_Vue双向绑定/vue数据双向绑定原理.png)
+
 
 
 -----

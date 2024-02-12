@@ -132,7 +132,7 @@ baidusitemap:
 
 # 懒加载
 lazyload:
-  enable: false
+  enable: true
   onlypost: false
   loadingImg: /images/loading.gif
   preloadRatio: 3

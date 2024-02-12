@@ -110,6 +110,8 @@
     <div class="article-entry" itemprop="articleBody">
        
   <p>&emsp;&emsp;<code>std::set</code> 是C++标准库中的容器之一，它基于红黑树实现。<code>std::set</code> 利用红黑树的特性来实现有序的插入、查找和删除操作，并且具有较好的平均和最坏情况下的时间复杂度。<br>当向 <code>std::set</code> 插入元素时，它会按照特定的比较函数（<code>bool less&lt;T&gt;::operator() const(const T &amp;lhs, const T &amp; rhs)</code>）将新元素插入到红黑树的适当位置，以保持树的有序性质。插入操作的平均时间复杂度为 $O(\log n)$，其中$n$是 <code>std::set</code> 中元素的数量。查找操作（<code>find()</code>）使用红黑树的性质，通过比较函数在树中进行二分查找，查找操作的平均时间复杂度为 $O(\log n)$。</p>
+<span id="more"></span>
+
 <p>&emsp;&emsp;但是当我们把 struct 放入 <code>std::set</code> 会有什么后果呢？因为 <code>std::set</code> 需要在插入到时候排序，所以需要重载  struct 的比较运算符，这个时候就出现问题了，首先我们定义一个结构体 <code>Person</code> ：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">int</span> _ID, string _name, <span class="type">int</span> _age) : <span class="built_in">ID</span>(_ID), <span class="built_in">age</span>(_age), <span class="built_in">name</span>(_name) &#123;&#125;</span><br><span class="line">    <span class="type">int</span> ID;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    string name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>&emsp;&emsp;当我们直接插入到 <code>std::set&lt;Person&gt;</code> 中时，会报 complier error 的错误，因此简单补写一个比较运算符重载，如下：</p>
@@ -238,7 +240,7 @@
     app_key: "G2qOYTyMGB3F79hHhg6LARHs",
     path: window.location.pathname,
     avatar: "mp",
-    placeholder: "给我的文章加点评论吧~",
+    placeholder: "欢迎交流讨论 ......",
     recordIP: true,
   });
   const infoEle = document.querySelector("#vcomments .info");
@@ -346,6 +348,10 @@
     </li>
     
     <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影空间</a>
+    </li>
+    
+    <li class="nav-item">
       <a class="nav-item-link" href="/categories">分类</a>
     </li>
     
@@ -358,15 +364,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/photos">光影记忆</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友情链接</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/about">博主简介</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -379,10 +377,6 @@
         <i class="ri-search-line"></i>
       </a>
       
-      
-      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-        <i class="ri-rss-line"></i>
-      </a>
       
     </li>
   </ul>

@@ -112,6 +112,8 @@
     <div class="article-entry" itemprop="articleBody">
        
   <p>&emsp;&emsp;在本文中将分析一个用于新生开学分配寝室的“<strong>宿舍秒杀</strong>”系统。从用户故事开始<strong>探索需求</strong>，进而分析得到系统的主要功能和非功能性需求。最后，根据需求分析设计数据库，数据库的设计原则是尽可能的方便之后的需求拓展和修改。</p>
+<span id="more"></span>
+
 <hr>
 <p><br/><br/></p>
 <h1 id="用户故事"><a href="#用户故事" class="headerlink" title="用户故事"></a>用户故事</h1><p>&emsp;&emsp;用户故事一般是产品经理初次描述给自己和开发人员看的，然后产品负责人要依据用户故事设计原型，原型在客户那里通过后，然后再在用户故事里面添加附件。用户故事不会一开始就很清晰，甚至可能不会有特专业术语。</p>
@@ -288,7 +290,7 @@
     app_key: "G2qOYTyMGB3F79hHhg6LARHs",
     path: window.location.pathname,
     avatar: "mp",
-    placeholder: "给我的文章加点评论吧~",
+    placeholder: "欢迎交流讨论 ......",
     recordIP: true,
   });
   const infoEle = document.querySelector("#vcomments .info");
@@ -396,6 +398,10 @@
     </li>
     
     <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影空间</a>
+    </li>
+    
+    <li class="nav-item">
       <a class="nav-item-link" href="/categories">分类</a>
     </li>
     
@@ -408,15 +414,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/photos">光影记忆</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友情链接</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/about">博主简介</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -429,10 +427,6 @@
         <i class="ri-search-line"></i>
       </a>
       
-      
-      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-        <i class="ri-rss-line"></i>
-      </a>
       
     </li>
   </ul>

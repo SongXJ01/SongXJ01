@@ -8,10 +8,10 @@ categories:
 - Python
 ---
 
------
-Matplotlib 是 Python 的绘图库，它与 NumPy 一起使用，可以基本上实现 MATLAB 的绘图和计算功能，而且效率更高，速度更快。
 
-今天主要说一下关于 Matplotlib 绘制三维图像，并实现一个可以多次使用的**函数模板**，直接复制调用即可使用。
+&emsp;&emsp;Matplotlib 是 Python 的绘图库，它与 NumPy 一起使用，可以基本上实现 MATLAB 的绘图和计算功能，而且效率更高，速度更快。今天主要说一下关于 Matplotlib 绘制三维图像，并实现一个可以多次使用的**函数模板**，直接复制调用即可使用。
+
+<!--more-->
 
 ----
 ## 1. 导入模块包

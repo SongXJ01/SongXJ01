@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">448</span>
+            <span class="post-count">444</span>
         </span>
     </span>
 
@@ -96,7 +96,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">2 分钟</span>
+            <span class="post-count">1 分钟</span>
         </span>
     </span>
 </div>
@@ -111,7 +111,9 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>给你一个字符串 <code>s</code>，找到 <code>s</code> 中最长的回文子串。</p>
+  <p>给你一个字符串 <code>s</code>，找到 <code>s</code> 中最长的回文子串。</p>
+<span id="more"></span>
+
 <h1 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h1><p>对于一个子串而言，如果它是回文串，并且长度大于 2，那么将它首尾的两个字母去除之后，它仍然是个回文串。例如对于字符串 “ababa”，如果我们已经知道 “bab” 是回文串，那么 “ababa” 一定是回文串，这是因为它的首尾两个字母都是 “a”。</p>
 <p><strong>注意：在状态转移方程中，我们是从长度较短的字符串向长度较长的字符串进行转移的，因此一定要注意动态规划的循环顺序。</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">longestPalindrome</span><span class="params">(String s)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> s.length();</span><br><span class="line">        <span class="keyword">if</span> (len &lt; <span class="number">2</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> s;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">maxLen</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">        <span class="type">int</span> <span class="variable">begin</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="comment">// dp[i][j] 表示 s[i..j] 是否是回文串</span></span><br><span class="line">        <span class="type">boolean</span>[][] dp = <span class="keyword">new</span> <span class="title class_">boolean</span>[len][len];</span><br><span class="line">        <span class="comment">// 初始化：所有长度为 1 的子串都是回文串</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">            dp[i][i] = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">char</span>[] charArray = s.toCharArray();</span><br><span class="line">        <span class="comment">// 递推开始</span></span><br><span class="line">        <span class="comment">// 先枚举子串长度</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">L</span> <span class="operator">=</span> <span class="number">2</span>; L &lt;= len; L++) &#123;</span><br><span class="line">            <span class="comment">// 枚举左边界，左边界的上限设置可以宽松一些</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">                <span class="comment">// 由 L 和 i 可以确定右边界，即 j - i + 1 = L 得</span></span><br><span class="line">                <span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> L + i - <span class="number">1</span>;</span><br><span class="line">                <span class="comment">// 如果右边界越界，就可以退出当前循环</span></span><br><span class="line">                <span class="keyword">if</span> (j &gt;= len) &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (charArray[i] != charArray[j]) &#123;</span><br><span class="line">                    dp[i][j] = <span class="literal">false</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (j - i &lt; <span class="number">3</span>) &#123;</span><br><span class="line">                        dp[i][j] = <span class="literal">true</span>;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        dp[i][j] = dp[i + <span class="number">1</span>][j - <span class="number">1</span>];</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 只要 dp[i][L] == true 成立，就表示子串 s[i..L] 是回文，此时记录回文长度和起始位置</span></span><br><span class="line">                <span class="keyword">if</span> (dp[i][j] &amp;&amp; j - i + <span class="number">1</span> &gt; maxLen) &#123;</span><br><span class="line">                    maxLen = j - i + <span class="number">1</span>;</span><br><span class="line">                    begin = i;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> s.substring(begin, begin + maxLen);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -232,7 +234,7 @@
     app_key: "G2qOYTyMGB3F79hHhg6LARHs",
     path: window.location.pathname,
     avatar: "mp",
-    placeholder: "给我的文章加点评论吧~",
+    placeholder: "欢迎交流讨论 ......",
     recordIP: true,
   });
   const infoEle = document.querySelector("#vcomments .info");
@@ -340,6 +342,10 @@
     </li>
     
     <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影空间</a>
+    </li>
+    
+    <li class="nav-item">
       <a class="nav-item-link" href="/categories">分类</a>
     </li>
     
@@ -352,15 +358,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/photos">光影记忆</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友情链接</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/about">博主简介</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -373,10 +371,6 @@
         <i class="ri-search-line"></i>
       </a>
       
-      
-      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-        <i class="ri-rss-line"></i>
-      </a>
       
     </li>
   </ul>
