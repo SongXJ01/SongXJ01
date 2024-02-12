@@ -110,6 +110,8 @@
     <div class="article-entry" itemprop="articleBody">
        
   <p>&emsp;&emsp;STL库中的 <code>vector</code> 是我们使用最频繁的STD容器之一。它具有广泛的应用，并且在性能方面表现出色。然而，其存在一种潜在问题，即<strong>溢出</strong>。由于 <code>vector</code> 在使用下标访问元素时不会检查索引是否越界，因此很可能导致溢出错误的出现。这种错误被严格定义为一种内存的<code>&quot;dirty read / dirty write&quot;</code>。</p>
+<span id="more"></span>
+
 <p><strong>下面的代码就是模拟这样的一种情况：</strong><br>&emsp;&emsp;首先在内存中声明一个长度为 16 的 <code>vector</code> 并命名为 <code>tmp</code>，用来在内存中写入藏数据。然后紧跟着声明一个长度为 16 的全 0 <code>vector</code> 。这里构建一个名为 <code>dirty_write</code> 的函数，其中向随机产生的索引中写入值，因为这里产生的索引不一定在 16 以内，所以会随机写入脏数据。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">dirty_write</span><span class="params">(std::vector&lt;<span class="type">double</span>&gt; &amp;args)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> r = <span class="built_in">rand</span>() % <span class="number">40</span> - <span class="number">10</span>;</span><br><span class="line">    args[r] = <span class="built_in">rand</span>() % <span class="number">101</span> - <span class="number">50</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">double</span>&gt; <span class="title">tmp</span><span class="params">(<span class="number">16</span>)</span></span>;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">double</span>&gt; <span class="title">zero_vec</span><span class="params">(<span class="number">16</span>, <span class="number">0</span>)</span></span>;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Before: &quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; zero_vec.<span class="built_in">size</span>(); ++i) &#123;</span><br><span class="line">        cout &lt;&lt; zero_vec[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">        <span class="built_in">dirty_write</span>(tmp);</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;\nAfter: &quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; zero_vec.<span class="built_in">size</span>(); ++i) &#123;</span><br><span class="line">        cout &lt;&lt; zero_vec[i] &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -234,7 +236,7 @@
     app_key: "G2qOYTyMGB3F79hHhg6LARHs",
     path: window.location.pathname,
     avatar: "mp",
-    placeholder: "给我的文章加点评论吧~",
+    placeholder: "欢迎交流讨论 ......",
     recordIP: true,
   });
   const infoEle = document.querySelector("#vcomments .info");
@@ -342,6 +344,10 @@
     </li>
     
     <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影空间</a>
+    </li>
+    
+    <li class="nav-item">
       <a class="nav-item-link" href="/categories">分类</a>
     </li>
     
@@ -354,15 +360,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/photos">光影记忆</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友情链接</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/about">博主简介</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -375,10 +373,6 @@
         <i class="ri-search-line"></i>
       </a>
       
-      
-      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-        <i class="ri-rss-line"></i>
-      </a>
       
     </li>
   </ul>

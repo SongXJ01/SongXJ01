@@ -111,8 +111,10 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <hr>
-<p>&emsp;&emsp;这个实验会建立一个全双工系统（Full-Duplex），实现两个管道同时收发消息。在程序中会涉及到3个文件，2个管道，2个进程，4个线程。线程之间的拓扑图如下：<br><img src="/images/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86_C%E8%AF%AD%E8%A8%80threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/%E9%80%9A%E4%BF%A1%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="通信示意图"></p>
+  <p>&emsp;&emsp;这个实验会建立一个全双工系统（Full-Duplex），实现两个管道同时收发消息。在程序中会涉及到3个文件，2个管道，2个进程，4个线程。线程之间的拓扑图如下：</p>
+<span id="more"></span>
+
+<p><img src="/images/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86_C%E8%AF%AD%E8%A8%80threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/%E9%80%9A%E4%BF%A1%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="通信示意图"></p>
 <p>【完整代码附在文章最后】</p>
 <hr>
 <h2 id="创建连通管道"><a href="#创建连通管道" class="headerlink" title="创建连通管道"></a>创建连通管道</h2><p>&emsp;&emsp;首先创建<code>fifo_create.c</code>文件来事先创建2个管道，分别为A发送B接收、A接收B发送。使用<code>mkfifo()</code>语句创建管道，分别标识为“A2B”、“B2A”。<br>访问权限为<code>0644</code>，第一位0不算，从左至右三个数字分别代表<code>rw-</code> <code>r--</code> <code>r--</code>对应转化为的二进制<code>110</code> <code>100</code> <code>100</code>。十进制第1个数字代表<strong>文件所有者</strong>的权限，十进制第2个数字代表<strong>同组用户</strong>的权限，十进制第3个数字代表<strong>其他用户</strong>的权限。<br>之后验证<code>mkfifo()</code>的返回值，验证管道是否创建成功。如果创建成功，当前目录下回多出来“A2B”、“B2A”两个文件。</p>
@@ -272,7 +274,7 @@
     app_key: "G2qOYTyMGB3F79hHhg6LARHs",
     path: window.location.pathname,
     avatar: "mp",
-    placeholder: "给我的文章加点评论吧~",
+    placeholder: "欢迎交流讨论 ......",
     recordIP: true,
   });
   const infoEle = document.querySelector("#vcomments .info");
@@ -380,6 +382,10 @@
     </li>
     
     <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影空间</a>
+    </li>
+    
+    <li class="nav-item">
       <a class="nav-item-link" href="/categories">分类</a>
     </li>
     
@@ -392,15 +398,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/photos">光影记忆</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友情链接</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/about">博主简介</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -413,10 +411,6 @@
         <i class="ri-search-line"></i>
       </a>
       
-      
-      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-        <i class="ri-rss-line"></i>
-      </a>
       
     </li>
   </ul>

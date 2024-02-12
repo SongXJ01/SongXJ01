@@ -111,8 +111,9 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h1 id="报错内容"><a href="#报错内容" class="headerlink" title="报错内容"></a>报错内容</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;class/panelPlugin.py&quot;</span>, line 2788, <span class="keyword">in</span> a</span><br><span class="line">    <span class="built_in">return</span> p.exec_fun(get)</span><br><span class="line">  File <span class="string">&quot;class/pluginAuth.py&quot;</span>, line 67, <span class="keyword">in</span> exec_fun</span><br><span class="line">    raise public.PanelError(res[<span class="string">&#x27;msg&#x27;</span>])</span><br><span class="line">public.PanelError: 面板运行时发生错误: Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;/www/server/panel/plugin/docker/docker_main.py&quot;</span>, line 57, <span class="keyword">in</span> GetConList</span><br><span class="line">    <span class="keyword">for</span> con <span class="keyword">in</span> self.__docker.containers.list(all=True):</span><br><span class="line">AttributeError: <span class="string">&#x27;NoneType&#x27;</span> object has no attribute <span class="string">&#x27;containers&#x27;</span></span><br></pre></td></tr></table></figure>
-
+  <p>报错内容</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;class/panelPlugin.py&quot;</span>, line 2788, <span class="keyword">in</span> a</span><br><span class="line">    <span class="built_in">return</span> p.exec_fun(get)</span><br><span class="line">  File <span class="string">&quot;class/pluginAuth.py&quot;</span>, line 67, <span class="keyword">in</span> exec_fun</span><br><span class="line">    raise public.PanelError(res[<span class="string">&#x27;msg&#x27;</span>])</span><br><span class="line">public.PanelError: 面板运行时发生错误: Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;/www/server/panel/plugin/docker/docker_main.py&quot;</span>, line 57, <span class="keyword">in</span> GetConList</span><br><span class="line">    <span class="keyword">for</span> con <span class="keyword">in</span> self.__docker.containers.list(all=True):</span><br><span class="line">AttributeError: <span class="string">&#x27;NoneType&#x27;</span> object has no attribute <span class="string">&#x27;containers&#x27;</span></span><br></pre></td></tr></table></figure>
+<span id="more"></span>
 
 <hr>
 <h1 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h1><h2 id="1-卸载已经安装的-Docker"><a href="#1-卸载已经安装的-Docker" class="headerlink" title="1. 卸载已经安装的 Docker"></a>1. 卸载已经安装的 Docker</h2><p>如果已经安装了未运行成功的 Docker，错误如下图所示，那么请将这个 Docker 卸载。</p>
@@ -239,7 +240,7 @@
     app_key: "G2qOYTyMGB3F79hHhg6LARHs",
     path: window.location.pathname,
     avatar: "mp",
-    placeholder: "给我的文章加点评论吧~",
+    placeholder: "欢迎交流讨论 ......",
     recordIP: true,
   });
   const infoEle = document.querySelector("#vcomments .info");
@@ -347,6 +348,10 @@
     </li>
     
     <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影空间</a>
+    </li>
+    
+    <li class="nav-item">
       <a class="nav-item-link" href="/categories">分类</a>
     </li>
     
@@ -359,15 +364,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/photos">光影记忆</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友情链接</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/about">博主简介</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -380,10 +377,6 @@
         <i class="ri-search-line"></i>
       </a>
       
-      
-      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-        <i class="ri-rss-line"></i>
-      </a>
       
     </li>
   </ul>

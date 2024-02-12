@@ -112,6 +112,9 @@
     <div class="article-entry" itemprop="articleBody">
        
   <h1 id="基础环境"><a href="#基础环境" class="headerlink" title="基础环境"></a>基础环境</h1><p>本次的实验环境是<code>CentOS 7.9</code> 已经安装了宝塔面板，并安装了<code>Docker管理器3.9.1</code>。</p>
+<span id="more"></span>
+
+
 <hr>
 <h1 id="MySQL的安装与部署"><a href="#MySQL的安装与部署" class="headerlink" title="MySQL的安装与部署"></a>MySQL的安装与部署</h1><h2 id="1-在Docker中安装MySQL"><a href="#1-在Docker中安装MySQL" class="headerlink" title="1. 在Docker中安装MySQL"></a>1. 在Docker中安装MySQL</h2><p><strong>【将Docker中MySQL数据库挂载到服务器】</strong><br>将Docker中的数据以及配置文件映射到服务器的文件系统上，这样当删除了Docker容器后，之前的数据记录依然存在。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker run --restart=always --privileged=true -d \</span><br><span class="line">-v /dockerImageFile/mysql/data:/var/lib/mysql \</span><br><span class="line">-v /dockerImageFile/mysql/conf:/etc/mysql/conf.d \</span><br><span class="line">-v /dockerImageFile/mysql/my.cnf:/etc/mysql/my.cnf </span><br><span class="line">-p 3306:3306 \</span><br><span class="line">--name mysql \</span><br><span class="line">-e MYSQL_ROOT_PASSWORD=123456 \</span><br><span class="line">mysql:5.7</span><br></pre></td></tr></table></figure>
@@ -330,7 +333,7 @@
     app_key: "G2qOYTyMGB3F79hHhg6LARHs",
     path: window.location.pathname,
     avatar: "mp",
-    placeholder: "给我的文章加点评论吧~",
+    placeholder: "欢迎交流讨论 ......",
     recordIP: true,
   });
   const infoEle = document.querySelector("#vcomments .info");
@@ -438,6 +441,10 @@
     </li>
     
     <li class="nav-item">
+      <a class="nav-item-link" href="/photos">光影空间</a>
+    </li>
+    
+    <li class="nav-item">
       <a class="nav-item-link" href="/categories">分类</a>
     </li>
     
@@ -450,15 +457,7 @@
     </li>
     
     <li class="nav-item">
-      <a class="nav-item-link" href="/photos">光影记忆</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/friends">友情链接</a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-item-link" href="/about">博主简介</a>
+      <a class="nav-item-link" href="/about">关于我</a>
     </li>
     
   </ul>
@@ -471,10 +470,6 @@
         <i class="ri-search-line"></i>
       </a>
       
-      
-      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
-        <i class="ri-rss-line"></i>
-      </a>
       
     </li>
   </ul>
