@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>算法分析与设计：动态规划（空间复杂度优化） |  SongXJ&#39;s Blog</title>
+      <title>CUDA 学习笔记 |  SongXJ&#39;s Blog</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/images/songxj.ico" />
@@ -56,7 +56,7 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="post-算法分析与设计：动态规划（空间复杂度优化）"
+  id="post-H100结构与CUDA编程"
   class="article article-type-post"
   itemscope
   itemprop="blogPost"
@@ -67,7 +67,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  算法分析与设计：动态规划（空间复杂度优化）
+  CUDA 学习笔记
 </h1>
  
 
@@ -75,11 +75,11 @@
     </header>
      
     <div class="article-meta">
-      <a href="/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%EF%BC%88%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%BC%98%E5%8C%96%EF%BC%89/" class="article-date">
-  <time datetime="2021-08-16T05:59:02.000Z" itemprop="datePublished">2021-08-16</time>
+      <a href="/2024/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/" class="article-date">
+  <time datetime="2024-01-16T05:24:39.000Z" itemprop="datePublished">2024-01-16</time>
 </a> 
   <div class="article-category">
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a> / <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1/">算法分析与设计</a>
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a> / <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/CUDA/">CUDA</a>
   </div>
   
 <div class="word_count">
@@ -87,7 +87,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">1.5k</span>
+            <span class="post-count">1.4k</span>
         </span>
     </span>
 
@@ -96,7 +96,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> 阅读时长≈</span>
-            <span class="post-count">6 分钟</span>
+            <span class="post-count">5 分钟</span>
         </span>
     </span>
 </div>
@@ -111,36 +111,43 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h2 id="背包问题"><a href="#背包问题" class="headerlink" title="背包问题"></a>背包问题</h2><p>&emsp;&emsp;由于高数巨养的喵星人太傲娇了，要天天吃新鲜猫粮而且还经常欺负高数巨，所以高数巨决定买几条哈士奇尝尝鲜。这天高数巨来到了二手狗市场买哈士奇，高数巨看完了所有的哈士奇，记下了每条哈士奇的价格，并根据对它们的好感程度给它们每只都赋予了一个萌值。高数现在手里有 <code>X</code> 元，她想通过购买若干条哈士奇来获得尽可能多的萌值。现在给定高数巨手里的钱 <code>X</code> 以及 <code>N</code> 条哈士奇的价格和萌值，求高数巨最多可获得多少萌值。</p>
+  <p>&emsp;&emsp;满配的 GH100 有 8 个 GPC（图形处理集群，Graphics Processor Cluster），每个 GPC 有 9 个 TPC（纹理处理集群，Texture Processor Cluster），每个 TPC 内有 2 个 SM（Streaming MultiProcessor），总共有 144 个 SM。基于 SXM5（Server PCI Express Module） 的 H100 砍掉了 6 个 TPC，只有 66 个 TPC，总计 132 个 SM。</p>
 <span id="more"></span>
 
-<h4 id="Input"><a href="#Input" class="headerlink" title="Input"></a>Input</h4><p>&emsp;&emsp;多组输入。对于每组输入，第一行有两个整数 <code>N,X(1 \leq N \leq 100，1 \leq X\leq1000)</code>，分别表示哈士奇的数量和高数巨的钱数。接下来的 <code>N</code> 行每行有两个整数 <code>P_i</code>，<code>M_i (1 \leq Pi,Mi \leq 100)</code>，分别表示第 <code>i</code> 条哈士奇的价格和萌值。</p>
-<h4 id="Output"><a href="#Output" class="headerlink" title="Output"></a>Output</h4><p>对于每组数据，输出一个整数，表示高数巨最多可以获得的萌值，每组输出占一行。</p>
-<h4 id="Sample-Input"><a href="#Sample-Input" class="headerlink" title="Sample Input"></a>Sample Input</h4><p>2 100 50 20 60 40 3 100 20 55 20 35 90 95 1 10 20 50</p>
-<h4 id="Sample-Output"><a href="#Sample-Output" class="headerlink" title="Sample Output"></a>Sample Output</h4><p>40 95 0</p>
-<h4 id="实例代码"><a href="#实例代码" class="headerlink" title="实例代码"></a>实例代码</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n, v;</span><br><span class="line">    <span class="type">int</span> w[<span class="number">1001</span>], p[<span class="number">1001</span>];</span><br><span class="line">    <span class="keyword">while</span> (~<span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;n, &amp;v)) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="comment">// w 重量  | p 价值</span></span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;w[i], &amp;p[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 重新初始化最优值结果数组</span></span><br><span class="line">        <span class="type">int</span> res[<span class="number">1001</span>] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123; <span class="comment">// 存储的物品个数</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> k = v; k &gt;= w[i]; k--) &#123; <span class="comment">// 从所需要的重量到当前重量</span></span><br><span class="line">                res[k] = <span class="built_in">max</span>(res[k], res[k - w[i]] + p[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, res[v]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<hr>
-<h2 id="最少硬币问题"><a href="#最少硬币问题" class="headerlink" title="最少硬币问题"></a>最少硬币问题</h2><h4 id="Problem-Description"><a href="#Problem-Description" class="headerlink" title="Problem Description"></a>Problem Description</h4><p>&emsp;&emsp;设有 <code>n</code> 种不同面值的硬币，各硬币的面值存于数组 <code>T[1:n]</code> 中。现要用这些面值的硬币来找钱。可以使用的各种面值的硬币个数存于数组 <code>Coins[1:n]</code> 中。 对任意钱数 <code>0 \leq m \leq 20001</code>，设计一个用最少硬币找钱 <code>m</code> 的方法。 对于给定的 <code>1 \leq n \leq 10</code>，硬币面值数组 <code>T</code> 和可以使用的各种面值的硬币个数数组 <code>Coins</code> ，以及钱数 <code>m</code> ，<code>0 \leq m \leq 20001</code> ，计算找钱 <code>m</code> 的最少硬币数。</p>
-<h4 id="Input-1"><a href="#Input-1" class="headerlink" title="Input"></a>Input</h4><p>&emsp;&emsp;输入数据第一行中只有1个整数给出 <code>n</code> 的值,第2行起每行2个数，分别是 <code>T[j]</code> 和 <code>Coins[j]</code> 。最后1行是要找的钱数 <code>m</code>。</p>
-<h4 id="Output-1"><a href="#Output-1" class="headerlink" title="Output"></a>Output</h4><p>&emsp;&emsp;输出数据只有一个整数，表示计算出的最少硬币数。问题无解时输出 -1。</p>
-<h4 id="Sample-Input-1"><a href="#Sample-Input-1" class="headerlink" title="Sample Input"></a>Sample Input</h4><p>3 1 3 2 3 5 3 18</p>
-<h4 id="Sample-Output-1"><a href="#Sample-Output-1" class="headerlink" title="Sample Output"></a>Sample Output</h4><p>5</p>
-<h4 id="实例代码-1"><a href="#实例代码-1" class="headerlink" title="实例代码"></a>实例代码</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INF 0x3f3f3f3f</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> m, n, T[<span class="number">20001</span>], Coin[<span class="number">20001</span>];</span><br><span class="line">    <span class="type">int</span> res[<span class="number">20001</span>];</span><br><span class="line">    <span class="built_in">memset</span>(res, INF, <span class="built_in">sizeof</span>(res));</span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cin &gt;&gt; T[i] &gt;&gt; Coin[i];</span><br><span class="line">    &#125;</span><br><span class="line">    cin &gt;&gt; m;</span><br><span class="line">    <span class="comment">// res[目标面额] = 最小需求个数</span></span><br><span class="line">    res[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历面额值</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">        <span class="comment">// 遍历每种面额内有几张</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= Coin[i]; j++)</span><br><span class="line">            <span class="comment">// 遍历目标金额，选择当前这枚硬币是要还是不要</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> k = m; k &gt;= T[i]; k--)</span><br><span class="line">                <span class="comment">// 将所有硬币依次拆分成单个，</span></span><br><span class="line">                <span class="comment">// res[目标面额] = min(res[目标面额-当前面额]+1，res[目标面额])，</span></span><br><span class="line">                <span class="comment">// 前一个是将该面额放入该组合中，后一个是不采用当前面额，选取数值最小的。</span></span><br><span class="line">                res[k] = <span class="built_in">min</span>(res[k - T[i]] + <span class="number">1</span>, res[k]);</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; (res[m] &lt; INF ? res[m] : <span class="number">-1</span>) &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="与“背包问题”的对比与分析"><a href="#与“背包问题”的对比与分析" class="headerlink" title="与“背包问题”的对比与分析"></a>与“背包问题”的对比与分析</h4><ol>
-<li>“背包”中给出了“损失”与“收益”，但其都是对于单个物品，求最大收益；“硬币”中给出的是“收益”、“个数”与“最终收益”，求最小组合。</li>
-<li>依旧采用一维数组 <code>res[目标面额]=最小需求个数</code> 来存储最终结果。</li>
-<li>将所有硬币依次拆分成单个，<code>res[目标面额] = min(res[目标面额-当前面额]+1，res[目标面额])</code>，前一个是将该面额放入该组合中，后一个是不采用当前面额，选取数值最小的。</li>
-</ol>
-<hr>
-<h2 id="空间复杂度优化-（以背包问题为例）"><a href="#空间复杂度优化-（以背包问题为例）" class="headerlink" title="空间复杂度优化 （以背包问题为例）"></a>空间复杂度优化 （以背包问题为例）</h2><p>&emsp;&emsp;有很多人采用二维数组 <code>res[i][j]</code> 静态地更新来解决背包问题，使用二维数组更加直观，但是空间复杂度较高。</p>
-<p>&emsp;&emsp;如果采用一维数组动态更新看起来比较难理解，但使用范围比较广。(比如，最少硬币问题中，三重循环，也可以采用一维数组来解决，但如果使用二维的话，对应地应该上升到三维)。</p>
-<h4 id="难点："><a href="#难点：" class="headerlink" title="难点："></a>难点：</h4><p><strong>“k:v-&gt;w[i]，依次递减”</strong>，这可能比较难以理解，在我们默认从小到大，而这里，必须从大到小，否则就是错误。</p>
-<h4 id="难点解答："><a href="#难点解答：" class="headerlink" title="难点解答："></a>难点解答：</h4><p>&emsp;&emsp;产生上述问题，本质就是对<code>res[]</code>数组在某一时间其存储的值的不理解。</p>
-<p>&emsp;&emsp;对于每一次更新开始，<code>res[]</code>存储着的是“放入这个物品之前的最优解”，而我们比较的是 <code>res[k]</code> 与 <code>res[k - w[i]] + p[i]</code> (背包问题)，其中 <code>res[k-w[i]]</code>是之前的最优解。</p>
-<p>&emsp;&emsp;因为一定存在 <code>k &gt; k-w[i]</code>，如果从小到大，则一定会先与 <code>res[k]</code> 更新 <code>res[k-w[i]]</code>，这就会导致比较错误。此时 <code>res[k-w[i]]</code> 已经变为“将该商品放入之后的最优价值”，在这价值基础之上，在加 <code>p[i]</code> ，其价值大概率会比 <code>res[k]</code> 高，而更新，这样，越来越大，完全背离了我们实际的意思。 因此，必须从后往前，因为前面存储着的是过去的值（不放第 <code>i</code> 件物品时的值）进行比较。</p>
-<p><br/><br/><br/><br/></p>
+<p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1696853644968-4ac898f4-c0ee-4a26-b5f0-8d18dbc2e7be.png#clientId=ua8b003a5-29d7-4&from=paste&height=544&id=u9c698fc9&originHeight=598&originWidth=1280&originalType=binary&ratio=1.100000023841858&rotation=0&showTitle=true&size=145793&status=done&style=none&taskId=u702ee5a8-df0b-4557-a62d-a0508793161&title=%E7%AE%80%E5%8C%96%E7%9A%84H100%E7%BB%93%E6%9E%84&width=1163.6363384152253" alt="简化的H100结构" title="简化的H100结构"></p>
+<ul>
+<li>对于每一个 GPU，通过 GPC 和 TPC 的层级可以划分为很多的 SM</li>
+<li>SM 进一步可以划分为 4 组，每组都有自己的 64KB Register File 和很多的计算核心，</li>
+<li>同一个 SM 中所有运行的 thread 共享 256KB 的 Shared Memory 和 L1 Data Cache</li>
+<li>同一个 GPU 内的所有 SM 共享 50MB L2 Cache 和 80GB HBM3 Memory</li>
+<li>进一步向外看，同一个节点上的 GPU 通过 NVLink&#x2F;NVSwitch 连接在一起</li>
+</ul>
+<h2 id="H100结构与CUDA编程"><a href="#H100结构与CUDA编程" class="headerlink" title="H100结构与CUDA编程"></a>H100结构与CUDA编程</h2><p>&emsp;&emsp;为了实现 GPU 并行加速计算，我们需要在 Host  上执行  <code>kernel launch</code>，让核函数在  Device 上的多个线程并发执行。CUDA 将核函数所定义的运算称为<strong>线程（Thread）</strong>，多个线程组成一个<strong>块（Block）</strong>，多个块组成<strong>网格（Grid）</strong>。具体的方式就是在调用核函数的时候通过<code>&lt;&lt;&lt;grid, block&gt;&gt;&gt;</code> 来指定核函数要执行的线程数量 N，之后 GPU 上的 N 个 Core 会并行执行核函数，并且每个线程会分配一个唯一的线程号 <code>threadID</code>，这个 ID 值可以通过核函数的内置变量 <code>threadIdx</code> 来获得。</p>
+<p>&emsp;&emsp;一个线程需要两个内置的坐标变量 <code>（blockIdx，threadIdx）</code> 来唯一标识，它们都是 <code>dim3</code> 类型变量，其中 <code>blockIdx</code> 指明线程所在 grid 中的位置，而 <code>threaIdx</code> 指明线程所在 block 中的位置。下面即是一个典型的矩阵乘法的 CUDA 程序示例，定义 block 大小为 16 x 16，也就是每个 block 有 256 个 threads。grid 的值则根据矩阵大小算出来需要多少个 block。<br>为了进一步理解这里的 CUDA 编程模型概念与硬件结构，我们继续聊聊刚才没有提到的 WARP Scheduler。NVIDIA SM 采用 SIMT（Single Instruction Multiple Thread，单指令多线程）架构，线程束 warp 是最基本的执行和调度单元，一个 warp 一般包含 32 threads，这些 threads 以不同的数据资源执行相同的指令。</p>
+<p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1696854012273-e78d303e-f89c-4d1d-b1ee-2ce2a5aa6363.png#clientId=ua8b003a5-29d7-4&from=paste&height=775&id=uc0cd093f&originHeight=852&originWidth=1149&originalType=binary&ratio=1.100000023841858&rotation=0&showTitle=false&size=141685&status=done&style=none&taskId=u75b0af99-aaeb-43c0-a28a-fffbb019390&title=&width=1044.545431905542" alt="image.png"></p>
+<h2 id="Cluster"><a href="#Cluster" class="headerlink" title="Cluster"></a>Cluster</h2><p>前面介绍的 CUDA 编程模型实际上都是在 Hopper 架构以前的抽象，也就是 grid&#x2F;block 两级调度，block 映射到 SM 上。随着 Cooperative Groups 的引入和异步编程的支持，多个 Kernel 之间以生产者和消费者的方式通信，SM 到 SM 之间的通信带宽也在增加。在 Hopper 架构中，新增了 Distributed Shared Memory (DSMEM) 的概念，在一个 GPC 内部的 SM 有了专用的通信带宽，因此 CUDA 上新增了一层 Cluster 的调度层次。<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697098390564-f2b41e10-a6ce-4a07-a467-4f14ee9ef94a.png#clientId=uf86abeb8-28e2-4&from=paste&height=598&id=ue50f0afb&originHeight=598&originWidth=1280&originalType=binary&ratio=1&rotation=0&showTitle=false&size=145793&status=done&style=none&taskId=u766fa813-ec45-4eb7-94f9-84203b089ce&title=&width=1280" alt="image.png"><br>⬇️<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697098369711-2aee227d-d3bb-45ce-9084-8b4892cf0ada.png#clientId=uf86abeb8-28e2-4&from=paste&height=597&id=u64727602&originHeight=597&originWidth=1080&originalType=binary&ratio=1&rotation=0&showTitle=false&size=204790&status=done&style=none&taskId=ud98284db-4398-4fe0-af43-04f5262d8f2&title=&width=1080" alt="image.png"><br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697027465510-ac13cfae-d138-4f61-abd6-a212d375febe.png#clientId=u2ade7838-3639-4&from=paste&height=895&id=ude2d2d3e&originHeight=1970&originWidth=3464&originalType=binary&ratio=2.200000047683716&rotation=0&showTitle=false&size=867417&status=done&style=none&taskId=u7426f0c9-f5dd-4745-bf6c-529c557e695&title=&width=1574.5454204181017" alt="image.png"><br>有了 cluster 这一层抽象之后，类似于同一个 block 的 threads 都会被调度到同一个 SM，<strong>同一个 cluster 的 thread blocks 都会被调度到同一个 GPC 中</strong>。<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697094471777-2c8c6c60-c61d-4892-b3d6-0f5f37cab3b9.png#clientId=uf86abeb8-28e2-4&from=paste&height=1638&id=u18ba6875&originHeight=1638&originWidth=3462&originalType=binary&ratio=1&rotation=0&showTitle=false&size=460613&status=done&style=none&taskId=u4957809d-36da-4985-8831-733dd728dc0&title=&width=3462" alt="image.png"><br>这样同一个 cluster 中不同 block 的 threads 可以通过 SM to SM Network 访问另一个 block 的 DSMEM（Distributed Shared Memory）。这样在一个 GPC 内部实现多个 SM 的Load&#x2F;Store，Atomic，Reduce 和异步 DMA（Direct Memory Access，通过锁页内存直接访问） 操作都变得非常的简洁。<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697094580288-777ccc70-098b-42c2-b8dd-27f67eb07146.png#clientId=uf86abeb8-28e2-4&from=paste&height=1932&id=u3b5b3d0f&originHeight=1932&originWidth=3422&originalType=binary&ratio=1&rotation=0&showTitle=false&size=488473&status=done&style=none&taskId=ud9869989-a710-4f8a-821c-11836c939cd&title=&width=3422" alt="image.png"><br><strong>CUDA 编程模型的内存模型也就变成了下图所示：</strong></p>
+<p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697094616445-75476a10-e3cf-4801-af24-faf85bd63046.png#clientId=uf86abeb8-28e2-4&from=paste&height=3684&id=u62bf16f5&originHeight=3684&originWidth=4850&originalType=binary&ratio=1&rotation=0&showTitle=false&size=599368&status=done&style=none&taskId=u41628e21-f281-4522-a826-37dbd2f5868&title=&width=4850" alt="image.png"><br>本质上看，CUDA 引入 block 和 cluster 的抽象，都是为了更好地利用空间局部性原理。Block 可以让所有的 threads 调度到同一个 SM，让 threads 可以通过 fast barriers 快速同步，并且通过 SM 的 Shared Memory 交换数据。<strong>随着 GPU 的 SM 越来越多，仅仅使用 Block 这一层抽象已经不能够更好地利用局部性原理，因此 Hopper 引入了 Cluster 这层抽象，让所有的 threads 运行在同一个 GPC 内部。</strong></p>
+<p><strong>参考链接：</strong><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/ccSHfgus5GvG6OleeOfglw">疯狂的 H100：现代 GPU 体系结构浅析，从算力焦虑开始聊起</a><br><a target="_blank" rel="noopener" href="https://loop.houmin.site/context/gpu-arch/">In The Loop | 疯狂的 H100：现代 GPU 体系结构浅析，从算力焦虑开始聊起</a></p>
+<h2 id="PCI-和-SXM"><a href="#PCI-和-SXM" class="headerlink" title="PCI 和 SXM"></a>PCI 和 SXM</h2><p>V100 有两种总线规格：<strong>PCIe</strong> 和 <strong>SXM2</strong>（南网服务器是V100-SXM2-16GB）<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1694489584094-c4d99f4d-fa9a-4723-81bb-b48008a08726.png#clientId=ue2ecc620-e824-4&from=paste&height=340&id=ub6c352c3&originHeight=724&originWidth=592&originalType=binary&ratio=2.5&rotation=0&showTitle=false&size=123533&status=done&style=none&taskId=u4bd5a75b-5bc4-49ec-8984-f6d064a1b13&title=&width=277.7916717529297" alt="image.png"><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1694762007273-7e474606-35eb-4aed-b3d5-ecb21f321d3c.png#clientId=u47648c90-f841-4&from=paste&height=204&id=uefe7eb39&originHeight=764&originWidth=2268&originalType=binary&ratio=2.200000047683716&rotation=0&showTitle=false&size=837702&status=done&style=none&taskId=u8db1488f-8200-4d85-a7f6-9f6176f1c87&title=&width=607" alt="image.png"></p>
+<ul>
+<li>PCIe（Peripheral Component Interconnect express）是一种高速串行计算机扩展总线标准，是英特尔公司在2001年提出来的，它的出现主要是为了取代AGP接口，优点就是兼容性比较好，数据传输速率高、潜力大。</li>
+<li>SXM（Server PCI Express Module）是英伟达公司设计出来的，它的出现主要是为高性能计算和数据中心提高更强的计算能力和传输速度。SXM接口的GPU通常是存在于<strong>DGX系统板</strong>上，该DGX系统板支持4张GPU-SXM或则8张GPU-SXM，而每个GPU之间通过<strong>NVLink</strong>进行通信。</li>
+</ul>
+<p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697027109353-dafbc1a8-8f88-4661-a114-75c998642b62.png#clientId=u2ade7838-3639-4&from=paste&height=396&id=ue70c1b2a&originHeight=871&originWidth=1795&originalType=binary&ratio=2.200000047683716&rotation=0&showTitle=true&size=1194369&status=done&style=none&taskId=ua260aadf-2685-4a78-a464-d24ac085eeb&title=%E8%BF%99%E6%98%AF%20H100%20GPU%20%E5%B0%81%E8%A3%85%E5%9C%A8%20SXM5%20%E6%A8%A1%E5%9D%97%E4%B8%AD&width=815.909073224738" alt="这是 H100 GPU 封装在 SXM5 模块中" title="这是 H100 GPU 封装在 SXM5 模块中"><br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697027168043-59216385-f108-4b24-a2ef-8f4ba2ef6c52.png#clientId=u2ade7838-3639-4&from=paste&height=981&id=uc26dcca4&originHeight=2158&originWidth=3492&originalType=binary&ratio=2.200000047683716&rotation=0&showTitle=true&size=2938741&status=done&style=none&taskId=ub1c2f626-5b51-4def-80f1-d9d0e5ecd42&title=NVIDIA%20HGX%20H100%EF%BC%8C%E7%94%B18%E4%B8%AAH100%20SXM5%20%E6%A8%A1%E5%9D%97%E5%8A%A0%E4%B8%8A4%E4%B8%AANVSwitch%20Chip%20%E5%9C%A8%E5%90%8C%E4%B8%80%E4%B8%AA%20system%20board%20%E4%B8%8A&width=1587.272692869518" alt="NVIDIA HGX H100，由8个H100 SXM5 模块加上4个NVSwitch Chip 在同一个 system board 上" title="NVIDIA HGX H100，由8个H100 SXM5 模块加上4个NVSwitch Chip 在同一个 system board 上"><br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697027220198-72c4ecc7-f1d8-4a1a-b303-6e7ea858a47e.png#clientId=u2ade7838-3639-4&from=paste&height=329&id=kb1B4&originHeight=618&originWidth=1379&originalType=binary&ratio=2.200000047683716&rotation=0&showTitle=true&size=310583&status=done&style=none&taskId=uca0466c0-4065-42c8-8811-a76c9560131&title=DGX%20H100%20%E5%9C%A8%20HGX%20100%20%E7%9A%84%E5%9F%BA%E7%A1%80%E4%B8%8A%EF%BC%8C%E8%BF%9B%E4%B8%80%E6%AD%A5%E9%85%8D%E7%BD%AE%E4%BA%86%20CPU%E3%80%81%E5%AD%98%E5%82%A8%E4%B8%8E%E7%BD%91%E5%8D%A1&width=734.8181762695312" alt="DGX H100 在 HGX 100 的基础上，进一步配置了 CPU、存储与网卡" title="DGX H100 在 HGX 100 的基础上，进一步配置了 CPU、存储与网卡"></p>
+<ul>
+<li>DGX（Deep-learning GPU Accelerator）：NVIDIA 推出的一系列专门用于加速深度学习工作负载的高性能计算平台<ul>
+<li>DGX系统板：<a target="_blank" rel="noopener" href="https://www.nvidia.cn/data-center/dgx-1/">https://www.nvidia.cn/data-center/dgx-1/</a></li>
+<li>DGX-1：8块 V100 （<a target="_blank" rel="noopener" href="https://www.nvidia.cn/content/dam/en-zz/Solutions/Data-Center/dgx-1/dgx-1-rhel-centos-datasheet-update-r2.pdf">技术文档</a>）</li>
+</ul>
+</li>
+</ul>
+<p><strong>NVLink 与 NVSwitch ：</strong><br>NVLink 是一种 GPU 之间的直接互连，可扩展服务器内的多 GPU 输入&#x2F;输出 (IO)。<br>NVSwitch 可连接多个 NVLink，在单节点内和节点间实现以 NVLink 能够达到的最高速度进行多对多 GPU 通信。<br><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1694492856127-bf215356-1f91-467a-89e1-3e679fcdf315.png#clientId=ue2ecc620-e824-4&from=paste&height=371&id=ufe235f30&originHeight=354&originWidth=630&originalType=binary&ratio=2.5&rotation=0&showTitle=true&size=223055&status=done&style=none&taskId=u8439c5fd-47d1-45f8-b844-a9ed7457460&title=NVSwitch%20%E4%BD%BF%20NVIDIA%20DGX%20H100%20%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%208%20%E4%B8%AA%20GPU%20%E8%83%BD%E5%A4%9F%E5%9C%A8%E4%B8%80%E4%B8%AA%E5%85%B7%E6%9C%89%E5%85%A8%E5%B8%A6%E5%AE%BD%E8%BF%9E%E6%8E%A5%E7%9A%84%E9%9B%86%E7%BE%A4%E4%B8%AD%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E3%80%82&width=660" alt="NVSwitch 使 NVIDIA DGX H100 系统中的 8 个 GPU 能够在一个具有全带宽连接的集群中协同工作。" title="NVSwitch 使 NVIDIA DGX H100 系统中的 8 个 GPU 能够在一个具有全带宽连接的集群中协同工作。"></p>
+<p>参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.nvidia.cn/data-center/nvlink/">https://www.nvidia.cn/data-center/nvlink/</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/read/cv24855760/">https://www.bilibili.com/read/cv24855760/</a></li>
+</ul>
  
       <!-- reward -->
       
@@ -211,12 +218,12 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%EF%BC%88%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%BC%98%E5%8C%96%EF%BC%89/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2024/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/" alt="微信分享二维码">
     </div>
 </div>
 
 <div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/" rel="tag">动态规划</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%9C%80%E5%B0%8F%E7%A1%AC%E5%B8%81%E9%97%AE%E9%A2%98/" rel="tag">最小硬币问题</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/" rel="tag">背包问题</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CUDA/" rel="tag">CUDA</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GPU/" rel="tag">GPU</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B9%B6%E8%A1%8C%E8%AE%A1%E7%AE%97/" rel="tag">并行计算</a></li></ul>
 
     </footer>
   </div>
@@ -224,19 +231,19 @@
    
   <nav class="article-nav">
     
-      <a href="/2021/%E5%89%8D%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9AVue-%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A/" class="article-nav-link">
+      <a href="/2024/%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5%E6%B1%87%E6%80%BB/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            前端技术栈：Vue 双向绑定
+            稀疏矩阵汇总
           
         </div>
       </a>
     
     
-      <a href="/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A7%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E5%A4%A7%E6%B1%87%E6%80%BB%EF%BC%88C++%EF%BC%89/" class="article-nav-link">
+      <a href="/2024/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">算法分析与设计：7大排序算法大汇总（C++）</div>
+        <div class="article-nav-title">CUDA 学习笔记</div>
       </a>
     
   </nav>

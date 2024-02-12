@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+       
+      <meta name="keywords" content="学习,技术,随笔,摄影,生活" />
+       
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>CUDA 学习笔记 |  SongXJ&#39;s Blog</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/images/songxj.ico" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    </head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-CUDA学习笔记"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  CUDA 学习笔记
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2024/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="article-date">
+  <time datetime="2024-01-15T08:54:49.000Z" itemprop="datePublished">2024-01-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a> / <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/CUDA/">CUDA</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> 字数统计:</span>
+            <span class="post-count">4.6k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> 阅读时长≈</span>
+            <span class="post-count">17 分钟</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>&emsp;&emsp;在这篇学习笔记中，我将从CUDA的编译开始，逐步深入到程序的运行与调试，旨在全面理解并掌握CUDA的工作流程。同时，我们还将触及CUDA的底层机制，包括内存操作、线程管理，以及如何通过代码优化提升程序的执行效率。希望通过这篇笔记，大家能够建立起对CUDA技术的完整认识，并在实践中不断提升自身技能。</p>
+<span id="more"></span>
+
+<h1 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h1><h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvcc add.cu -o add_cuda</span><br></pre></td></tr></table></figure>
+<p>nvcc 编译时输出核函数寄存器使用情况 <code>-res-usage</code>（或<code>-Xptxas -v</code>）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvcc add.cu -o add_cuda -res-usage -w</span><br></pre></td></tr></table></figure>
+<p>输出说明</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">nvcc thread_fence.cu -o thread_fence -res-usage -w</span><br><span class="line"></span><br><span class="line">ptxas info: 35 bytes gmem</span><br><span class="line">ptxas info: Compiling entry <span class="keyword">function</span> <span class="string">&#x27;_Z6kernelPi&#x27;</span> <span class="keyword">for</span> <span class="string">&#x27;sm_52&#x27;</span></span><br><span class="line">ptxas info: Function properties <span class="keyword">for</span> _Z6kernelPi</span><br><span class="line">    16 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads</span><br><span class="line">ptxas info: Used 10 registers, 328 bytes cmem[0]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-res-usage</code>：显示资源使用情况的选项。它告诉编译器在编译过程中显示有关资源（如全局内存、常量内存、纹理内存等）使用情况的信息。</li>
+<li><code>-w</code>：禁用警告信息的选项。</li>
+</ul>
+<p>输出信息：</p>
+<ul>
+<li><code>35 bytes gmem</code>：表示使用了35字节的<strong>全局内存</strong>。</li>
+<li><code>Compiling entry function &#39;_Z6**kernel**Pi&#39; for &#39;sm_52&#39;</code>：表示正在为名为 kernel 的入口函数编译为计算能力为 sm_52 的设备。</li>
+<li><code>16 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads</code>：表示函数使用了16字节的堆栈帧，并没有spill存储或加载操作。</li>
+<li><code>Used 10 registers, 328 bytes cmem[0]</code>：表示函数使用了10个寄存器，328字节的常量内存，0字节的共享内存。</li>
+</ul>
+<p><strong>【注意】</strong>：</p>
+<blockquote>
+<ul>
+<li>一个空的核函数会占用 <code>2 registers，32bytes cmem[0]</code></li>
+<li><strong>例子</strong>：每个 Thread 占用0个寄存器，每个Block有个128线程，且每个Block占用48KB共享内存。由于SM内共享内存大小限制，此时一个SM只能并发2个Block，即可并发2*128&#x2F;32&#x3D;8个Warp，该情况下的 SM Occupany &#x3D; 8&#x2F;64 &#x3D; 12.5%，可见SM的利用率极低。对于 Tesla M6，为了将SM利用率达到100%，在块数够多的情况下，则：<ul>
+<li>每个Block有1024个Thread时，每个Block占用共享内存需小于等于48KB</li>
+<li>每个Block有512个Thread时，每个Block占用共享内存需小于等于24KB</li>
+<li>每个Block有256个Thread时，每个Block占用共享内存需小于等于12KB</li>
+<li>每个Block有128个Thread时，每个Block占用共享内存需小于等于6KB</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>从以上信息可以看出，对于同一个 GPU 而言，Block 内的 Thread 数越多，每个 Block 可占用的共享内存上限越大。</p>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./add_cuda</span><br></pre></td></tr></table></figure>
+
+<p>快速检查</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvprof ./myApp</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>官方调试方案：<a target="_blank" rel="noopener" href="https://developer.nvidia.cn/debugging-solutions">Debugging Solutions</a></p>
+<h3 id="CUDA-GDB"><a href="#CUDA-GDB" class="headerlink" title="CUDA-GDB"></a>CUDA-GDB</h3><p>链接：<a target="_blank" rel="noopener" href="https://developer.nvidia.cn/cuda-gdb">CUDA-GDB</a><br>编译成可调试版本：-g 表示将CPU代码编译成可调试版本，-G表示将GPU代码编译成可调试版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvcc -g -G main.cu -o main</span><br></pre></td></tr></table></figure>
+<p>运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cuda-gdb main</span><br></pre></td></tr></table></figure>
+<p>开始</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">start</span><br></pre></td></tr></table></figure>
+<p>在53行设置断点，<code>c</code>是continue</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">b <span class="number">53</span></span><br><span class="line">c</span><br></pre></td></tr></table></figure>
+<p>查看变量值</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">p val_num</span><br></pre></td></tr></table></figure>
+<p>变换threads：跳到threadsIdx.x&#x3D;0, threadsIdx.y&#x3D;7的线程</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cuda <span class="title">thread</span> <span class="params">(<span class="number">0</span>,<span class="number">7</span>,<span class="number">0</span>)</span></span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E8%B0%83%E8%AF%95%E5%B8%B8%E7%94%A8%E5%8F%82%E6%95%B0.png" alt="调试常用参数"></p>
+<h3 id="NVIDIA-Nsight-Systems"><a href="#NVIDIA-Nsight-Systems" class="headerlink" title="NVIDIA Nsight Systems"></a><strong>NVIDIA Nsight Systems</strong></h3><p>链接：<a target="_blank" rel="noopener" href="https://developer.nvidia.cn/zh-cn/nsight-systems">NVIDIA Nsight Systems</a><br>NVIDIA Nsight Systems是一款低开销性能分析工具，旨在为开发人员提供优化软件所需的洞察力。无偏差的活动数据可在工具中可视化，可帮助用户调查瓶颈，避免推断误报，并以更高的性能提升概率实现优化。</p>
+<p><img src="/images/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/NVIDIANsightSystems.png" alt="NVIDIA Nsight Systems"></p>
+<p><br/><br/></p>
+<h1 id="内存操作"><a href="#内存操作" class="headerlink" title="内存操作"></a>内存操作</h1><h2 id="内存层次结构"><a href="#内存层次结构" class="headerlink" title="内存层次结构"></a>内存层次结构</h2><p>&emsp;&emsp;在 GPU 内存层次结构中，最主要的两种内存是<strong>全局内存</strong>和<strong>共享内存</strong>。全局类似于CPU的系统内存，而共享内存类似于CPU的缓存。然而 GPU 的共享内存可以由 CUDA C 的内核直接控制。</p>
+<p><img src="/images/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/GPU%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84.png" alt="GPU内存结构"></p>
+<h3 id="共享内存"><a href="#共享内存" class="headerlink" title="共享内存"></a>共享内存</h3><p>&emsp;&emsp;共享内存是较小的片上内存，具有相对较低的延迟，并且共享内存可以提供比全局内存高得多的带宽。共享内存相较于全局内存而言，延迟要低大约20~30倍，而带宽高其大约10倍。<br>共享内存可以当作一个可编程管理的缓存。共享内存通常的用途有:</p>
+<ul>
+<li>块内线程通信的通道 </li>
+<li>用于全局内存数据的可编程管理的缓存 </li>
+<li>高速暂存存储器，用于转换数据以优化全局内存访问模式</li>
+</ul>
+<p>&emsp;&emsp;可以静态或动态地分配共享内存变量。在CUDA的源代码文件中，共享内存可以被声明为一个本地的CUDA核函数或是一个全局的 CUDA 核函数。如果在核函数中进行声明，那么这个变量的作用域就局限在该内核中。如果在文件的任何核函数外进行声明，那么这个变量的作用域对所有核函数来说都是全局的。CUDA支持一维、二维和三维共享内存数组的声明。<br>&emsp;&emsp;如果共享内存的大小在编译时是未知的，那么可以用 <code>extern</code> 关键字声明一个未知大小的数组（仅限一维）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">extern __shared__ int arr [];</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;因为这个数组的大小在编译时是未知的，所以在每个核函数被调用时，需要动态分配共享内存，如下所示：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kernel&lt;&lt;&lt;grid, block, <span class="function">isize * <span class="title">sizeof</span><span class="params">(<span class="type">int</span>)</span>&gt;&gt;&gt;<span class="params">(...)</span></span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>位置</strong>：设备内存。</li>
+<li><strong>形式</strong>：关键字<code>__**shared__**</code>添加到变量声明中。如<code>__**shared__** float cache[10]</code>。</li>
+<li><strong>目的</strong>：对于GPU上启动的每个线程块，CUDA C编译器都将创建该共享变量的一个副本。线程块中的每个线程都共享这块内存，但线程却无法看到也不能修改其他线程块的变量副本。这样使得一个线程块中的多个线程能够在计算上通信和协作。</li>
+</ul>
+<h3 id="常量内存"><a href="#常量内存" class="headerlink" title="常量内存"></a>常量内存</h3><ul>
+<li><strong>位置</strong>：设备内存</li>
+<li><strong>形式</strong>：关键字<code>__**constant__**</code>添加到变量声明中。如<code>__**constant__** float s[10];</code>。</li>
+<li><strong>目的</strong>：为了提升性能。常量内存采取了不同于标准全局内存的处理方式。在某些情况下，用常量内存替换全局内存能有效地减少内存带宽。</li>
+<li><strong>特点</strong>：常量内存用于保存在核函数执行期间不会发生变化的数据。变量的访问限制为只读。NVIDIA硬件提供了64KB的常量内存。不再需要cudaMalloc()或者cudaFree()，而是在编译时，静态地分配空间。</li>
+<li><strong>要求</strong>：当我们需要拷贝数据到常量内存中应该使用cudaMemcpyToSymbol()，而cudaMemcpy()会复制到全局内存。</li>
+<li>性能提升的原因：<br>&emsp;&emsp;对常量内存的单次读操作可以广播到其他的“邻近”线程。这将节约15次读取操作。（为什么是15，因为“邻近”指半个线程束，一个线程束包含32个线程的集合。）<br>常量内存的数据将缓存起来，因此对相同地址的连续读操作将不会产生额外的内存通信量。</li>
+</ul>
+<h3 id="纹理内存（Texture-Cache）"><a href="#纹理内存（Texture-Cache）" class="headerlink" title="纹理内存（Texture Cache）"></a>纹理内存（Texture Cache）</h3><ul>
+<li>位置：设备内存</li>
+<li>目的：能够减少对内存的请求并提供高效的内存带宽。是专门为那些在内存访问模式中存在大量空间局部性的图形应用程序设计，意味着一个线程读取的位置可能与邻近线程读取的位置“非常接近”。</li>
+<li>纹理变量（引用）必须声明为文件作用域内的全局变量。</li>
+<li>形式：分为一维纹理内存 和 二维纹理内存。</li>
+</ul>
+<p><img src="/images/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%BA%B9%E7%90%86%E5%86%85%E5%AD%98.png" alt="纹理内存"></p>
+<h2 id="同步"><a href="#同步" class="headerlink" title="同步"></a>同步</h2><h3 id="障碍点"><a href="#障碍点" class="headerlink" title="障碍点"></a>障碍点</h3><p>&emsp;&emsp;<code>__syncthreads()</code>用于协调同一 block 中线程间的通信。它要求块中的线程必须等待直到所有线程都到达该点。</p>
+<h3 id="内存栅栏"><a href="#内存栅栏" class="headerlink" title="内存栅栏"></a>内存栅栏</h3><p>&emsp;&emsp;内存栅栏确保栅栏前的任何内存写操作对栅栏后的其他线程都是可见的。memory fence不能保证所有线程运行到同一位置，只保证执行memory fence函数的线程生产的数据能够安全地被其他线程消费。根据所需范围，有3种内存栅栏：Block、Grid或System。</p>
+<ol>
+<li><code>__threadfence()</code>：一个线程调用__threadfence后，该线程在该语句前对全局存储器或共享存储器的访问已经全部完成，执行结果对<strong>grid中</strong>的所有线程可见。</li>
+<li><code>__threadfence_block()</code>：一个线程调用__threadfence_block后，该线程在该语句前对全局存储器或者共享存储器的访问已经全部完成，执行结果对<strong>block中</strong>的所有线程可见。</li>
+<li><code>__threadfence_system()</code>：可以跨系统(包括主机和设备)设置内存栅栏。__threadfence_system 挂起调用的线程，以确保该线程对全局内存、锁页主机内存和其他设备内存中的所有写操作对全部设备中的线程和主机线程都是可见的。</li>
+</ol>
+<p>注意：<strong>threadfence不是保证所有线程都完成同一操作，而只保证正在进行fence的线程本身的操作能够对所有线程安全可见，fence不要求线程运行到同一指令。</strong></p>
+<p>（参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/yutianzuijin/article/details/8507355">https://blog.csdn.net/yutianzuijin/article/details/8507355</a>）</p>
+<p><br/><br/></p>
+<h1 id="线程管理"><a href="#线程管理" class="headerlink" title="线程管理"></a>线程管理</h1><h2 id="硬件层面"><a href="#硬件层面" class="headerlink" title="硬件层面"></a>硬件层面</h2><p><img src="/images/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/CUDA%E8%BD%AF%E4%BB%B6%E5%92%8C%E7%A1%AC%E4%BB%B6%E7%BB%93%E6%9E%84.png" alt="CUDA软件和硬件结构"></p>
+<h2 id="软件层面"><a href="#软件层面" class="headerlink" title="软件层面"></a>软件层面</h2><p>&emsp;&emsp;一个SM（Streaming MultiProcessor）由多个CUDA core组成，每个SM根据GPU架构不同有不同数量的CUDA core。SM还包括特殊运算单元(SFU)，共享内存(shared memory)，寄存器文件(Register File)和调度器(Warp Scheduler)等。register 和 shared memory 是稀缺资源，<strong>这些有限的资源就使每个SM中active warps有非常严格的限制，也就限制了并行能力。</strong></p>
+<p><img src="/images/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/CUDA%E8%BD%AF%E4%BB%B6%E7%BB%93%E6%9E%84.png" alt="CUDA软件结构"></p>
+<p>&emsp;&emsp;由一个内核启动所产生的所有线程统称为一个<strong>网格（Grid）</strong>。同一 Grid 中的所有线程共享相同的全局内存空间。一个网格由多个<strong>线程块（Block）</strong>构成，其包含一组<strong>线程（Thread）</strong>，同一个 block 中的 thread 可以同步，也可以通过 shared memory 进行通信，不同块内的线程不能协作。</p>
+<h2 id="Warp-线程束"><a href="#Warp-线程束" class="headerlink" title="Warp 线程束"></a>Warp 线程束</h2><p>&emsp;&emsp;SM 采用的 SIMT（Single-Instruction, Multiple-Thread，单指令多线程）架构，warp 是最基本的执行单元，一个 warp 包含 32 个并行 thread，这些 thread <strong>以不同数据资源执行相同的指令</strong>。当一个 kernel 被执行时，grid 中的线程块被分配到 SM 上，<strong>一个 Block 中的 thread 只能在一个SM上调度</strong>，SM 一般可以调度多个线程块。每个thread 拥有它自己的程序计数器和状态寄存器，并且用该线程自己的数据执行指令，这就是所谓的单指令多线程。<br>一个CUDA core可以执行一个thread，一个SM的 CUDA core 会分成几个 warp（即CUDA core在SM中分组），由 warp scheduler 负责调度。<strong>一个SM同时并发的warp是有限的</strong>，因为资源限制，SM要为每个线程块分配共享内存，而也要为每个线程束中的线程分配独立的寄存器，所以SM的配置会影响其所支持的线程块和 warp 并发数量。<br>一个warp中的线程必然在同一个 block 中，如果block所含线程数目不是warp大小的整数倍，那么多出的那些thread所在的warp中，会剩余一些inactive的thread。<strong>由于warp的大小一般为32，所以block所含的thread的大小一般要设置为32的倍数。</strong></p>
+<p><br/><br/></p>
+<h1 id="CUDA-优化"><a href="#CUDA-优化" class="headerlink" title="CUDA 优化"></a>CUDA 优化</h1><h2 id="CUDA核函数中的printf原理"><a href="#CUDA核函数中的printf原理" class="headerlink" title="CUDA核函数中的printf原理"></a>CUDA核函数中的printf原理</h2><p>&emsp;&emsp;printf就是GPU往CPU回传数据，然后显示在终端窗口里。由CUDA负责安排多个线程之间的都有哪些数据需要被准备，又是什么格式的，当前kernel运行期间因为不能暂停，临时性的又将数据放到哪里。kernel结束后，检查是否又有需要回传的东西，回传，然后调用host上的printf。</p>
+<h2 id="优化-Host-和-GPU-之间的内存传输"><a href="#优化-Host-和-GPU-之间的内存传输" class="headerlink" title="优化 Host 和 GPU 之间的内存传输"></a>优化 Host 和 GPU 之间的内存传输</h2><h3 id="常规传输方式-cudaMemcpy"><a href="#常规传输方式-cudaMemcpy" class="headerlink" title="常规传输方式 cudaMemcpy"></a>常规传输方式 cudaMemcpy</h3><p>&emsp;&emsp;在很多情况下都是最慢的方式，但他近乎适用于所有情况，所以也可能是被使用最多的方式。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemcpy</span> ( <span class="type">void</span>* dst, <span class="type">const</span> <span class="type">void</span>* src, <span class="type">size_t</span> count, cudaMemcpyKind kind )</span><br></pre></td></tr></table></figure>
+<h3 id="高维矩阵传输-cudaMemcpy2D-cudaMalloc3D"><a href="#高维矩阵传输-cudaMemcpy2D-cudaMalloc3D" class="headerlink" title="高维矩阵传输 cudaMemcpy2D &#x2F; cudaMalloc3D"></a>高维矩阵传输 cudaMemcpy2D &#x2F; cudaMalloc3D</h3><p>&emsp;&emsp;以二维矩阵为例，可以用<code>cudaMalloc</code>来分配一维数组来存储一张图像数据，但这不是效率最快的方案，推荐的方式是使用<code>cudaMallocPitch</code>来分配一个二维数组，存取效率更快。<code>cudaMallocPitch</code>有一个非常好的特性是二维矩阵的每一行是内存对齐的，访问效率比一维数组更高。而通过<code>cudaMallocPitch</code>分配的内存必须配套使用<code>cudaMemcpy2D</code>完成数据传输。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMallocPitch</span> ( <span class="type">void</span>** devPtr, <span class="type">size_t</span>* pitch, <span class="type">size_t</span> width, <span class="type">size_t</span> height )</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemcpy2D</span> ( <span class="type">void</span>* dst, <span class="type">size_t</span> dpitch, <span class="type">const</span> <span class="type">void</span>* src, <span class="type">size_t</span> spitch, <span class="type">size_t</span> width, <span class="type">size_t</span> height, cudaMemcpyKind kind )</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;相比于普通的<code>cudaMemcpy</code>，<code>cudaMemcpy2D</code>多了两个参数<code>dpitch</code>和<code>spitch</code>，他们是每一行的实际字节数，是对齐分配<code>cudaMallocPitch</code>返回的值。</p>
+<h3 id="异步传输-cudaMemcpyAsync-cudaMemcpy2DAsync-cudaMemcpy3DAsync"><a href="#异步传输-cudaMemcpyAsync-cudaMemcpy2DAsync-cudaMemcpy3DAsync" class="headerlink" title="异步传输 cudaMemcpyAsync &#x2F; cudaMemcpy2DAsync &#x2F; cudaMemcpy3DAsync"></a>异步传输 cudaMemcpyAsync &#x2F; cudaMemcpy2DAsync &#x2F; cudaMemcpy3DAsync</h3><p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697100322397-33ce42bf-7542-4061-a3db-3a75879a17b4.png#clientId=uf86abeb8-28e2-4&from=paste&height=85&id=u967794ea&originHeight=181&originWidth=1353&originalType=binary&ratio=1&rotation=0&showTitle=false&size=75812&status=done&style=none&taskId=u4a20f5be-b99b-4aed-b9bb-36520f395ba&title=&width=637" alt="image.png"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemsetAsync</span> ( <span class="type">void</span>* devPtr, <span class="type">int</span>  value, <span class="type">size_t</span> count, cudaStream_t stream = <span class="number">0</span> )</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemcpy2DAsync</span> ( <span class="type">void</span>* dst, <span class="type">size_t</span> dpitch, <span class="type">const</span> <span class="type">void</span>* src, <span class="type">size_t</span> spitch, <span class="type">size_t</span> width, <span class="type">size_t</span> height, cudaMemcpyKind kind, cudaStream_t stream = <span class="number">0</span> )</span><br></pre></td></tr></table></figure>
+
+<h3 id="锁页内存"><a href="#锁页内存" class="headerlink" title="锁页内存"></a>锁页内存</h3><p>&emsp;&emsp;<strong>当从可分页内存传输数据到设备内存时，CUDA驱动程序首先分配临时页面锁定的主机内存，将“可分页内存”复制到“锁页内存”中 [copy 1]，然后再从“锁页内存”传输到“设备内存”[copy 2]<strong>。为了让传输只有一次，我们可以在主机端分配</strong>锁页内存</strong>。锁页内存是主机端一块固定的物理内存，它不能被操作系统移动，不参与虚拟内存相关的交换操作。简而言之，分配之后，地址就固定了，被释放之前不会再变化。GPU知道锁页内存的物理地址，可以通过“<strong>直接内存访问（Direct Memory Access，DMA）</strong>”技术直接在主机和GPU之间复制数据，传输仅一次，效率更高。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMallocHost</span> ( <span class="type">void</span>** ptr, <span class="type">size_t</span> size )</span><br></pre></td></tr></table></figure>
+<p><code>ptr</code>为分配的锁页内存地址，<code>size</code>为分配的字节数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaHostAlloc</span> ( <span class="type">void</span>** pHost, <span class="type">size_t</span> size, <span class="type">unsigned</span> <span class="type">int</span> flags )</span><br></pre></td></tr></table></figure>
+<p><code>pHost</code>为分配的锁页内存地址，<code>size</code>为分配的字节数，<code>flags</code>为内存分配类型，取值如下：</p>
+<ul>
+<li><code>cudaHostAllocDefault</code>：默认值，等同于cudaMallocHost</li>
+<li><code>cudaHostAllocPortable</code>：分配所有GPU都可使用的锁页内存</li>
+<li><code>cudaHostAllocMapped</code>：分配的锁页内存可实现零拷贝功能，主机端和设备端各维护一个地址，通过地址直接访问该块内存，无需传输。</li>
+<li><code>cudaHostAllocWriteCombined</code>：将分配的锁页内存声明为write-combined写联合内存，此类内存不使用L1 和L2 cache。</li>
+</ul>
+<p><strong>分配的锁页内存必须使用</strong><code>**cudaFreeHost**</code><strong>接口释放。</strong><br>对于一个已存在的可分页内存，可使用<code>cudaHostRegister() </code>函数将其注册为锁页内存：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaHostRegister</span> ( <span class="type">void</span>* ptr, <span class="type">size_t</span> size, <span class="type">unsigned</span> <span class="type">int</span> flags )</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>锁页内存相比可分页内存可减少一次传输过程，显著提高传输效率，但过多的分配会影响操作系统性能。对于图像这类小内存应用还是比较合适的。</p>
+<h3 id="零拷贝内存"><a href="#零拷贝内存" class="headerlink" title="零拷贝内存"></a>零拷贝内存</h3><p>&emsp;&emsp;使用零拷贝内存时不需要<code>cudaMemcpy</code>之类的显式拷贝操作，直接通过指针取值，所以对调用者来说似乎是没有拷贝操作。但实际上是在引用内存中某个值时隐式走PCIe总线拷贝，这样的方式有几个优点：</p>
+<ul>
+<li>无需所有数据一次性显式拷贝到设备端，而是引用某个数据时即时隐式拷贝</li>
+<li>隐式拷贝是<strong>异步</strong>的，可以和计算并行，隐藏内存传输延时</li>
+</ul>
+<p>零拷贝内存是一块主机端和设备端共享的内存区域，是锁页内存，使用<code>cudaHostAlloc</code>接口分配，分配标志是<code>cudaHostAllocMapped</code>。<br>避免显式的数据传输，适用于数据量少且数据使用次数少的情况</p>
+<p>参考：<br><a target="_blank" rel="noopener" href="https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/">https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/188246455">https://zhuanlan.zhihu.com/p/188246455</a></p>
+<h2 id="多卡CUDA编程"><a href="#多卡CUDA编程" class="headerlink" title="多卡CUDA编程"></a>多卡CUDA编程</h2><h3 id="多卡通信框架NCCL"><a href="#多卡通信框架NCCL" class="headerlink" title="多卡通信框架NCCL"></a>多卡通信框架NCCL</h3><p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/63219175">如何理解Nvidia英伟达的Multi-GPU多卡通信框架NCCL？ - 知乎</a></p>
+<p><br/><br/></p>
+<h1 id="CUDA-Toolkit"><a href="#CUDA-Toolkit" class="headerlink" title="CUDA Toolkit"></a>CUDA Toolkit</h1><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/11.2.0/index.html">CUDA Toolkit Documentation-11.2</a></p>
+<h2 id="Thrust"><a href="#Thrust" class="headerlink" title="Thrust"></a>Thrust</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/11.2.0/thrust/index.html#abstract">Thrust :: CUDA Toolkit Documentation</a></p>
+<p>Thrust 是基于 STL 的 CUDA C++模板库。安装 CUDA 工具包会将 Thrust 头文件复制到系统的标准 CUDA 包含目录，无需进一步安装即可使用。</p>
+<h2 id="cuBLAS"><a href="#cuBLAS" class="headerlink" title="cuBLAS"></a>cuBLAS</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/11.2.0/cublas/index.html">cuBLAS :: CUDA Toolkit Documentation</a></p>
+<p>cuBLAS 是 CUDA 基本线性代数子程序库，它允许用户访问NVIDIA图形处理单元（GPU）的计算资源。</p>
+<h2 id="cuSOLVER"><a href="#cuSOLVER" class="headerlink" title="cuSOLVER"></a>cuSOLVER</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cusolver/index.html">https://docs.nvidia.com/cuda/cusolver/index.html</a></p>
+<p>&emsp;&emsp;cuSolver 库是基于 cuBLAS 和 cuSPARSE 库的高级包。它由对应于两组 API 的两个模块组成：</p>
+<ul>
+<li>单个 GPU 上的 cuSolver API</li>
+<li>单节点多GPU上的 cuSolverMG API</li>
+</ul>
+<p>&emsp;&emsp;cuSolver 的目的是提供有用的类似 LAPACK （<a target="_blank" rel="noopener" href="https://netlib.org/lapack/">https://netlib.org/lapack/</a>）的功能，例如：矩阵分解、密集矩阵的三角求解、稀疏最小二乘求解器和特征值求解器。 此外，cuSolver 还提供了一个新的重构库，可用于求解矩阵序列稀疏模式。<br>cuSolver 将三个独立的组件组合在一起。</p>
+<ol>
+<li><strong>cuSolverDN</strong>，处理密集矩阵分解和求解，诸如 LU、QR、SVD 和 LDLT 等，以及矩阵和矢量排列等实用程序。</li>
+<li><strong>cuSolverSP</strong> 提供了一组基于稀疏矩阵的 QR 分解。 并非所有矩阵在因式分解中都具有良好的并行性稀疏模式，因此 cuSolverSP 库还提供了处理这些类似顺序矩阵的 CPU 路径。 对于那些具有丰富并行性的矩阵，GPU 路径将提供更高的性能。 </li>
+<li><strong>cuSolverRF</strong>，是一个稀疏重构包，可以提供非常好的求解矩阵序列时的性能，其中仅更改系数但稀疏模式保持不变。</li>
+</ol>
+<h2 id="cuSPARSE"><a href="#cuSPARSE" class="headerlink" title="cuSPARSE"></a>cuSPARSE</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cusparse/index.html">https://docs.nvidia.com/cuda/cusparse/index.html</a></p>
+<p><br/><br/></p>
+<h1 id="CUDA-的版本敏感性"><a href="#CUDA-的版本敏感性" class="headerlink" title="CUDA 的版本敏感性"></a>CUDA 的版本敏感性</h1><p>&emsp;&emsp;版本冲突记录（10.1、11.2、11.4）：cusparseScsrmv、cusparseDcsrmv 替换成 cusparseSpMV，参考链接：<br><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/11.2.0/index.html">CUDA Toolkit Documentation-11.2</a><br><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/10.1/index.html">CUDA Toolkit Documentation-10.1（POGS）</a><br><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/CUDALibrarySamples/blob/master/cuSPARSE/spmv_csr/spmv_csr_example.c">CUDALibrarySamples&#x2F;cuSPARSE&#x2F;spmv_csr&#x2F;spmv_csr_example.c at master · NVIDIA&#x2F;CUDALibrarySamples</a></p>
+<ul>
+<li>cusparseScsr2csc (10.1) ➡️ cusparseCsr2cscEx2 (11.2)</li>
+<li>cusparseDcsrmv (10.1) ➡️ cusparseSpMV (11.2)</li>
+<li>在 11.3 或更高版本中，NVIDIA 使用 <em><strong>CUSPARSE_SPMV_ALG_DEFAULT</strong></em> 作为稀疏矩阵乘法标志；但在 11.2 或更早版本中，它们使用 <em><strong>CUSPARSE_MV_ALG_DEFAULT</strong></em> 作为标志。</li>
+</ul>
+<p><br/><br/></p>
+<h1 id="CUDA-常用参考网站"><a href="#CUDA-常用参考网站" class="headerlink" title="CUDA 常用参考网站"></a>CUDA 常用参考网站</h1><ul>
+<li>不同版本的说明文档：<a target="_blank" rel="noopener" href="https://developer.nvidia.cn/cuda-toolkit-archive">CUDA Toolkit Archive</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/11.2.0/index.html">CUDA Toolkit Documentation-11.2</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/10.1/index.html">CUDA Toolkit Documentation-10.1（POGS）</a></li>
+</ul>
+<p><br/><br/><br/><br/></p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          打赏
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>版权声明： </strong>
+          
+          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2024/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CUDA/" rel="tag">CUDA</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GPU/" rel="tag">GPU</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B9%B6%E8%A1%8C%E8%AE%A1%E7%AE%97/" rel="tag">并行计算</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2024/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            CUDA 学习笔记
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/STL%E5%BA%93%E4%B8%ADSET%E7%9A%84%E5%8E%9F%E7%90%86/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">STL库中SET的原理</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "tahglBYerISh7wrhyXMEH6UV-gzGzoHsz",
+    app_key: "G2qOYTyMGB3F79hHhg6LARHs",
+    path: window.location.pathname,
+    avatar: "mp",
+    placeholder: "欢迎交流讨论 ......",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2019-2024
+        <i class="ri-heart-fill heart_icon"></i> SongXJ
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1280220642&amp;web_id=1280220642'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s Blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photos">摄影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/money_alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/money_wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+ 
+<script src="/js/clickLove.js"></script>
+ 
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>
