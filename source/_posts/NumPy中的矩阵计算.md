@@ -14,8 +14,9 @@ categories:
 <!--more-->
 
 
----
 
+
+<br/><br/>
 
 # 点乘（Element-wise multiplication）
 
@@ -240,7 +241,14 @@ $M \; .* \; a^T = \left[\begin{array}{lll}
 \end{array}\right]= Invalid$
 
 
-# 矩阵叉乘（dot）
+<br/><br/>
+
+---
+
+<br/><br/>
+
+# 叉乘（dot）
+
 &emsp;&emsp;矩阵叉乘，$\mathrm{m} \times \mathrm{n}$矩阵乘以 $\mathrm{n} \times \mathrm{k}$矩阵会得到一个$\mathrm{m} \times \mathrm{k}$的矩阵，用符号 `*` 表示（等价于`numpy`中的`@`符号）。
 
 $A^{\mathrm{m} \times \mathrm{n}}  \quad * \quad B^{\mathrm{n} \times \mathrm{k}} \quad=\quad C^{\mathrm{m} \times \mathrm{k}}$

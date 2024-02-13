@@ -32,78 +32,6 @@
       </tags>
   </entry>
   <entry>
-    <title>H100 结构与 CUDA 编程</title>
-    <url>/2024/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/</url>
-    <content><![CDATA[<p>  满配的 H100 有 8 个 GPC（图形处理集群，Graphics Processor Cluster），每个 GPC 有 9 个 TPC（纹理处理集群，Texture Processor Cluster），每个 TPC 内有 2 个 SM（Streaming MultiProcessor），总共有 144 个 SM。基于 SXM5（Server PCI Express Module） 的 H100 砍掉了 6 个 TPC，只有 66 个 TPC，总计 132 个 SM。</p>
-<span id="more"></span>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E7%AE%80%E5%8C%96%E7%9A%84H100%E7%BB%93%E6%9E%84.png" alt="简化的 H100 结构"></p>
-<ul>
-<li>对于每一个 GPU，通过 GPC 和 TPC 的层级可以划分为很多的 SM</li>
-<li>SM 进一步可以划分为 4 组，每组都有自己的 64KB Register File 和很多的计算核心，</li>
-<li>同一个 SM 中所有运行的 thread 共享 256KB 的 Shared Memory 和 L1 Data Cache</li>
-<li>同一个 GPU 内的所有 SM 共享 50MB L2 Cache 和 80GB HBM3 Memory</li>
-<li>进一步向外看，同一个节点上的 GPU 通过 NVLink/NVSwitch 连接在一起</li>
-</ul>
-<h2 id="h100 结构与 cuda 编程">H100 结构与 CUDA 编程</h2>
-<p>  为了实现 GPU 并行加速计算，我们需要在 Host  上执行  <code>kernel launch</code>，让核函数在  Device 上的多个线程并发执行。CUDA 将核函数所定义的运算称为 <strong> 线程（Thread）</strong>，多个线程组成一个 <strong> 块（Block）</strong>，多个块组成 <strong> 网格（Grid）</strong>。具体的方式就是在调用核函数的时候通过<code>&lt;&lt;&lt;grid, block&gt;&gt;&gt;</code> 来指定核函数要执行的线程数量 N，之后 GPU 上的 N 个 Core 会并行执行核函数，并且每个线程会分配一个唯一的线程号 <code>threadID</code>，这个 ID 值可以通过核函数的内置变量 <code>threadIdx</code> 来获得。</p>
-<p>  一个线程需要两个内置的坐标变量 <code>（blockIdx，threadIdx）</code> 来唯一标识，它们都是 <code>dim3</code> 类型变量，其中 <code>blockIdx</code> 指明线程所在 grid 中的位置，而 <code>threaIdx</code> 指明线程所在 block 中的位置。下面即是一个典型的矩阵乘法的 CUDA 程序示例，定义 block 大小为 16 x 16，也就是每个 block 有 256 个 threads。grid 的值则根据矩阵大小算出来需要多少个 block。<br>
-为了进一步理解这里的 CUDA 编程模型概念与硬件结构，我们继续聊聊刚才没有提到的 WARP Scheduler。NVIDIA SM 采用 SIMT（Single Instruction Multiple Thread，单指令多线程）架构，线程束 warp 是最基本的执行和调度单元，一个 warp 一般包含 32 threads，这些 threads 以不同的数据资源执行相同的指令。</p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E4%B8%89%E6%AC%BE%E6%98%BE%E5%8D%A1%E7%9A%84%E8%AE%A1%E7%AE%97%E8%83%BD%E5%8A%9B%E6%AF%94%E8%BE%83.png" alt="三款显卡的计算能力比较"></p>
-<h2 id="cluster">Cluster</h2>
-<p>  前面介绍的 CUDA 编程模型实际上都是在 Hopper 架构以前的抽象，也就是 grid/block 两级调度，block 映射到 SM 上。随着 Cooperative Groups 的引入和异步编程的支持，多个 Kernel 之间以生产者和消费者的方式通信，SM 到 SM 之间的通信带宽也在增加。在 Hopper 架构中，新增了 Distributed Shared Memory (DSMEM) 的概念，在一个 GPC 内部的 SM 有了专用的通信带宽，因此 CUDA 上新增了一层 Cluster 的调度层次。</p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E6%9C%AA%E5%8A%A0Cluster%E5%89%8D%E7%9A%84GPU%E6%9E%B6%E6%9E%84.png" alt="未加 Cluster 前的 GPU 架构"></p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E5%B8%A6%E6%9C%89Cluster%E7%9A%84GPU%E6%9E%B6%E6%9E%84.png" alt="带有 Cluster 的 GPU 架构"></p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/threads_cluster.png" alt="threads cluster"></p>
-<p>  有了 cluster 这一层抽象之后，类似于同一个 block 的 threads 都会被调度到同一个 SM，<strong>同一个 cluster 的 thread blocks 都会被调度到同一个 GPC 中</strong>。</p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/ClusterGPC.png" alt="Cluster 和 GPC"></p>
-<p>  这样同一个 cluster 中不同 block 的 threads 可以通过 SM to SM Network 访问另一个 block 的 DSMEM（Distributed Shared Memory）。这样在一个 GPC 内部实现多个 SM 的 Load/Store，Atomic，Reduce 和异步 DMA（Direct Memory Access，通过锁页内存直接访问） 操作都变得非常的简洁。</p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/block%E4%B9%8B%E9%97%B4%E7%9A%84%E4%BA%A4%E4%BA%92.png" alt="block 之间的交互"></p>
-<p><strong>CUDA 编程模型的内存模型也就变成了下图所示：</strong><br>
-<img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E6%96%B0%E7%9A%84CUDA%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B.png" alt="新的 CUDA 内存模型"></p>
-<p>  本质上看，CUDA 引入 block 和 cluster 的抽象，都是为了更好地利用空间局部性原理。Block 可以让所有的 threads 调度到同一个 SM，让 threads 可以通过 fast barriers 快速同步，并且通过 SM 的 Shared Memory 交换数据。<strong>随着 GPU 的 SM 越来越多，仅仅使用 Block 这一层抽象已经不能够更好地利用局部性原理，因此 Hopper 引入了 Cluster 这层抽象，让所有的 threads 运行在同一个 GPC 内部。</strong></p>
-<p><strong>参考链接：</strong><br>
-<a href="https://mp.weixin.qq.com/s/ccSHfgus5GvG6OleeOfglw">疯狂的 H100：现代 GPU 体系结构浅析，从算力焦虑开始聊起</a><br>
-<a href="https://loop.houmin.site/context/gpu-arch/">In The Loop | 疯狂的 H100：现代 GPU 体系结构浅析，从算力焦虑开始聊起</a></p>
-<h2 id="pci- 和 -sxm">PCI 和 SXM</h2>
-<p>V100 有两种总线规格：<strong>PCIe</strong> 和 <strong>SXM2</strong>。</p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/V100%E7%9A%84%E6%80%BB%E7%BA%BF%E8%A7%84%E6%A0%BC.png" alt="V100 的总线规格"></p>
-<ul>
-<li><strong>PCIe</strong>（Peripheral Component Interconnect express）是一种高速串行计算机扩展总线标准，是英特尔公司在 2001 年提出来的，它的出现主要是为了取代 AGP 接口，优点就是兼容性比较好，数据传输速率高、潜力大。</li>
-<li><strong>SXM</strong>（Server PCI Express Module）是英伟达公司设计出来的，它的出现主要是为高性能计算和数据中心提高更强的计算能力和传输速度。SXM 接口的 GPU 通常是存在于 <strong>DGX 系统板</strong> 上，该 DGX 系统板支持 4 张 GPU-SXM 或则 8 张 GPU-SXM，而每个 GPU 之间通过 <strong>NVLink</strong> 进行通信。</li>
-</ul>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/SXM5%E6%A8%A1%E5%9D%97.png" alt="这是 H100 GPU 封装在 SXM5 模块中"></p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/HGX.png" alt="NVIDIA HGX H100，由 8 个 H100 SXM5 模块加上 4 个 NVSwitch Chip 在同一个 system board 上"></p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/DGX.png" alt="DGX H100 在 HGX 100 的基础上，进一步配置了 CPU、存储与网卡"></p>
-<ul>
-<li>DGX（Deep-learning GPU Accelerator）：NVIDIA 推出的一系列专门用于加速深度学习工作负载的高性能计算平台
-<ul>
-<li>DGX 系统板：<a href="https://www.nvidia.cn/data-center/dgx-1/">https://www.nvidia.cn/data-center/dgx-1/</a></li>
-<li>DGX-1：8 块 V100 （<a href="https://www.nvidia.cn/content/dam/en-zz/Solutions/Data-Center/dgx-1/dgx-1-rhel-centos-datasheet-update-r2.pdf">技术文档</a>）</li>
-</ul>
-</li>
-</ul>
-<p><strong>NVLink 与 NVSwitch ：</strong><br>
-NVLink 是一种 GPU 之间的直接互连，可扩展服务器内的多 GPU 输入 / 输出 (IO)。<br>
-NVSwitch 可连接多个 NVLink，在单节点内和节点间实现以 NVLink 能够达到的最高速度进行多对多 GPU 通信。</p>
-<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/NVSwitch.png" alt="NVSwitch 使 NVIDIA DGX H100 系统中的 8 个 GPU 能够在一个具有全带宽连接的集群中协同工作。"></p>
-<p>参考：</p>
-<ul>
-<li><a href="https://www.nvidia.cn/data-center/nvlink/">https://www.nvidia.cn/data-center/nvlink/</a></li>
-<li><a href="https://www.bilibili.com/read/cv24855760/">https://www.bilibili.com/read/cv24855760/</a></li>
-</ul>
-<p><br/><br/><br/><br/></p>
-]]></content>
-      <categories>
-        <category>技术笔记</category>
-        <category>CUDA</category>
-      </categories>
-      <tags>
-        <tag>CUDA</tag>
-        <tag>GPU</tag>
-        <tag>并行计算</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hexo 博客技能树</title>
     <url>/2023/Hexo%E5%8D%9A%E5%AE%A2%E6%8A%80%E8%83%BD%E6%A0%91/</url>
     <content><![CDATA[<p>  Hexo 博客技能树汇总，在本篇文章中将会汇总本网站支持的各种功能，包括动态图表生成和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>LaTeX</mtext></mrow><annotation encoding="application/x-tex">\LaTeX</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.89883em;vertical-align:-0.2155em;"></span><span class="mord text"><span class="mord textrm">L</span><span class="mspace" style="margin-right:-0.36em;"></span><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.68333em;"><span style="top:-2.904999em;"><span class="pstrut" style="height:2.7em;"></span><span class="mord"><span class="mord textrm mtight sizing reset-size6 size3">A</span></span></span></span></span></span><span class="mspace" style="margin-right:-0.15em;"></span><span class="mord text"><span class="mord textrm">T</span><span class="mspace" style="margin-right:-0.1667em;"></span><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.46782999999999997em;"><span style="top:-2.7845em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord textrm">E</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2155em;"><span></span></span></span></span><span class="mspace" style="margin-right:-0.125em;"></span><span class="mord textrm">X</span></span></span></span></span></span> 公式表示。</p>
@@ -112,11 +40,11 @@ NVSwitch 可连接多个 NVLink，在单节点内和节点间实现以 NVLink �
 <p> 基于插件 <code>hexo-tag-chart</code> 实现数据图表可视化。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">npm i hexo-tag-chart -S</span><br></pre></td></tr></table></figure>
 <div style="width: 90%;margin: 0 auto">
-    <canvas id="chart7853" style="height: 300px"></canvas>
+    <canvas id="chart1419" style="height: 300px"></canvas>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 <script type="text/javascript">
-    var ctx = document.getElementById('chart7853').getContext('2d');
+    var ctx = document.getElementById('chart1419').getContext('2d');
     var options =     {
     type: 'line',
     data: {labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -202,6 +130,78 @@ Class08 <--> C2: Cool label</pre>
         <tag>前端</tag>
         <tag>Hexo</tag>
         <tag>个人博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>H100 结构与 CUDA 编程</title>
+    <url>/2024/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/</url>
+    <content><![CDATA[<p>  满配的 H100 有 8 个 GPC（图形处理集群，Graphics Processor Cluster），每个 GPC 有 9 个 TPC（纹理处理集群，Texture Processor Cluster），每个 TPC 内有 2 个 SM（Streaming MultiProcessor），总共有 144 个 SM。基于 SXM5（Server PCI Express Module） 的 H100 砍掉了 6 个 TPC，只有 66 个 TPC，总计 132 个 SM。</p>
+<span id="more"></span>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E7%AE%80%E5%8C%96%E7%9A%84H100%E7%BB%93%E6%9E%84.png" alt="简化的 H100 结构"></p>
+<ul>
+<li>对于每一个 GPU，通过 GPC 和 TPC 的层级可以划分为很多的 SM</li>
+<li>SM 进一步可以划分为 4 组，每组都有自己的 64KB Register File 和很多的计算核心，</li>
+<li>同一个 SM 中所有运行的 thread 共享 256KB 的 Shared Memory 和 L1 Data Cache</li>
+<li>同一个 GPU 内的所有 SM 共享 50MB L2 Cache 和 80GB HBM3 Memory</li>
+<li>进一步向外看，同一个节点上的 GPU 通过 NVLink/NVSwitch 连接在一起</li>
+</ul>
+<h2 id="h100 结构与 cuda 编程">H100 结构与 CUDA 编程</h2>
+<p>  为了实现 GPU 并行加速计算，我们需要在 Host  上执行  <code>kernel launch</code>，让核函数在  Device 上的多个线程并发执行。CUDA 将核函数所定义的运算称为 <strong> 线程（Thread）</strong>，多个线程组成一个 <strong> 块（Block）</strong>，多个块组成 <strong> 网格（Grid）</strong>。具体的方式就是在调用核函数的时候通过<code>&lt;&lt;&lt;grid, block&gt;&gt;&gt;</code> 来指定核函数要执行的线程数量 N，之后 GPU 上的 N 个 Core 会并行执行核函数，并且每个线程会分配一个唯一的线程号 <code>threadID</code>，这个 ID 值可以通过核函数的内置变量 <code>threadIdx</code> 来获得。</p>
+<p>  一个线程需要两个内置的坐标变量 <code>（blockIdx，threadIdx）</code> 来唯一标识，它们都是 <code>dim3</code> 类型变量，其中 <code>blockIdx</code> 指明线程所在 grid 中的位置，而 <code>threaIdx</code> 指明线程所在 block 中的位置。下面即是一个典型的矩阵乘法的 CUDA 程序示例，定义 block 大小为 16 x 16，也就是每个 block 有 256 个 threads。grid 的值则根据矩阵大小算出来需要多少个 block。<br>
+为了进一步理解这里的 CUDA 编程模型概念与硬件结构，我们继续聊聊刚才没有提到的 WARP Scheduler。NVIDIA SM 采用 SIMT（Single Instruction Multiple Thread，单指令多线程）架构，线程束 warp 是最基本的执行和调度单元，一个 warp 一般包含 32 threads，这些 threads 以不同的数据资源执行相同的指令。</p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E4%B8%89%E6%AC%BE%E6%98%BE%E5%8D%A1%E7%9A%84%E8%AE%A1%E7%AE%97%E8%83%BD%E5%8A%9B%E6%AF%94%E8%BE%83.png" alt="三款显卡的计算能力比较"></p>
+<h2 id="cluster">Cluster</h2>
+<p>  前面介绍的 CUDA 编程模型实际上都是在 Hopper 架构以前的抽象，也就是 grid/block 两级调度，block 映射到 SM 上。随着 Cooperative Groups 的引入和异步编程的支持，多个 Kernel 之间以生产者和消费者的方式通信，SM 到 SM 之间的通信带宽也在增加。在 Hopper 架构中，新增了 Distributed Shared Memory (DSMEM) 的概念，在一个 GPC 内部的 SM 有了专用的通信带宽，因此 CUDA 上新增了一层 Cluster 的调度层次。</p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E6%9C%AA%E5%8A%A0Cluster%E5%89%8D%E7%9A%84GPU%E6%9E%B6%E6%9E%84.png" alt="未加 Cluster 前的 GPU 架构"></p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E5%B8%A6%E6%9C%89Cluster%E7%9A%84GPU%E6%9E%B6%E6%9E%84.png" alt="带有 Cluster 的 GPU 架构"></p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/threads_cluster.png" alt="threads cluster"></p>
+<p>  有了 cluster 这一层抽象之后，类似于同一个 block 的 threads 都会被调度到同一个 SM，<strong>同一个 cluster 的 thread blocks 都会被调度到同一个 GPC 中</strong>。</p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/ClusterGPC.png" alt="Cluster 和 GPC"></p>
+<p>  这样同一个 cluster 中不同 block 的 threads 可以通过 SM to SM Network 访问另一个 block 的 DSMEM（Distributed Shared Memory）。这样在一个 GPC 内部实现多个 SM 的 Load/Store，Atomic，Reduce 和异步 DMA（Direct Memory Access，通过锁页内存直接访问） 操作都变得非常的简洁。</p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/block%E4%B9%8B%E9%97%B4%E7%9A%84%E4%BA%A4%E4%BA%92.png" alt="block 之间的交互"></p>
+<p><strong>CUDA 编程模型的内存模型也就变成了下图所示：</strong><br>
+<img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/%E6%96%B0%E7%9A%84CUDA%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B.png" alt="新的 CUDA 内存模型"></p>
+<p>  本质上看，CUDA 引入 block 和 cluster 的抽象，都是为了更好地利用空间局部性原理。Block 可以让所有的 threads 调度到同一个 SM，让 threads 可以通过 fast barriers 快速同步，并且通过 SM 的 Shared Memory 交换数据。<strong>随着 GPU 的 SM 越来越多，仅仅使用 Block 这一层抽象已经不能够更好地利用局部性原理，因此 Hopper 引入了 Cluster 这层抽象，让所有的 threads 运行在同一个 GPC 内部。</strong></p>
+<p><strong>参考链接：</strong><br>
+<a href="https://mp.weixin.qq.com/s/ccSHfgus5GvG6OleeOfglw">疯狂的 H100：现代 GPU 体系结构浅析，从算力焦虑开始聊起</a><br>
+<a href="https://loop.houmin.site/context/gpu-arch/">In The Loop | 疯狂的 H100：现代 GPU 体系结构浅析，从算力焦虑开始聊起</a></p>
+<h2 id="pci- 和 -sxm">PCI 和 SXM</h2>
+<p>V100 有两种总线规格：<strong>PCIe</strong> 和 <strong>SXM2</strong>。</p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/V100%E7%9A%84%E6%80%BB%E7%BA%BF%E8%A7%84%E6%A0%BC.png" alt="V100 的总线规格"></p>
+<ul>
+<li><strong>PCIe</strong>（Peripheral Component Interconnect express）是一种高速串行计算机扩展总线标准，是英特尔公司在 2001 年提出来的，它的出现主要是为了取代 AGP 接口，优点就是兼容性比较好，数据传输速率高、潜力大。</li>
+<li><strong>SXM</strong>（Server PCI Express Module）是英伟达公司设计出来的，它的出现主要是为高性能计算和数据中心提高更强的计算能力和传输速度。SXM 接口的 GPU 通常是存在于 <strong>DGX 系统板</strong> 上，该 DGX 系统板支持 4 张 GPU-SXM 或则 8 张 GPU-SXM，而每个 GPU 之间通过 <strong>NVLink</strong> 进行通信。</li>
+</ul>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/SXM5%E6%A8%A1%E5%9D%97.png" alt="这是 H100 GPU 封装在 SXM5 模块中"></p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/HGX.png" alt="NVIDIA HGX H100，由 8 个 H100 SXM5 模块加上 4 个 NVSwitch Chip 在同一个 system board 上"></p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/DGX.png" alt="DGX H100 在 HGX 100 的基础上，进一步配置了 CPU、存储与网卡"></p>
+<ul>
+<li>DGX（Deep-learning GPU Accelerator）：NVIDIA 推出的一系列专门用于加速深度学习工作负载的高性能计算平台
+<ul>
+<li>DGX 系统板：<a href="https://www.nvidia.cn/data-center/dgx-1/">https://www.nvidia.cn/data-center/dgx-1/</a></li>
+<li>DGX-1：8 块 V100 （<a href="https://www.nvidia.cn/content/dam/en-zz/Solutions/Data-Center/dgx-1/dgx-1-rhel-centos-datasheet-update-r2.pdf">技术文档</a>）</li>
+</ul>
+</li>
+</ul>
+<p><strong>NVLink 与 NVSwitch ：</strong><br>
+NVLink 是一种 GPU 之间的直接互连，可扩展服务器内的多 GPU 输入 / 输出 (IO)。<br>
+NVSwitch 可连接多个 NVLink，在单节点内和节点间实现以 NVLink 能够达到的最高速度进行多对多 GPU 通信。</p>
+<p><img src="/images/H100%E7%BB%93%E6%9E%84%E4%B8%8ECUDA%E7%BC%96%E7%A8%8B/NVSwitch.png" alt="NVSwitch 使 NVIDIA DGX H100 系统中的 8 个 GPU 能够在一个具有全带宽连接的集群中协同工作。"></p>
+<p>参考：</p>
+<ul>
+<li><a href="https://www.nvidia.cn/data-center/nvlink/">https://www.nvidia.cn/data-center/nvlink/</a></li>
+<li><a href="https://www.bilibili.com/read/cv24855760/">https://www.bilibili.com/read/cv24855760/</a></li>
+</ul>
+<p><br/><br/><br/><br/></p>
+]]></content>
+      <categories>
+        <category>技术笔记</category>
+        <category>CUDA</category>
+      </categories>
+      <tags>
+        <tag>CUDA</tag>
+        <tag>GPU</tag>
+        <tag>并行计算</tag>
       </tags>
   </entry>
   <entry>
@@ -346,7 +346,7 @@ Class08 <--> C2: Cool label</pre>
     <url>/2023/NumPy%E4%B8%AD%E7%9A%84%E7%9F%A9%E9%98%B5%E8%AE%A1%E7%AE%97/</url>
     <content><![CDATA[<p>  在本篇文章中将深入探讨 NumPy 库中矩阵点乘与叉乘的具体运算法则。</p>
 <span id="more"></span>
-<hr>
+<p><br/><br/></p>
 <h1>点乘（Element-wise multiplication）</h1>
 <p>  对于两个维度完全一样的矩阵用 multiply 做乘法，那么它们就是进行对应位置元素之间的乘法（Element-Wise Product），得到一个同样维度的矩阵输出，用符号 <code>.*</code> 表示（等价于 <code>numpy</code> 中的 <code>*</code> 符号）。</p>
 <p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.15999999999999992em" columnalign="left left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>11</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>12</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>13</mn></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>21</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>22</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>23</mn></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>31</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>32</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>a</mi><mn>33</mn></msub></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mi mathvariant="normal">.</mi><mo>∗</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.15999999999999992em" columnalign="left left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>11</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>12</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>13</mn></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>21</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>22</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>23</mn></msub></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>31</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>32</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><msub><mi>b</mi><mn>33</mn></msub></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.15999999999999992em" columnalign="left left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>11</mn></msub><msub><mi>b</mi><mn>11</mn></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>12</mn></msub><msub><mi>b</mi><mn>12</mn></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>13</mn></msub><msub><mi>b</mi><mn>13</mn></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>21</mn></msub><msub><mi>b</mi><mn>21</mn></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>22</mn></msub><msub><mi>b</mi><mn>22</mn></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>23</mn></msub><msub><mi>b</mi><mn>23</mn></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>31</mn></msub><msub><mi>b</mi><mn>31</mn></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>32</mn></msub><msub><mi>b</mi><mn>32</mn></msub></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><msub><mi>a</mi><mn>33</mn></msub><msub><mi>b</mi><mn>33</mn></msub></mrow></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex">\left[\begin{array}{lll}
@@ -544,7 +544,10 @@ Class08 <--> C2: Cool label</pre>
 2 \\
 3 
 \end{array}\right]= Invalid</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord">.</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8413309999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault">a</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">[</span></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">5</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">]</span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord">.</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:3.6010299999999997em;vertical-align:-1.55002em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.0510099999999998em;"><span style="top:-2.2500000000000004em;"><span class="pstrut" style="height:3.1550000000000002em;"></span><span class="delimsizinginner delim-size4"><span>⎣</span></span></span><span style="top:-2.8099900000000004em;"><span class="pstrut" style="height:3.1550000000000002em;"></span><span class="delimsizinginner delim-size4"><span>⎢</span></span></span><span style="top:-4.05101em;"><span class="pstrut" style="height:3.1550000000000002em;"></span><span class="delimsizinginner delim-size4"><span>⎡</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55002em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span><span style="top:-3.0099999999999993em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span></span></span><span style="top:-1.8099999999999994em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.5500000000000007em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.0510099999999998em;"><span style="top:-2.2500000000000004em;"><span class="pstrut" style="height:3.1550000000000002em;"></span><span class="delimsizinginner delim-size4"><span>⎦</span></span></span><span style="top:-2.8099900000000004em;"><span class="pstrut" style="height:3.1550000000000002em;"></span><span class="delimsizinginner delim-size4"><span>⎥</span></span></span><span style="top:-4.05101em;"><span class="pstrut" style="height:3.1550000000000002em;"></span><span class="delimsizinginner delim-size4"><span>⎤</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55002em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="mord mathdefault">n</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">i</span><span class="mord mathdefault">d</span></span></span></span></p>
-<h1>矩阵叉乘（dot）</h1>
+<p><br/><br/></p>
+<hr>
+<p><br/><br/></p>
+<h1>叉乘（dot）</h1>
 <p>  矩阵叉乘，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">m</mi><mo>×</mo><mi mathvariant="normal">n</mi></mrow><annotation encoding="application/x-tex">\mathrm{m} \times \mathrm{n}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord"><span class="mord mathrm">m</span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord"><span class="mord mathrm">n</span></span></span></span></span>矩阵乘以 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">n</mi><mo>×</mo><mi mathvariant="normal">k</mi></mrow><annotation encoding="application/x-tex">\mathrm{n} \times \mathrm{k}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord"><span class="mord mathrm">n</span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord"><span class="mord mathrm">k</span></span></span></span></span>矩阵会得到一个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">m</mi><mo>×</mo><mi mathvariant="normal">k</mi></mrow><annotation encoding="application/x-tex">\mathrm{m} \times \mathrm{k}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord"><span class="mord mathrm">m</span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord"><span class="mord mathrm">k</span></span></span></span></span> 的矩阵，用符号 <code>*</code> 表示（等价于 <code>numpy</code> 中的 <code>@</code> 符号）。</p>
 <p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>A</mi><mrow><mi mathvariant="normal">m</mi><mo>×</mo><mi mathvariant="normal">n</mi></mrow></msup><mspace width="1em"/><mo>∗</mo><mspace width="1em"/><msup><mi>B</mi><mrow><mi mathvariant="normal">n</mi><mo>×</mo><mi mathvariant="normal">k</mi></mrow></msup><mspace width="1em"/><mo>=</mo><mspace width="1em"/><msup><mi>C</mi><mrow><mi mathvariant="normal">m</mi><mo>×</mo><mi mathvariant="normal">k</mi></mrow></msup></mrow><annotation encoding="application/x-tex">A^{\mathrm{m} \times \mathrm{n}}  \quad * \quad B^{\mathrm{n} \times \mathrm{k}} \quad=\quad C^{\mathrm{m} \times \mathrm{k}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.771331em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault">A</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.771331em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">m</span></span><span class="mbin mtight">×</span><span class="mord mtight"><span class="mord mathrm mtight">n</span></span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mspace" style="margin-right:1em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mspace" style="margin-right:1em;"></span></span><span class="base"><span class="strut" style="height:0.8491079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">n</span></span><span class="mbin mtight">×</span><span class="mord mtight"><span class="mord mathrm mtight">k</span></span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mspace" style="margin-right:1em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mspace" style="margin-right:1em;"></span></span><span class="base"><span class="strut" style="height:0.8491079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathrm mtight">m</span></span><span class="mbin mtight">×</span><span class="mord mtight"><span class="mord mathrm mtight">k</span></span></span></span></span></span></span></span></span></span></span></span></span></p>
 <h2 id="标量 - 向量 -or- 矩阵 -scalar-vector-or-matrix">标量 * 向量 or 矩阵（Scalar * Vector or Matrix）</h2>
@@ -642,88 +645,6 @@ Class08 <--> C2: Cool label</pre>
         <tag>矩阵计算</tag>
         <tag>Python</tag>
         <tag>NumPy</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>STL 库中 SET 的原理</title>
-    <url>/2023/STL%E5%BA%93%E4%B8%ADSET%E7%9A%84%E5%8E%9F%E7%90%86/</url>
-    <content><![CDATA[<p>  <code>std::set</code> 是 C++ 标准库中的容器之一，它基于红黑树实现。<code>std::set</code> 利用红黑树的特性来实现有序的插入、查找和删除操作，并且具有较好的平均和最坏情况下的时间复杂度。<br>
-当向 <code>std::set</code> 插入元素时，它会按照特定的比较函数（<code>bool less&lt;T&gt;::operator() const(const T &amp;lhs, const T &amp; rhs)</code>）将新元素插入到红黑树的适当位置，以保持树的有序性质。插入操作的平均时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">n</span></span></span></span> 是 <code>std::set</code> 中元素的数量。查找操作（<code>find()</code>）使用红黑树的性质，通过比较函数在树中进行二分查找，查找操作的平均时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>。</p>
-<span id="more"></span>
-<p>  但是当我们把 struct 放入 <code>std::set</code> 会有什么后果呢？因为 <code>std::set</code> 需要在插入到时候排序，所以需要重载  struct 的比较运算符，这个时候就出现问题了，首先我们定义一个结构体 <code>Person</code> ：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">int</span> _ID, string _name, <span class="type">int</span> _age) : <span class="built_in">ID</span>(_ID), <span class="built_in">age</span>(_age), <span class="built_in">name</span>(_name) &#123;&#125;</span><br><span class="line">    <span class="type">int</span> ID;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    string name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>  当我们直接插入到 <code>std::set&lt;Person&gt;</code> 中时，会报 complier error 的错误，因此简单补写一个比较运算符重载，如下：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> Person &amp;lhs, <span class="type">const</span> Person &amp;rhs) &#123;</span><br><span class="line">    <span class="keyword">return</span> lhs.age &lt; rhs.age;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>  OK，编译起来没有问题，但是我们运行测试一下下面的 <code>find</code> 操作就会发现问题</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;set&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">int</span> _ID, string _name, <span class="type">int</span> _age) : <span class="built_in">ID</span>(_ID), <span class="built_in">age</span>(_age), <span class="built_in">name</span>(_name) &#123;&#125;</span><br><span class="line">    <span class="type">int</span> ID;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    string name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> Person &amp;lhs, <span class="type">const</span> Person &amp;rhs) &#123;</span><br><span class="line">    <span class="keyword">return</span> lhs.age &lt; rhs.age;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    set&lt;Person&gt; person;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; ++i) &#123;</span><br><span class="line">        <span class="function">Person <span class="title">p_tmp</span><span class="params">(i, <span class="string">&quot;sxj&quot;</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">        person.<span class="built_in">insert</span>(p_tmp);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">Person <span class="title">p</span><span class="params">(<span class="number">2000</span>, <span class="string">&quot;sxj&quot;</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">    <span class="keyword">auto</span> it = person.<span class="built_in">find</span>(p);</span><br><span class="line">    <span class="keyword">if</span> (it != person.<span class="built_in">end</span>())</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Find Person --- ID: &quot;</span> &lt;&lt; it-&gt;ID &lt;&lt; <span class="string">&quot;  name: &quot;</span> &lt;&lt; it-&gt;name &lt;&lt; <span class="string">&quot;  age: &quot;</span> &lt;&lt; it-&gt;age;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Can&#x27;t find&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/STL%E5%BA%93%E4%B8%ADSET%E7%9A%84%E5%8E%9F%E7%90%86/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C.png" alt="运行结果"></p>
-<p>  明明不在 <code>set</code> 中的 <strong>ID-2000</strong> 的 <code>Person</code> 也可以被找到。造成这个结果的原因是我们所提供的 <code>operator&lt;() </code>，当<code>Person</code> <code>p1</code>、<code>p2</code>，在 <code>p1&lt;p2</code> 与 <code>p2&lt;p2</code> 都不成立时，<code>find</code> 就会判断 <code>p1</code> 和 <code>p2</code> 是同一个 <code>Person</code> ，因此会造成这样的错误结果。</p>
-<p>  <strong>解决方案 </strong> 就是补充完整我们的比较运算符重载，<strong>完整代码如下</strong>：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;set&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">int</span> _ID, string _name, <span class="type">int</span> _age) : <span class="built_in">ID</span>(_ID), <span class="built_in">age</span>(_age), <span class="built_in">name</span>(_name) &#123;&#125;</span><br><span class="line">    <span class="type">int</span> ID;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    string name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> Person &amp;lhs, <span class="type">const</span> Person &amp;rhs) &#123;</span><br><span class="line">    <span class="keyword">if</span> (lhs.ID &lt; rhs.ID) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">if</span> (lhs.ID &gt; rhs.ID) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (lhs.name &lt; rhs.name) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">if</span> (lhs.name &gt; rhs.name) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">return</span> lhs.age &lt; rhs.age;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    set&lt;Person&gt; person;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; ++i) &#123;</span><br><span class="line">        <span class="function">Person <span class="title">p_tmp</span><span class="params">(i, <span class="string">&quot;sxj&quot;</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">        person.<span class="built_in">insert</span>(p_tmp);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">Person <span class="title">p</span><span class="params">(<span class="number">2000</span>, <span class="string">&quot;sxj&quot;</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">    <span class="keyword">auto</span> it = person.<span class="built_in">find</span>(p);</span><br><span class="line">    <span class="keyword">if</span> (it != person.<span class="built_in">end</span>())</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Find Person --- ID: &quot;</span> &lt;&lt; it-&gt;ID &lt;&lt; <span class="string">&quot;  name: &quot;</span> &lt;&lt; it-&gt;name &lt;&lt; <span class="string">&quot;  age: &quot;</span> &lt;&lt; it-&gt;age;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Can&#x27;t find&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>参考：<a href="https://mp.weixin.qq.com/s?__biz=MzkxMzQ5NTI2Mg==&amp;mid=2247483878&amp;idx=1&amp;sn=d155daf0a7125c05c44c639711c254a6&amp;chksm=c17d8457f60a0d41e248ebfd6342c89476eaa710178889458d2442ec74561de1ac13b0f0614a&amp;scene=132&amp;exptype=timeline_recommend_article_extendread_samebiz#wechat_redirect">才哥第十四讲 std:set (二）</a></p>
-<p><br/><br/><br/><br/></p>
-]]></content>
-      <categories>
-        <category>技术笔记</category>
-        <category>C++</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>STL库</tag>
-        <tag>集合</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Python：Matplotlib 绘制 3D 曲面图</title>
-    <url>/2020/Python%EF%BC%9AMatplotlib%20%E7%BB%98%E5%88%B6%203D%E6%9B%B2%E9%9D%A2%E5%9B%BE/</url>
-    <content><![CDATA[<p>  Matplotlib 是 Python 的绘图库，它与 NumPy 一起使用，可以基本上实现 MATLAB 的绘图和计算功能，而且效率更高，速度更快。今天主要说一下关于 Matplotlib 绘制三维图像，并实现一个可以多次使用的 <strong> 函数模板</strong>，直接复制调用即可使用。</p>
-<span id="more"></span>
-<hr>
-<h2 id="1- 导入模块包">1. 导入模块包</h2>
-<p><code>numpy</code>和 <code>matplotlib</code> 是两个常规的基本模块。因为实现的是三维绘图，所以需要另外一个模块<code>Axes3D</code>，这是是 Matplotlib 里面专门用来画三维图的工具包。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br></pre></td></tr></table></figure>
-<h2 id="2- 图像的基本设置">2. 图像的基本设置</h2>
-<p>这里包括对图中字体大小、图片长宽比、分辨率的调整，并将其转换为三维格式。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.rcParams.update(&#123;<span class="string">&#x27;font.size&#x27;</span>: <span class="number">32</span>&#125;)  <span class="comment"># 统一设置图中字体大小</span></span><br><span class="line">fig = plt.figure(figsize=(<span class="number">20</span>, <span class="number">16</span>), dpi=<span class="number">50</span>)  <span class="comment"># 设置图像大小和分辨率</span></span><br><span class="line">ax3 = Axes3D(fig)  <span class="comment"># 将图像转换为 3D 模式</span></span><br></pre></td></tr></table></figure>
-<h2 id="3- 处理数据 - 生成坐标矩阵">3. 处理数据，生成坐标矩阵</h2>
-<p>这里的 <code>matrix</code> 是一个二维列表，是 Python 的基本数据格式，需要将其先转化为 <code>np.array</code> 的格式，才能进行更多的操作。<br>
-另外要根据传入的二维数据 <strong> 创建坐标矩阵</strong>，这一点很重要。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 绘制三维图像</span></span><br><span class="line">matrix = np.array(matrix)</span><br><span class="line"><span class="comment"># 根据二维数据的长宽创建坐标矩阵</span></span><br><span class="line">arrX = np.arange(<span class="number">0</span>, <span class="built_in">len</span>(matrix[<span class="number">0</span>]))</span><br><span class="line">arrY = np.arange(<span class="number">0</span>, <span class="built_in">len</span>(matrix))</span><br><span class="line">X, Y = np.meshgrid(arrX, arrY)  <span class="comment"># 创建坐标矩阵</span></span><br><span class="line"><span class="built_in">print</span>(X.shape, Y.shape, matrix.shape)</span><br><span class="line">ax3.plot_surface(X, Y, matrix, cmap=<span class="string">&#x27;rainbow&#x27;</span>)</span><br></pre></td></tr></table></figure>
-<h2 id="4- 设置坐标轴刻度 - 稀疏化坐标轴刻度">4. 设置坐标轴刻度，稀疏化坐标轴刻度</h2>
-<p>如果我们的数据是 100 X 100 的二维矩阵，如果将所有的刻度都显示在坐标轴上，那么必会变得密密麻麻，所以我们需要将坐标刻度稀疏化，并用自己想要的方式展现出来。<br>
-使用 <code>xticks(x, _x)</code> 设置 X 坐标轴刻度（Y 轴同理，但是不能设置 Z 轴）：</p>
-<ul>
-<li>第一个参数：刻度值列表</li>
-<li>第二个参数：需要展示的出来的经过处理的刻度值列表。这里可以对刻度自定义，比如统一扩大 10 倍或缩小十倍（本例中以 0.1 为步长取的数据，所以在刻度上要乘上步长，即缩小为 0.1 倍），同时也可以设置为字符串。</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(arrX)))[::<span class="built_in">int</span>(<span class="built_in">len</span>(arrX) / <span class="number">10</span>)]</span><br><span class="line">_x = [<span class="built_in">int</span>(i * stepValue) <span class="keyword">for</span> i <span class="keyword">in</span> x]</span><br><span class="line">plt.xticks(x, _x)</span><br></pre></td></tr></table></figure>
-<h2 id="5- 设置图片名称并保存">5. 设置图片名称并保存</h2>
-<p>使用 <code>xlabel</code> 设置 X 轴名称（Y 轴同理，但是不能设置 Z 轴）：</p>
-<ul>
-<li>第一个参数：X 轴名称的字符串</li>
-<li>第二个参数（<code>labelpad</code>）：X 轴名称与 X 轴之间的间隔距离</li>
-</ul>
-<p>使用 <code>savefig</code> 储存图片，这里直接将需要储存的图片格式写在图片名称的字符串中即可。如果在 LaTeX 中 使用推荐 <code>.eps</code> 格式，另外也可以储存为 <code>.jpg</code> 格式和 <code>.png</code> 格式.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.xlabel(keyX, labelpad=<span class="number">30</span>)  <span class="comment"># X 轴名称</span></span><br><span class="line">plt.ylabel(keyY, labelpad=<span class="number">30</span>)  <span class="comment"># Y 轴名称</span></span><br><span class="line">plt.title(<span class="string">&quot;The effect of &#123;&#125; and &#123;&#125; on GJBD&quot;</span>.<span class="built_in">format</span>(keyX, keyY), pad=<span class="number">20</span>)  <span class="comment"># 图形题目</span></span><br><span class="line">plt.savefig(<span class="string">&quot;./change_&#123;&#125;&#123;&#125;.eps&quot;</span>.<span class="built_in">format</span>(keyX, keyY))  <span class="comment"># 保存图片</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="完整代码接口如下">完整代码接口如下</h2>
-<p>三个参数如下：</p>
-<ul>
-<li>matrix : 二维列表格式的数据，形如[[1,2,3], [4,5,6], [7,8,9] ]</li>
-<li>keyX : X 轴名称</li>
-<li>keyY : Y 轴名称</li>
-</ul>
-<p>其中 <code>stepValue</code> 是二维数据的采集步长，可以根据实际情况自行修改。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27; 使用二维列表数据绘制三维曲面图</span></span><br><span class="line"><span class="string">--- matrix : 二维数据（普通 Python 二维列表）</span></span><br><span class="line"><span class="string">--- keyX : X 轴名称（string）</span></span><br><span class="line"><span class="string">--- keyY : Y 轴名称（string）</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">figure_3D</span>(<span class="params">matrix, keyX, keyY</span>):</span><br><span class="line">    plt.rcParams.update(&#123;<span class="string">&#x27;font.size&#x27;</span>: <span class="number">32</span>&#125;)  <span class="comment"># 统一设置图中字体大小</span></span><br><span class="line">    fig = plt.figure(figsize=(<span class="number">20</span>, <span class="number">16</span>), dpi=<span class="number">50</span>)  <span class="comment"># 设置图像大小和分辨率</span></span><br><span class="line">    ax3 = Axes3D(fig)  <span class="comment"># 将图像转换为 3D 模式</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 绘制三维图像</span></span><br><span class="line">    matrix = np.array(matrix)</span><br><span class="line">    <span class="comment"># 根据二维数据的长宽创建坐标矩阵</span></span><br><span class="line">    arrX = np.arange(<span class="number">0</span>, <span class="built_in">len</span>(matrix[<span class="number">0</span>]))</span><br><span class="line">    arrY = np.arange(<span class="number">0</span>, <span class="built_in">len</span>(matrix))</span><br><span class="line">    X, Y = np.meshgrid(arrX, arrY)  <span class="comment"># 创建坐标矩阵</span></span><br><span class="line">    <span class="built_in">print</span>(X.shape, Y.shape, matrix.shape)</span><br><span class="line">    ax3.plot_surface(X, Y, matrix, cmap=<span class="string">&#x27;rainbow&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 设置坐标轴刻度</span></span><br><span class="line">	stepValue = <span class="number">0.1</span>    <span class="comment"># 步长</span></span><br><span class="line">    x = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(arrX)))[::<span class="built_in">int</span>(<span class="built_in">len</span>(arrX) / <span class="number">10</span>)]</span><br><span class="line">    _x = [<span class="built_in">int</span>(i * stepValue) <span class="keyword">for</span> i <span class="keyword">in</span> x]</span><br><span class="line">    plt.xticks(x, _x)</span><br><span class="line">    y = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(arrY)))[::<span class="built_in">int</span>(<span class="built_in">len</span>(arrY) / <span class="number">5</span>)]</span><br><span class="line">    _y = [<span class="built_in">round</span>(i * stepValue, <span class="number">1</span>) <span class="keyword">for</span> i <span class="keyword">in</span> y]</span><br><span class="line">    plt.yticks(y, _y)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 设置坐标轴名称</span></span><br><span class="line">    plt.xlabel(keyX, labelpad=<span class="number">30</span>)  <span class="comment"># X 轴名称</span></span><br><span class="line">    plt.ylabel(keyY, labelpad=<span class="number">30</span>)  <span class="comment"># Y 轴名称</span></span><br><span class="line">    plt.title(<span class="string">&quot;The effect of &#123;&#125; and &#123;&#125; &quot;</span>.<span class="built_in">format</span>(keyX, keyY), pad=<span class="number">20</span>)  <span class="comment"># 图形题目</span></span><br><span class="line">    plt.savefig(<span class="string">&quot;./change_&#123;&#125;&#123;&#125;.eps&quot;</span>.<span class="built_in">format</span>(keyX, keyY))  <span class="comment"># 保存图片</span></span><br><span class="line">    plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p><br/><br/><br/><br/></p>
-]]></content>
-      <categories>
-        <category>技术笔记</category>
-        <category>Python</category>
-      </categories>
-      <tags>
-        <tag>Python</tag>
-        <tag>Matplotlib</tag>
       </tags>
   </entry>
   <entry>
@@ -958,6 +879,88 @@ cuSolver 将三个独立的组件组合在一起。</p>
       </tags>
   </entry>
   <entry>
+    <title>STL 库中 SET 的原理</title>
+    <url>/2023/STL%E5%BA%93%E4%B8%ADSET%E7%9A%84%E5%8E%9F%E7%90%86/</url>
+    <content><![CDATA[<p>  <code>std::set</code> 是 C++ 标准库中的容器之一，它基于红黑树实现。<code>std::set</code> 利用红黑树的特性来实现有序的插入、查找和删除操作，并且具有较好的平均和最坏情况下的时间复杂度。<br>
+当向 <code>std::set</code> 插入元素时，它会按照特定的比较函数（<code>bool less&lt;T&gt;::operator() const(const T &amp;lhs, const T &amp; rhs)</code>）将新元素插入到红黑树的适当位置，以保持树的有序性质。插入操作的平均时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">n</span></span></span></span> 是 <code>std::set</code> 中元素的数量。查找操作（<code>find()</code>）使用红黑树的性质，通过比较函数在树中进行二分查找，查找操作的平均时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>。</p>
+<span id="more"></span>
+<p>  但是当我们把 struct 放入 <code>std::set</code> 会有什么后果呢？因为 <code>std::set</code> 需要在插入到时候排序，所以需要重载  struct 的比较运算符，这个时候就出现问题了，首先我们定义一个结构体 <code>Person</code> ：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">int</span> _ID, string _name, <span class="type">int</span> _age) : <span class="built_in">ID</span>(_ID), <span class="built_in">age</span>(_age), <span class="built_in">name</span>(_name) &#123;&#125;</span><br><span class="line">    <span class="type">int</span> ID;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    string name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>  当我们直接插入到 <code>std::set&lt;Person&gt;</code> 中时，会报 complier error 的错误，因此简单补写一个比较运算符重载，如下：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> Person &amp;lhs, <span class="type">const</span> Person &amp;rhs) &#123;</span><br><span class="line">    <span class="keyword">return</span> lhs.age &lt; rhs.age;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  OK，编译起来没有问题，但是我们运行测试一下下面的 <code>find</code> 操作就会发现问题</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;set&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">int</span> _ID, string _name, <span class="type">int</span> _age) : <span class="built_in">ID</span>(_ID), <span class="built_in">age</span>(_age), <span class="built_in">name</span>(_name) &#123;&#125;</span><br><span class="line">    <span class="type">int</span> ID;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    string name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> Person &amp;lhs, <span class="type">const</span> Person &amp;rhs) &#123;</span><br><span class="line">    <span class="keyword">return</span> lhs.age &lt; rhs.age;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    set&lt;Person&gt; person;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; ++i) &#123;</span><br><span class="line">        <span class="function">Person <span class="title">p_tmp</span><span class="params">(i, <span class="string">&quot;sxj&quot;</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">        person.<span class="built_in">insert</span>(p_tmp);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">Person <span class="title">p</span><span class="params">(<span class="number">2000</span>, <span class="string">&quot;sxj&quot;</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">    <span class="keyword">auto</span> it = person.<span class="built_in">find</span>(p);</span><br><span class="line">    <span class="keyword">if</span> (it != person.<span class="built_in">end</span>())</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Find Person --- ID: &quot;</span> &lt;&lt; it-&gt;ID &lt;&lt; <span class="string">&quot;  name: &quot;</span> &lt;&lt; it-&gt;name &lt;&lt; <span class="string">&quot;  age: &quot;</span> &lt;&lt; it-&gt;age;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Can&#x27;t find&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/STL%E5%BA%93%E4%B8%ADSET%E7%9A%84%E5%8E%9F%E7%90%86/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C.png" alt="运行结果"></p>
+<p>  明明不在 <code>set</code> 中的 <strong>ID-2000</strong> 的 <code>Person</code> 也可以被找到。造成这个结果的原因是我们所提供的 <code>operator&lt;() </code>，当<code>Person</code> <code>p1</code>、<code>p2</code>，在 <code>p1&lt;p2</code> 与 <code>p2&lt;p2</code> 都不成立时，<code>find</code> 就会判断 <code>p1</code> 和 <code>p2</code> 是同一个 <code>Person</code> ，因此会造成这样的错误结果。</p>
+<p>  <strong>解决方案 </strong> 就是补充完整我们的比较运算符重载，<strong>完整代码如下</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;set&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">int</span> _ID, string _name, <span class="type">int</span> _age) : <span class="built_in">ID</span>(_ID), <span class="built_in">age</span>(_age), <span class="built_in">name</span>(_name) &#123;&#125;</span><br><span class="line">    <span class="type">int</span> ID;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    string name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> Person &amp;lhs, <span class="type">const</span> Person &amp;rhs) &#123;</span><br><span class="line">    <span class="keyword">if</span> (lhs.ID &lt; rhs.ID) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">if</span> (lhs.ID &gt; rhs.ID) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (lhs.name &lt; rhs.name) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">if</span> (lhs.name &gt; rhs.name) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">return</span> lhs.age &lt; rhs.age;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    set&lt;Person&gt; person;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; ++i) &#123;</span><br><span class="line">        <span class="function">Person <span class="title">p_tmp</span><span class="params">(i, <span class="string">&quot;sxj&quot;</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">        person.<span class="built_in">insert</span>(p_tmp);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">Person <span class="title">p</span><span class="params">(<span class="number">2000</span>, <span class="string">&quot;sxj&quot;</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">    <span class="keyword">auto</span> it = person.<span class="built_in">find</span>(p);</span><br><span class="line">    <span class="keyword">if</span> (it != person.<span class="built_in">end</span>())</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Find Person --- ID: &quot;</span> &lt;&lt; it-&gt;ID &lt;&lt; <span class="string">&quot;  name: &quot;</span> &lt;&lt; it-&gt;name &lt;&lt; <span class="string">&quot;  age: &quot;</span> &lt;&lt; it-&gt;age;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Can&#x27;t find&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参考：<a href="https://mp.weixin.qq.com/s?__biz=MzkxMzQ5NTI2Mg==&amp;mid=2247483878&amp;idx=1&amp;sn=d155daf0a7125c05c44c639711c254a6&amp;chksm=c17d8457f60a0d41e248ebfd6342c89476eaa710178889458d2442ec74561de1ac13b0f0614a&amp;scene=132&amp;exptype=timeline_recommend_article_extendread_samebiz#wechat_redirect">才哥第十四讲 std:set (二）</a></p>
+<p><br/><br/><br/><br/></p>
+]]></content>
+      <categories>
+        <category>技术笔记</category>
+        <category>C++</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>STL库</tag>
+        <tag>集合</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python：Matplotlib 绘制 3D 曲面图</title>
+    <url>/2020/Python%EF%BC%9AMatplotlib%20%E7%BB%98%E5%88%B6%203D%E6%9B%B2%E9%9D%A2%E5%9B%BE/</url>
+    <content><![CDATA[<p>  Matplotlib 是 Python 的绘图库，它与 NumPy 一起使用，可以基本上实现 MATLAB 的绘图和计算功能，而且效率更高，速度更快。今天主要说一下关于 Matplotlib 绘制三维图像，并实现一个可以多次使用的 <strong> 函数模板</strong>，直接复制调用即可使用。</p>
+<span id="more"></span>
+<hr>
+<h2 id="1- 导入模块包">1. 导入模块包</h2>
+<p><code>numpy</code>和 <code>matplotlib</code> 是两个常规的基本模块。因为实现的是三维绘图，所以需要另外一个模块<code>Axes3D</code>，这是是 Matplotlib 里面专门用来画三维图的工具包。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br></pre></td></tr></table></figure>
+<h2 id="2- 图像的基本设置">2. 图像的基本设置</h2>
+<p>这里包括对图中字体大小、图片长宽比、分辨率的调整，并将其转换为三维格式。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.rcParams.update(&#123;<span class="string">&#x27;font.size&#x27;</span>: <span class="number">32</span>&#125;)  <span class="comment"># 统一设置图中字体大小</span></span><br><span class="line">fig = plt.figure(figsize=(<span class="number">20</span>, <span class="number">16</span>), dpi=<span class="number">50</span>)  <span class="comment"># 设置图像大小和分辨率</span></span><br><span class="line">ax3 = Axes3D(fig)  <span class="comment"># 将图像转换为 3D 模式</span></span><br></pre></td></tr></table></figure>
+<h2 id="3- 处理数据 - 生成坐标矩阵">3. 处理数据，生成坐标矩阵</h2>
+<p>这里的 <code>matrix</code> 是一个二维列表，是 Python 的基本数据格式，需要将其先转化为 <code>np.array</code> 的格式，才能进行更多的操作。<br>
+另外要根据传入的二维数据 <strong> 创建坐标矩阵</strong>，这一点很重要。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 绘制三维图像</span></span><br><span class="line">matrix = np.array(matrix)</span><br><span class="line"><span class="comment"># 根据二维数据的长宽创建坐标矩阵</span></span><br><span class="line">arrX = np.arange(<span class="number">0</span>, <span class="built_in">len</span>(matrix[<span class="number">0</span>]))</span><br><span class="line">arrY = np.arange(<span class="number">0</span>, <span class="built_in">len</span>(matrix))</span><br><span class="line">X, Y = np.meshgrid(arrX, arrY)  <span class="comment"># 创建坐标矩阵</span></span><br><span class="line"><span class="built_in">print</span>(X.shape, Y.shape, matrix.shape)</span><br><span class="line">ax3.plot_surface(X, Y, matrix, cmap=<span class="string">&#x27;rainbow&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="4- 设置坐标轴刻度 - 稀疏化坐标轴刻度">4. 设置坐标轴刻度，稀疏化坐标轴刻度</h2>
+<p>如果我们的数据是 100 X 100 的二维矩阵，如果将所有的刻度都显示在坐标轴上，那么必会变得密密麻麻，所以我们需要将坐标刻度稀疏化，并用自己想要的方式展现出来。<br>
+使用 <code>xticks(x, _x)</code> 设置 X 坐标轴刻度（Y 轴同理，但是不能设置 Z 轴）：</p>
+<ul>
+<li>第一个参数：刻度值列表</li>
+<li>第二个参数：需要展示的出来的经过处理的刻度值列表。这里可以对刻度自定义，比如统一扩大 10 倍或缩小十倍（本例中以 0.1 为步长取的数据，所以在刻度上要乘上步长，即缩小为 0.1 倍），同时也可以设置为字符串。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(arrX)))[::<span class="built_in">int</span>(<span class="built_in">len</span>(arrX) / <span class="number">10</span>)]</span><br><span class="line">_x = [<span class="built_in">int</span>(i * stepValue) <span class="keyword">for</span> i <span class="keyword">in</span> x]</span><br><span class="line">plt.xticks(x, _x)</span><br></pre></td></tr></table></figure>
+<h2 id="5- 设置图片名称并保存">5. 设置图片名称并保存</h2>
+<p>使用 <code>xlabel</code> 设置 X 轴名称（Y 轴同理，但是不能设置 Z 轴）：</p>
+<ul>
+<li>第一个参数：X 轴名称的字符串</li>
+<li>第二个参数（<code>labelpad</code>）：X 轴名称与 X 轴之间的间隔距离</li>
+</ul>
+<p>使用 <code>savefig</code> 储存图片，这里直接将需要储存的图片格式写在图片名称的字符串中即可。如果在 LaTeX 中 使用推荐 <code>.eps</code> 格式，另外也可以储存为 <code>.jpg</code> 格式和 <code>.png</code> 格式.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.xlabel(keyX, labelpad=<span class="number">30</span>)  <span class="comment"># X 轴名称</span></span><br><span class="line">plt.ylabel(keyY, labelpad=<span class="number">30</span>)  <span class="comment"># Y 轴名称</span></span><br><span class="line">plt.title(<span class="string">&quot;The effect of &#123;&#125; and &#123;&#125; on GJBD&quot;</span>.<span class="built_in">format</span>(keyX, keyY), pad=<span class="number">20</span>)  <span class="comment"># 图形题目</span></span><br><span class="line">plt.savefig(<span class="string">&quot;./change_&#123;&#125;&#123;&#125;.eps&quot;</span>.<span class="built_in">format</span>(keyX, keyY))  <span class="comment"># 保存图片</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="完整代码接口如下">完整代码接口如下</h2>
+<p>三个参数如下：</p>
+<ul>
+<li>matrix : 二维列表格式的数据，形如[[1,2,3], [4,5,6], [7,8,9] ]</li>
+<li>keyX : X 轴名称</li>
+<li>keyY : Y 轴名称</li>
+</ul>
+<p>其中 <code>stepValue</code> 是二维数据的采集步长，可以根据实际情况自行修改。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27; 使用二维列表数据绘制三维曲面图</span></span><br><span class="line"><span class="string">--- matrix : 二维数据（普通 Python 二维列表）</span></span><br><span class="line"><span class="string">--- keyX : X 轴名称（string）</span></span><br><span class="line"><span class="string">--- keyY : Y 轴名称（string）</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">figure_3D</span>(<span class="params">matrix, keyX, keyY</span>):</span><br><span class="line">    plt.rcParams.update(&#123;<span class="string">&#x27;font.size&#x27;</span>: <span class="number">32</span>&#125;)  <span class="comment"># 统一设置图中字体大小</span></span><br><span class="line">    fig = plt.figure(figsize=(<span class="number">20</span>, <span class="number">16</span>), dpi=<span class="number">50</span>)  <span class="comment"># 设置图像大小和分辨率</span></span><br><span class="line">    ax3 = Axes3D(fig)  <span class="comment"># 将图像转换为 3D 模式</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 绘制三维图像</span></span><br><span class="line">    matrix = np.array(matrix)</span><br><span class="line">    <span class="comment"># 根据二维数据的长宽创建坐标矩阵</span></span><br><span class="line">    arrX = np.arange(<span class="number">0</span>, <span class="built_in">len</span>(matrix[<span class="number">0</span>]))</span><br><span class="line">    arrY = np.arange(<span class="number">0</span>, <span class="built_in">len</span>(matrix))</span><br><span class="line">    X, Y = np.meshgrid(arrX, arrY)  <span class="comment"># 创建坐标矩阵</span></span><br><span class="line">    <span class="built_in">print</span>(X.shape, Y.shape, matrix.shape)</span><br><span class="line">    ax3.plot_surface(X, Y, matrix, cmap=<span class="string">&#x27;rainbow&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 设置坐标轴刻度</span></span><br><span class="line">	stepValue = <span class="number">0.1</span>    <span class="comment"># 步长</span></span><br><span class="line">    x = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(arrX)))[::<span class="built_in">int</span>(<span class="built_in">len</span>(arrX) / <span class="number">10</span>)]</span><br><span class="line">    _x = [<span class="built_in">int</span>(i * stepValue) <span class="keyword">for</span> i <span class="keyword">in</span> x]</span><br><span class="line">    plt.xticks(x, _x)</span><br><span class="line">    y = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(arrY)))[::<span class="built_in">int</span>(<span class="built_in">len</span>(arrY) / <span class="number">5</span>)]</span><br><span class="line">    _y = [<span class="built_in">round</span>(i * stepValue, <span class="number">1</span>) <span class="keyword">for</span> i <span class="keyword">in</span> y]</span><br><span class="line">    plt.yticks(y, _y)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 设置坐标轴名称</span></span><br><span class="line">    plt.xlabel(keyX, labelpad=<span class="number">30</span>)  <span class="comment"># X 轴名称</span></span><br><span class="line">    plt.ylabel(keyY, labelpad=<span class="number">30</span>)  <span class="comment"># Y 轴名称</span></span><br><span class="line">    plt.title(<span class="string">&quot;The effect of &#123;&#125; and &#123;&#125; &quot;</span>.<span class="built_in">format</span>(keyX, keyY), pad=<span class="number">20</span>)  <span class="comment"># 图形题目</span></span><br><span class="line">    plt.savefig(<span class="string">&quot;./change_&#123;&#125;&#123;&#125;.eps&quot;</span>.<span class="built_in">format</span>(keyX, keyY))  <span class="comment"># 保存图片</span></span><br><span class="line">    plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><br/><br/><br/><br/></p>
+]]></content>
+      <categories>
+        <category>技术笔记</category>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+        <tag>Matplotlib</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>STL 库中可能存在的内存溢出与脏数据问题</title>
     <url>/2023/STL%E5%BA%93%E4%B8%AD%E5%8F%AF%E8%83%BD%E5%AD%98%E5%9C%A8%E7%9A%84%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E4%B8%8E%E8%84%8F%E6%95%B0%E6%8D%AE%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<p>  STL 库中的 <code>vector</code> 是我们使用最频繁的 STD 容器之一。它具有广泛的应用，并且在性能方面表现出色。然而，其存在一种潜在问题，即 <strong> 溢出</strong>。由于 <code>vector</code> 在使用下标访问元素时不会检查索引是否越界，因此很可能导致溢出错误的出现。这种错误被严格定义为一种内存的<code>&quot;dirty read / dirty write&quot;</code>。</p>
@@ -980,6 +983,83 @@ cuSolver 将三个独立的组件组合在一起。</p>
         <tag>C++</tag>
         <tag>STL库</tag>
         <tag>内存溢出</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>后端技术栈：优秀的项目代码是怎么分层的</title>
+    <url>/2021/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9A%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/</url>
+    <content><![CDATA[<h1>阿里手册是怎么约定的</h1>
+<p><a href="https://kangroo.gitee.io/ajcg/#/">阿里巴巴 Java 开发手册（https://kangroo.gitee.io/ajcg/#/）</a></p>
+<span id="more"></span>
+<ul>
+<li><strong>开放接口层</strong>：可直接封装 Service 方法暴露成 RPC 接口；通过 Web 封装成 http 接口；进行网关安全控制、流量控制等。</li>
+<li><strong>终端显示层</strong>：各个端的模板渲染并执行显示的层。当前主要是 velocity 渲染，JS 渲染， JSP 渲染，移动端展示等。</li>
+<li><strong>Web 层</strong>：主要是对访问控制进行转发，各类基本参数校验，或者不复用的业务简单处理等。</li>
+<li><strong>Service 层</strong>：相对具体的业务逻辑服务层。</li>
+<li><strong>Manager 层</strong>：通用业务处理层，它有如下特征：<br>
+对第三方平台封装的层，预处理返回结果及转化异常信息；<br>
+对 Service 层通用能力的下沉，如缓存方案、中间件通用处理；<br>
+与 DAO 层交互，对多个 DAO 的组合复用。</li>
+<li><strong>DAO 层</strong>：数据访问层，与底层 MySQL、Oracle、Hbase 等进行数据交互。</li>
+<li><strong>外部接口或第三方平台</strong>：包括其它部门 RPC 开放接口，基础平台，其它公司的 HTTP 接口。</li>
+</ul>
+<p><img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/%E5%BA%94%E7%94%A8%E5%88%86%E5%B1%82.png" alt="应用分层"></p>
+<hr>
+<h1>通常的项目结构</h1>
+<p>就以当下非常火热的 Spring Boot 典型项目结构为例，创建出来的项目应该总体分为三大层：<br>
+<img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/%E5%85%B8%E5%9E%8B%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.png" alt="典型项目结构"></p>
+<ul>
+<li>项目根目录<code>/src/main/java</code>：放置项目 Java 源代码</li>
+<li>项目根目录<code>/src/main/resources</code>：放置项目静态资源和配置文件</li>
+<li>项目根目录<code>/src/test/java</code>：放置项目测试用例代码</li>
+</ul>
+<p>而位于 <code>/src/main/java</code> 目录下的 Java 源代码的组织结构大家比较关心，这地方也只能给出一个通常典型的结构，毕竟不同项目和团队实践不一样，稍许有区别，但整体安排应该差不多。而且如果是多模块的项目的话，下面的结构应该只对应其中一个模块，其他模块的代码组织也大致差不多。</p>
+<p><img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/Java%E6%BA%90%E4%BB%A3%E7%A0%81%E7%9A%84%E7%BB%84%E7%BB%87%E7%BB%93%E6%9E%84.png" alt="Java 源代码的组织结构"></p>
+<p>各个目录详细介绍：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">|_annotation：放置项目自定义注解</span><br><span class="line">|_aspect：放置切面代码</span><br><span class="line">|_config：放置配置类</span><br><span class="line">|_constant：放置常量、枚举等定义</span><br><span class="line">   |__constnt：存放常量定义</span><br><span class="line">   |__enums：存放枚举定义</span><br><span class="line">|_controller：放置控制器代码</span><br><span class="line">|_filter：放置一些过滤、拦截相关的代码</span><br><span class="line">|_mapper：放置数据访问层代码接口</span><br><span class="line">|_model：放置数据模型代码</span><br><span class="line">   |__entity：放置数据库实体对象定义</span><br><span class="line">   |__dto：存放数据传输对象定义</span><br><span class="line">   |__vo：存放显示层对象定义</span><br><span class="line">|_service：放置具体的业务逻辑代码（接口和实现分离）</span><br><span class="line">   |__intf：存放业务逻辑接口定义</span><br><span class="line">   |__impl：存放业务逻辑实际实现</span><br><span class="line">|_utils：放置工具类和辅助代码</span><br></pre></td></tr></table></figure>
+<p>然后接下来 <code>/src/main/resources</code> 目录，里面主要存放静态配置文件和页面静态资源等东西：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">|_mapper：存放 mybatis 的 XML 映射文件（如果是 mybatis 项目）</span><br><span class="line">|_static：存放网页静态资源，比如下面的 js/css/img</span><br><span class="line">   |__js：</span><br><span class="line">   |__css：</span><br><span class="line">   |__img：</span><br><span class="line">   |__font：</span><br><span class="line">   |__等等</span><br><span class="line">|_template：存放网页模板，比如 thymeleaf/freemarker 模板等</span><br><span class="line">   |__header</span><br><span class="line">   |__sidebar</span><br><span class="line">   |__bottom</span><br><span class="line">   |__XXX.html 等等</span><br><span class="line">|_application.yml       基本配置文件</span><br><span class="line">|_application-dev.yml   开发环境配置文件</span><br><span class="line">|_application-test.yml  测试环境配置文件</span><br><span class="line">|_application-prod.yml  生产环境配置文件</span><br></pre></td></tr></table></figure>
+<p>当然，这地方估计有一个很多人都会纠结的关于 DTO/VO/DO 等数据模型定义的区分。这在《阿里巴巴 Java 开发手册》中倒是做了一个所谓的严格区分，那本书上是这样去定义的：</p>
+<ul>
+<li><strong>DO（Data Object）</strong>：与数据库表结构一一对应，通过 DAO 层向上传输数据源对象。</li>
+<li><strong>DTO（Data Transfer Object）</strong>：数据传输对象，Service 或 Manager 向外传输的对象。</li>
+<li><strong>BO（Business Object）</strong>：业务对象。由 Service 层输出的封装业务逻辑的对象。</li>
+<li><strong>AO（Application Object）</strong>：应用对象。在 Web 层与 Service 层之间抽象的复用对象模型，极为贴近展示层，复用度不高。</li>
+<li><strong>VO（View Object）</strong>：显示层对象，通常是 Web 向模板渲染引擎层传输的对象。</li>
+<li><strong>Query</strong>：数据查询对象，各层接收上层的查询请求。注意超过 2 个参数的查询封装，禁止使用 Map 类来传输。</li>
+</ul>
+<p>老实讲，看到这么多对象的定义，我也是很蒙的。实际项目开发时，我觉得没有必要刻意照搬去定义这么多层对象，这样后续做对象转换工作都能烦 skr 人。</p>
+<p>出于简单起见，我个人觉得，只要保证业务逻辑层 Service 和数据库 DAO 层的操作对象严格划分出来，确保互相不渗透，不混用，问题应该就不大。比如在上面举例的这个项目的代码结构中，Service 层处理的对象都定义在了 DTO 包里，而 DAO 层处理的对象都放在了 Entity 包里了。</p>
+<hr>
+<h1>项目结构划分总结</h1>
+<p><img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/%E6%80%BB%E7%BB%93.png" alt="总结"></p>
+<p>对应代码目录的流转逻辑就是：<br>
+<img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/%E4%BB%A3%E7%A0%81%E9%80%BB%E8%BE%91.png" alt="代码逻辑"></p>
+<hr>
+<h1>一些注意事项</h1>
+<ol>
+<li>Contorller 层参数传递建议不要使用 HashMap，建议使用数据模型定义；</li>
+<li>Controller 层里可以做参数校验、异常抛出等操作，但建议不要放太多业务逻辑，业务逻辑尽量放到 Service 层代码中去做；</li>
+<li>Service 层做实际业务逻辑，可以按照功能模块做好定义和区分，相互可以调用；</li>
+<li>功能模块 Service 之间引用时，建议不要渗透到 DAO 层（或者 mapper 层），基于 Service 层进行调用和复用比较合理；</li>
+<li>业务逻辑层 Service 和数据库 DAO 层的操作对象不要混用。 Controller 层的数据对象不要直接渗透到 DAO 层（或者 mapper 层）；同理数据表实体对象 Entity 也不要直接传到 Controller 层进行输出或展示。</li>
+</ol>
+<p><br/><br/></p>
+<hr>
+<p>参考：</p>
+<ol>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU4ODI1MjA3NQ==&amp;mid=2247504977&amp;idx=2&amp;sn=477e70d58d7d8eaa526fa1cdc06a0f8a&amp;chksm=fddd0295caaa8b8341d4f4b39ec60df44865d9251d6dd77f41dea6c2829d8e075a083ed21ebf&amp;mpshare=1&amp;scene=23&amp;srcid=0831lx40ax2sxK3Qm789P4bj&amp;sharer_sharetime=1630392151403&amp;sharer_shareid=90de416a9fd907a1fb3174e6a5a27440#rd">CodeSheep 的公众号</a></li>
+<li><a href="https://kangroo.gitee.io/ajcg/#/">阿里巴巴 Java 开发手册</a></li>
+</ol>
+<p><br/><br/><br/><br/></p>
+]]></content>
+      <categories>
+        <category>技术笔记</category>
+        <category>后端技术栈</category>
+      </categories>
+      <tags>
+        <tag>后端</tag>
+        <tag>项目架构</tag>
       </tags>
   </entry>
   <entry>
@@ -1069,83 +1149,6 @@ cuSolver 将三个独立的组件组合在一起。</p>
       <tags>
         <tag>前端</tag>
         <tag>Vue</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>后端技术栈：优秀的项目代码是怎么分层的</title>
-    <url>/2021/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9A%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/</url>
-    <content><![CDATA[<h1>阿里手册是怎么约定的</h1>
-<p><a href="https://kangroo.gitee.io/ajcg/#/">阿里巴巴 Java 开发手册（https://kangroo.gitee.io/ajcg/#/）</a></p>
-<span id="more"></span>
-<ul>
-<li><strong>开放接口层</strong>：可直接封装 Service 方法暴露成 RPC 接口；通过 Web 封装成 http 接口；进行网关安全控制、流量控制等。</li>
-<li><strong>终端显示层</strong>：各个端的模板渲染并执行显示的层。当前主要是 velocity 渲染，JS 渲染， JSP 渲染，移动端展示等。</li>
-<li><strong>Web 层</strong>：主要是对访问控制进行转发，各类基本参数校验，或者不复用的业务简单处理等。</li>
-<li><strong>Service 层</strong>：相对具体的业务逻辑服务层。</li>
-<li><strong>Manager 层</strong>：通用业务处理层，它有如下特征：<br>
-对第三方平台封装的层，预处理返回结果及转化异常信息；<br>
-对 Service 层通用能力的下沉，如缓存方案、中间件通用处理；<br>
-与 DAO 层交互，对多个 DAO 的组合复用。</li>
-<li><strong>DAO 层</strong>：数据访问层，与底层 MySQL、Oracle、Hbase 等进行数据交互。</li>
-<li><strong>外部接口或第三方平台</strong>：包括其它部门 RPC 开放接口，基础平台，其它公司的 HTTP 接口。</li>
-</ul>
-<p><img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/%E5%BA%94%E7%94%A8%E5%88%86%E5%B1%82.png" alt="应用分层"></p>
-<hr>
-<h1>通常的项目结构</h1>
-<p>就以当下非常火热的 Spring Boot 典型项目结构为例，创建出来的项目应该总体分为三大层：<br>
-<img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/%E5%85%B8%E5%9E%8B%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84.png" alt="典型项目结构"></p>
-<ul>
-<li>项目根目录<code>/src/main/java</code>：放置项目 Java 源代码</li>
-<li>项目根目录<code>/src/main/resources</code>：放置项目静态资源和配置文件</li>
-<li>项目根目录<code>/src/test/java</code>：放置项目测试用例代码</li>
-</ul>
-<p>而位于 <code>/src/main/java</code> 目录下的 Java 源代码的组织结构大家比较关心，这地方也只能给出一个通常典型的结构，毕竟不同项目和团队实践不一样，稍许有区别，但整体安排应该差不多。而且如果是多模块的项目的话，下面的结构应该只对应其中一个模块，其他模块的代码组织也大致差不多。</p>
-<p><img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/Java%E6%BA%90%E4%BB%A3%E7%A0%81%E7%9A%84%E7%BB%84%E7%BB%87%E7%BB%93%E6%9E%84.png" alt="Java 源代码的组织结构"></p>
-<p>各个目录详细介绍：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">|_annotation：放置项目自定义注解</span><br><span class="line">|_aspect：放置切面代码</span><br><span class="line">|_config：放置配置类</span><br><span class="line">|_constant：放置常量、枚举等定义</span><br><span class="line">   |__constnt：存放常量定义</span><br><span class="line">   |__enums：存放枚举定义</span><br><span class="line">|_controller：放置控制器代码</span><br><span class="line">|_filter：放置一些过滤、拦截相关的代码</span><br><span class="line">|_mapper：放置数据访问层代码接口</span><br><span class="line">|_model：放置数据模型代码</span><br><span class="line">   |__entity：放置数据库实体对象定义</span><br><span class="line">   |__dto：存放数据传输对象定义</span><br><span class="line">   |__vo：存放显示层对象定义</span><br><span class="line">|_service：放置具体的业务逻辑代码（接口和实现分离）</span><br><span class="line">   |__intf：存放业务逻辑接口定义</span><br><span class="line">   |__impl：存放业务逻辑实际实现</span><br><span class="line">|_utils：放置工具类和辅助代码</span><br></pre></td></tr></table></figure>
-<p>然后接下来 <code>/src/main/resources</code> 目录，里面主要存放静态配置文件和页面静态资源等东西：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">|_mapper：存放 mybatis 的 XML 映射文件（如果是 mybatis 项目）</span><br><span class="line">|_static：存放网页静态资源，比如下面的 js/css/img</span><br><span class="line">   |__js：</span><br><span class="line">   |__css：</span><br><span class="line">   |__img：</span><br><span class="line">   |__font：</span><br><span class="line">   |__等等</span><br><span class="line">|_template：存放网页模板，比如 thymeleaf/freemarker 模板等</span><br><span class="line">   |__header</span><br><span class="line">   |__sidebar</span><br><span class="line">   |__bottom</span><br><span class="line">   |__XXX.html 等等</span><br><span class="line">|_application.yml       基本配置文件</span><br><span class="line">|_application-dev.yml   开发环境配置文件</span><br><span class="line">|_application-test.yml  测试环境配置文件</span><br><span class="line">|_application-prod.yml  生产环境配置文件</span><br></pre></td></tr></table></figure>
-<p>当然，这地方估计有一个很多人都会纠结的关于 DTO/VO/DO 等数据模型定义的区分。这在《阿里巴巴 Java 开发手册》中倒是做了一个所谓的严格区分，那本书上是这样去定义的：</p>
-<ul>
-<li><strong>DO（Data Object）</strong>：与数据库表结构一一对应，通过 DAO 层向上传输数据源对象。</li>
-<li><strong>DTO（Data Transfer Object）</strong>：数据传输对象，Service 或 Manager 向外传输的对象。</li>
-<li><strong>BO（Business Object）</strong>：业务对象。由 Service 层输出的封装业务逻辑的对象。</li>
-<li><strong>AO（Application Object）</strong>：应用对象。在 Web 层与 Service 层之间抽象的复用对象模型，极为贴近展示层，复用度不高。</li>
-<li><strong>VO（View Object）</strong>：显示层对象，通常是 Web 向模板渲染引擎层传输的对象。</li>
-<li><strong>Query</strong>：数据查询对象，各层接收上层的查询请求。注意超过 2 个参数的查询封装，禁止使用 Map 类来传输。</li>
-</ul>
-<p>老实讲，看到这么多对象的定义，我也是很蒙的。实际项目开发时，我觉得没有必要刻意照搬去定义这么多层对象，这样后续做对象转换工作都能烦 skr 人。</p>
-<p>出于简单起见，我个人觉得，只要保证业务逻辑层 Service 和数据库 DAO 层的操作对象严格划分出来，确保互相不渗透，不混用，问题应该就不大。比如在上面举例的这个项目的代码结构中，Service 层处理的对象都定义在了 DTO 包里，而 DAO 层处理的对象都放在了 Entity 包里了。</p>
-<hr>
-<h1>项目结构划分总结</h1>
-<p><img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/%E6%80%BB%E7%BB%93.png" alt="总结"></p>
-<p>对应代码目录的流转逻辑就是：<br>
-<img src="/images/%E5%90%8E%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88_%E4%BC%98%E7%A7%80%E7%9A%84%E9%A1%B9%E7%9B%AE%E4%BB%A3%E7%A0%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84/%E4%BB%A3%E7%A0%81%E9%80%BB%E8%BE%91.png" alt="代码逻辑"></p>
-<hr>
-<h1>一些注意事项</h1>
-<ol>
-<li>Contorller 层参数传递建议不要使用 HashMap，建议使用数据模型定义；</li>
-<li>Controller 层里可以做参数校验、异常抛出等操作，但建议不要放太多业务逻辑，业务逻辑尽量放到 Service 层代码中去做；</li>
-<li>Service 层做实际业务逻辑，可以按照功能模块做好定义和区分，相互可以调用；</li>
-<li>功能模块 Service 之间引用时，建议不要渗透到 DAO 层（或者 mapper 层），基于 Service 层进行调用和复用比较合理；</li>
-<li>业务逻辑层 Service 和数据库 DAO 层的操作对象不要混用。 Controller 层的数据对象不要直接渗透到 DAO 层（或者 mapper 层）；同理数据表实体对象 Entity 也不要直接传到 Controller 层进行输出或展示。</li>
-</ol>
-<p><br/><br/></p>
-<hr>
-<p>参考：</p>
-<ol>
-<li><a href="https://mp.weixin.qq.com/s?__biz=MzU4ODI1MjA3NQ==&amp;mid=2247504977&amp;idx=2&amp;sn=477e70d58d7d8eaa526fa1cdc06a0f8a&amp;chksm=fddd0295caaa8b8341d4f4b39ec60df44865d9251d6dd77f41dea6c2829d8e075a083ed21ebf&amp;mpshare=1&amp;scene=23&amp;srcid=0831lx40ax2sxK3Qm789P4bj&amp;sharer_sharetime=1630392151403&amp;sharer_shareid=90de416a9fd907a1fb3174e6a5a27440#rd">CodeSheep 的公众号</a></li>
-<li><a href="https://kangroo.gitee.io/ajcg/#/">阿里巴巴 Java 开发手册</a></li>
-</ol>
-<p><br/><br/><br/><br/></p>
-]]></content>
-      <categories>
-        <category>技术笔记</category>
-        <category>后端技术栈</category>
-      </categories>
-      <tags>
-        <tag>后端</tag>
-        <tag>项目架构</tag>
       </tags>
   </entry>
   <entry>
@@ -1477,52 +1480,6 @@ pybind11 支持 STL 容器自动转换，当需要处理 STL 容器时，只要�
         <tag>单机聊天系统</tag>
         <tag>C语言</tag>
         <tag>多线程</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>程序人生：“写作”与“写代码”</title>
-    <url>/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E2%80%9C%E5%86%99%E4%BD%9C%E2%80%9D%E4%B8%8E%E2%80%9C%E5%86%99%E4%BB%A3%E7%A0%81%E2%80%9D/</url>
-    <content><![CDATA[<p>  前不久在网站中读到一篇文章，讲述的是写作与作曲的关系。对于大部分程序员来说，作曲似乎离我们比较遥远，可是写作却始终与我们的工作、生活紧密相连，比如在我们的工作中要编写各种文档、做项目计划，而在生活中，我们也可能会写自己的博客或是日记。</p>
-<span id="more"></span>
-<hr>
-<h1>1. 写作很像写代码 </h1>
-<h2 id="1- 写作和写代码都要遵循一定的逻辑规则">（1）写作和写代码都要遵循一定的逻辑规则 </h2>
-<p>  写作和写代码一样，都要求我们去遵循一定的规则和规律，你需要懂得：</p>
-<ul>
-<li><strong> 语法 </strong>：我们都知道写代码时，需要遵循所使用的编程语言的语法。如果语法不对，那么代码根本无法编译。同样，在写作中，你需要遵循中文语法，包括正确的使用断句、标点、段落等，这些都是写作过程中的最近的要求。</li>
-<li><strong> 逻辑 </strong>：没有逻辑的代码，会漏洞百出，甚至造成系统的严重缺陷。同样，文章的前后章节或所写的故事也需要遵循一定的逻辑，没有逻辑的文章会让人觉得不知所云，从而放弃继续阅读。</li>
-<li><strong> 装饰 </strong>：文章需要通过一些表达方式（议论、抒情、描写等）或修辞手法（排比、比喻、对比、夸张等）来使文章更加生动有趣，没哟修饰的文章就像没有界面的软件，让人觉得枯燥、乏味，失去阅读的兴趣。</li>
-</ul>
-<p>  上面所说的三点都是写作中的最基本的要求，如果你都能做到，那么它已经是一篇合格的文章了，如果能加上更吸引人的标题和内容，那么相信那将会是一篇精彩的文章。</p>
-<h2 id="2- 都是将细节组合成更美的东西">（2）都是将细节组合成更美的东西 </h2>
-<p>  文章是由一个个段落组成的，而每一个段落又由很多词句组成。这很像一个软件由很多模块组成，每个模块又包含了很多代码段一样。它们都是将这些很微小的部分一点点组合起来变成一个完整的作品：一篇文章或一个软件应用。</p>
-<h2 id="3- 你需要能够看到全局">（3）你需要能够看到全局 </h2>
-<p>  软件开发中有架构师的角色，他会负责整个应用的架构，确定模块间的调用关系，以保证整个应用都能协调高效地工作。同样，在写一篇文章时，你就成了这篇文章的架构师，你需要对文章的段落构成和每个章节进行合理的规划，使整个文章既有清晰的层次，又能突出重点并且完整地表达你的主题。</p>
-<h2 id="4- 自我表达非常关键">（4）自我表达非常关键 </h2>
-<p>  写作和写代码都需要创造力以及自我表达能力，它们不是与生俱来的，需要你通过不断地练习（写作和写代码），逐渐地去掌握它，并最终创造出属于你自己的风格和表现形式。</p>
-<h2 id="5- 考虑你的读者或用户">（5）考虑你的读者或用户 </h2>
-<p>  现在的应用变得越来越重视用户了，从 UI（用户界面）设计到 UX（用户体验）设计再到情感设计，软件设计师们越来越重视用户的使用感受。同样，你在写一篇文章时也需要能够站在读者的角度去审视你的文章，并通过一些方法，比如，强调某一个你希望引起读者管制的段落，来引导你的读者更好地阅读和理解你的文章，并且从中获得更好的阅读体验。</p>
-<h2 id="6- 每个人都可以写作和学会写代码">（6）每个人都可以写作和学会写代码 </h2>
-<p>  我还没有看过一本介绍如何写作的书籍，我既不懂得太多的修辞手法，文笔也不老道，但这些都不会成为我写作的障碍。我所做的只是将我所想的用最简单的语言表达出来，然后通过反复的修改，让它们读起来通顺，仅此而已。同样，你也不需要任何准备就可以开始学习写代码，就像在“技匠”的公众号中的一篇文章中提到，只用 5 分钟就学会了如何写一个能够识别橙子🍊和苹果🍎的人工智能程序一样，你也可以通过自学编程来学会写代码。</p>
-<hr>
-<h1>2. 写作和写代码又是不一样的 </h1>
-<h2 id="1- 写作和写代码的目的不同">（1）写作和写代码的目的不同 </h2>
-<p>  我们写代码的目的都是相似的，那就是去解决某一个或者一类问题。写作的目的则宽泛得多，它可以用来叙事，用来说明，用来议论，用来描写，更可以用来抒情。相对写代码而言，写作的目的是如此丰富，这也正是它吸引我的原因。</p>
-<h2 id="2- 写作能够表达感情 - 而写代码不能">（2）写作能够表达感情，而写代码不能 </h2>
-<p>  我看过很多别人写的代码，可我从来没有从中感受到喜悦、悲伤、激动、以及爱情，我从这一行行代码中完全体会不到情感。但我却能从他人的文章中感受到这些。我喜欢那些富有情感的文章，并且真心喜欢那些文章的作者。或许，能够给文章赋予情感才是写作与写代码的最大区别，也应该是最重要的区别吧！</p>
-<p>  我的写作之旅还在继续，我会坚持用那些最简单的文字去表达自己。同样，如果你是一名程序员，那么我也非常鼓励你能够开始写作，因为你会发现写作会给你带来很多好处，而这其中也包括编程能力的提升。</p>
-<p><br/><br/></p>
-<hr>
-<blockquote>
-<p> 读《程序员的自我修养》（陈逸鹤）有感，感触至深之处，摘录于此，若有不当之处，联系博主即可删文。</p>
-</blockquote>
-<p><br/><br/><br/><br/></p>
-]]></content>
-      <categories>
-        <category>程序人生</category>
-      </categories>
-      <tags>
-        <tag>程序人生</tag>
       </tags>
   </entry>
   <entry>
@@ -2469,6 +2426,52 @@ pybind11 支持 STL 容器自动转换，当需要处理 STL 容器时，只要�
       </tags>
   </entry>
   <entry>
+    <title>程序人生：“写作”与“写代码”</title>
+    <url>/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E2%80%9C%E5%86%99%E4%BD%9C%E2%80%9D%E4%B8%8E%E2%80%9C%E5%86%99%E4%BB%A3%E7%A0%81%E2%80%9D/</url>
+    <content><![CDATA[<p>  前不久在网站中读到一篇文章，讲述的是写作与作曲的关系。对于大部分程序员来说，作曲似乎离我们比较遥远，可是写作却始终与我们的工作、生活紧密相连，比如在我们的工作中要编写各种文档、做项目计划，而在生活中，我们也可能会写自己的博客或是日记。</p>
+<span id="more"></span>
+<hr>
+<h1>1. 写作很像写代码 </h1>
+<h2 id="1- 写作和写代码都要遵循一定的逻辑规则">（1）写作和写代码都要遵循一定的逻辑规则 </h2>
+<p>  写作和写代码一样，都要求我们去遵循一定的规则和规律，你需要懂得：</p>
+<ul>
+<li><strong> 语法 </strong>：我们都知道写代码时，需要遵循所使用的编程语言的语法。如果语法不对，那么代码根本无法编译。同样，在写作中，你需要遵循中文语法，包括正确的使用断句、标点、段落等，这些都是写作过程中的最近的要求。</li>
+<li><strong> 逻辑 </strong>：没有逻辑的代码，会漏洞百出，甚至造成系统的严重缺陷。同样，文章的前后章节或所写的故事也需要遵循一定的逻辑，没有逻辑的文章会让人觉得不知所云，从而放弃继续阅读。</li>
+<li><strong> 装饰 </strong>：文章需要通过一些表达方式（议论、抒情、描写等）或修辞手法（排比、比喻、对比、夸张等）来使文章更加生动有趣，没哟修饰的文章就像没有界面的软件，让人觉得枯燥、乏味，失去阅读的兴趣。</li>
+</ul>
+<p>  上面所说的三点都是写作中的最基本的要求，如果你都能做到，那么它已经是一篇合格的文章了，如果能加上更吸引人的标题和内容，那么相信那将会是一篇精彩的文章。</p>
+<h2 id="2- 都是将细节组合成更美的东西">（2）都是将细节组合成更美的东西 </h2>
+<p>  文章是由一个个段落组成的，而每一个段落又由很多词句组成。这很像一个软件由很多模块组成，每个模块又包含了很多代码段一样。它们都是将这些很微小的部分一点点组合起来变成一个完整的作品：一篇文章或一个软件应用。</p>
+<h2 id="3- 你需要能够看到全局">（3）你需要能够看到全局 </h2>
+<p>  软件开发中有架构师的角色，他会负责整个应用的架构，确定模块间的调用关系，以保证整个应用都能协调高效地工作。同样，在写一篇文章时，你就成了这篇文章的架构师，你需要对文章的段落构成和每个章节进行合理的规划，使整个文章既有清晰的层次，又能突出重点并且完整地表达你的主题。</p>
+<h2 id="4- 自我表达非常关键">（4）自我表达非常关键 </h2>
+<p>  写作和写代码都需要创造力以及自我表达能力，它们不是与生俱来的，需要你通过不断地练习（写作和写代码），逐渐地去掌握它，并最终创造出属于你自己的风格和表现形式。</p>
+<h2 id="5- 考虑你的读者或用户">（5）考虑你的读者或用户 </h2>
+<p>  现在的应用变得越来越重视用户了，从 UI（用户界面）设计到 UX（用户体验）设计再到情感设计，软件设计师们越来越重视用户的使用感受。同样，你在写一篇文章时也需要能够站在读者的角度去审视你的文章，并通过一些方法，比如，强调某一个你希望引起读者管制的段落，来引导你的读者更好地阅读和理解你的文章，并且从中获得更好的阅读体验。</p>
+<h2 id="6- 每个人都可以写作和学会写代码">（6）每个人都可以写作和学会写代码 </h2>
+<p>  我还没有看过一本介绍如何写作的书籍，我既不懂得太多的修辞手法，文笔也不老道，但这些都不会成为我写作的障碍。我所做的只是将我所想的用最简单的语言表达出来，然后通过反复的修改，让它们读起来通顺，仅此而已。同样，你也不需要任何准备就可以开始学习写代码，就像在“技匠”的公众号中的一篇文章中提到，只用 5 分钟就学会了如何写一个能够识别橙子🍊和苹果🍎的人工智能程序一样，你也可以通过自学编程来学会写代码。</p>
+<hr>
+<h1>2. 写作和写代码又是不一样的 </h1>
+<h2 id="1- 写作和写代码的目的不同">（1）写作和写代码的目的不同 </h2>
+<p>  我们写代码的目的都是相似的，那就是去解决某一个或者一类问题。写作的目的则宽泛得多，它可以用来叙事，用来说明，用来议论，用来描写，更可以用来抒情。相对写代码而言，写作的目的是如此丰富，这也正是它吸引我的原因。</p>
+<h2 id="2- 写作能够表达感情 - 而写代码不能">（2）写作能够表达感情，而写代码不能 </h2>
+<p>  我看过很多别人写的代码，可我从来没有从中感受到喜悦、悲伤、激动、以及爱情，我从这一行行代码中完全体会不到情感。但我却能从他人的文章中感受到这些。我喜欢那些富有情感的文章，并且真心喜欢那些文章的作者。或许，能够给文章赋予情感才是写作与写代码的最大区别，也应该是最重要的区别吧！</p>
+<p>  我的写作之旅还在继续，我会坚持用那些最简单的文字去表达自己。同样，如果你是一名程序员，那么我也非常鼓励你能够开始写作，因为你会发现写作会给你带来很多好处，而这其中也包括编程能力的提升。</p>
+<p><br/><br/></p>
+<hr>
+<blockquote>
+<p> 读《程序员的自我修养》（陈逸鹤）有感，感触至深之处，摘录于此，若有不当之处，联系博主即可删文。</p>
+</blockquote>
+<p><br/><br/><br/><br/></p>
+]]></content>
+      <categories>
+        <category>程序人生</category>
+      </categories>
+      <tags>
+        <tag>程序人生</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>程序人生：如何成为一名优秀的全栈工程师</title>
     <url>/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E5%A6%82%E4%BD%95%E6%88%90%E4%B8%BA%E4%B8%80%E5%90%8D%E4%BC%98%E7%A7%80%E7%9A%84%E5%85%A8%E6%A0%88%E5%B7%A5%E7%A8%8B%E5%B8%88/</url>
     <content><![CDATA[<blockquote>
@@ -2676,64 +2679,6 @@ pybind11 支持 STL 容器自动转换，当需要处理 STL 容器时，只要�
       </tags>
   </entry>
   <entry>
-    <title>算法分析与设计：动态规划（空间复杂度优化）</title>
-    <url>/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%EF%BC%88%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%BC%98%E5%8C%96%EF%BC%89/</url>
-    <content><![CDATA[<h2 id="背包问题">背包问题</h2>
-<p>  由于高数巨养的喵星人太傲娇了，要天天吃新鲜猫粮而且还经常欺负高数巨，所以高数巨决定买几条哈士奇尝尝鲜。这天高数巨来到了二手狗市场买哈士奇，高数巨看完了所有的哈士奇，记下了每条哈士奇的价格，并根据对它们的好感程度给它们每只都赋予了一个萌值。高数现在手里有 <code>X</code> 元，她想通过购买若干条哈士奇来获得尽可能多的萌值。现在给定高数巨手里的钱 <code>X</code> 以及 <code>N</code> 条哈士奇的价格和萌值，求高数巨最多可获得多少萌值。</p>
-<span id="more"></span>
-<h4 id="input">Input</h4>
-<p>  多组输入。对于每组输入，第一行有两个整数 <code>N,X(1 \leq N \leq 100，1 \leq X\leq1000)</code>，分别表示哈士奇的数量和高数巨的钱数。接下来的 <code>N</code> 行每行有两个整数 <code>P_i</code>，<code>M_i (1 \leq Pi,Mi \leq 100)</code>，分别表示第 <code>i</code> 条哈士奇的价格和萌值。</p>
-<h4 id="output">Output</h4>
-<p>对于每组数据，输出一个整数，表示高数巨最多可以获得的萌值，每组输出占一行。</p>
-<h4 id="sample-input">Sample Input</h4>
-<p>2 100 50 20 60 40 3 100 20 55 20 35 90 95 1 10 20 50</p>
-<h4 id="sample-output">Sample Output</h4>
-<p>40 95 0</p>
-<h4 id="实例代码">实例代码</h4>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n, v;</span><br><span class="line">    <span class="type">int</span> w[<span class="number">1001</span>], p[<span class="number">1001</span>];</span><br><span class="line">    <span class="keyword">while</span> (~<span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;n, &amp;v)) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="comment">// w 重量  | p 价值</span></span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;w[i], &amp;p[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 重新初始化最优值结果数组</span></span><br><span class="line">        <span class="type">int</span> res[<span class="number">1001</span>] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123; <span class="comment">// 存储的物品个数</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> k = v; k &gt;= w[i]; k--) &#123; <span class="comment">// 从所需要的重量到当前重量</span></span><br><span class="line">                res[k] = <span class="built_in">max</span>(res[k], res[k - w[i]] + p[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, res[v]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<hr>
-<h2 id="最少硬币问题">最少硬币问题</h2>
-<h4 id="problem-description">Problem Description</h4>
-<p>  设有 <code>n</code> 种不同面值的硬币，各硬币的面值存于数组 <code>T[1:n]</code> 中。现要用这些面值的硬币来找钱。可以使用的各种面值的硬币个数存于数组 <code>Coins[1:n]</code> 中。 对任意钱数 <code>0 \leq m \leq 20001</code>，设计一个用最少硬币找钱 <code>m</code> 的方法。 对于给定的 <code>1 \leq n \leq 10</code>，硬币面值数组 <code>T</code> 和可以使用的各种面值的硬币个数数组 <code>Coins</code> ，以及钱数 <code>m</code> ，<code>0 \leq m \leq 20001</code> ，计算找钱 <code>m</code> 的最少硬币数。</p>
-<h4 id="input">Input</h4>
-<p>  输入数据第一行中只有 1 个整数给出 <code>n</code> 的值, 第 2 行起每行 2 个数，分别是 <code>T[j]</code> 和 <code>Coins[j]</code> 。最后 1 行是要找的钱数 <code>m</code>。</p>
-<h4 id="output">Output</h4>
-<p>  输出数据只有一个整数，表示计算出的最少硬币数。问题无解时输出 -1。</p>
-<h4 id="sample-input">Sample Input</h4>
-<p>3 1 3 2 3 5 3 18</p>
-<h4 id="sample-output">Sample Output</h4>
-<p>5</p>
-<h4 id="实例代码">实例代码</h4>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INF 0x3f3f3f3f</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> m, n, T[<span class="number">20001</span>], Coin[<span class="number">20001</span>];</span><br><span class="line">    <span class="type">int</span> res[<span class="number">20001</span>];</span><br><span class="line">    <span class="built_in">memset</span>(res, INF, <span class="built_in">sizeof</span>(res));</span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cin &gt;&gt; T[i] &gt;&gt; Coin[i];</span><br><span class="line">    &#125;</span><br><span class="line">    cin &gt;&gt; m;</span><br><span class="line">    <span class="comment">// res[目标面额] = 最小需求个数</span></span><br><span class="line">    res[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历面额值</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">        <span class="comment">// 遍历每种面额内有几张</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= Coin[i]; j++)</span><br><span class="line">            <span class="comment">// 遍历目标金额，选择当前这枚硬币是要还是不要</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> k = m; k &gt;= T[i]; k--)</span><br><span class="line">                <span class="comment">// 将所有硬币依次拆分成单个，</span></span><br><span class="line">                <span class="comment">// res[目标面额] = min(res[目标面额 - 当前面额]+1，res[目标面额])，</span></span><br><span class="line">                <span class="comment">// 前一个是将该面额放入该组合中，后一个是不采用当前面额，选取数值最小的。</span></span><br><span class="line">                res[k] = <span class="built_in">min</span>(res[k - T[i]] + <span class="number">1</span>, res[k]);</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; (res[m] &lt; INF ? res[m] : <span class="number">-1</span>) &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="与 - 背包问题 - 的对比与分析">与“背包问题”的对比与分析</h4>
-<ol>
-<li>“背包”中给出了“损失”与“收益”，但其都是对于单个物品，求最大收益；“硬币”中给出的是“收益”、“个数”与“最终收益”，求最小组合。</li>
-<li>依旧采用一维数组 <code>res[目标面额]= 最小需求个数</code> 来存储最终结果。</li>
-<li>将所有硬币依次拆分成单个，<code>res[目标面额] = min(res[目标面额 - 当前面额]+1，res[目标面额])</code>，前一个是将该面额放入该组合中，后一个是不采用当前面额，选取数值最小的。</li>
-</ol>
-<hr>
-<h2 id="空间复杂度优化 - 以背包问题为例">空间复杂度优化 （以背包问题为例）</h2>
-<p>  有很多人采用二维数组 <code>res[i][j]</code> 静态地更新来解决背包问题，使用二维数组更加直观，但是空间复杂度较高。</p>
-<p>  如果采用一维数组动态更新看起来比较难理解，但使用范围比较广。(比如，最少硬币问题中，三重循环，也可以采用一维数组来解决，但如果使用二维的话，对应地应该上升到三维)。</p>
-<h4 id="难点：">难点：</h4>
-<p><strong>“k:v-&gt;w[i]，依次递减”</strong>，这可能比较难以理解，在我们默认从小到大，而这里，必须从大到小，否则就是错误。</p>
-<h4 id="难点解答：">难点解答：</h4>
-<p>  产生上述问题，本质就是对 <code>res[]</code> 数组在某一时间其存储的值的不理解。</p>
-<p>  对于每一次更新开始，<code>res[]</code>存储着的是“放入这个物品之前的最优解”，而我们比较的是 <code>res[k]</code> 与 <code>res[k - w[i]] + p[i]</code> (背包问题)，其中 <code>res[k-w[i]]</code>是之前的最优解。</p>
-<p>  因为一定存在 <code>k &gt; k-w[i]</code>，如果从小到大，则一定会先与 <code>res[k]</code> 更新 <code>res[k-w[i]]</code>，这就会导致比较错误。此时 <code>res[k-w[i]]</code> 已经变为“将该商品放入之后的最优价值”，在这价值基础之上，在加 <code>p[i]</code> ，其价值大概率会比 <code>res[k]</code> 高，而更新，这样，越来越大，完全背离了我们实际的意思。 因此，必须从后往前，因为前面存储着的是过去的值（不放第 <code>i</code> 件物品时的值）进行比较。</p>
-<p><br/><br/><br/><br/></p>
-]]></content>
-      <categories>
-        <category>技术笔记</category>
-        <category>算法分析与设计</category>
-      </categories>
-      <tags>
-        <tag>背包问题</tag>
-        <tag>最小硬币问题</tag>
-        <tag>动态规划</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>算法题：LeetCode (1094) 拼车【一题搞懂差分数组】</title>
     <url>/2022/%E7%AE%97%E6%B3%95%E9%A2%98%EF%BC%9ALeetCode%20(1094)%20%E6%8B%BC%E8%BD%A6%E3%80%90%E4%B8%80%E9%A2%98%E6%90%9E%E6%87%82%E5%B7%AE%E5%88%86%E6%95%B0%E7%BB%84%E3%80%91/</url>
     <content><![CDATA[<p>  车上最初有 <code>capacity</code> 个空座位，车只能向一个方向行驶，给定整数 <code>capacity</code> 和一个数组 <code>trips</code> ,  <code>trip[i] = [numPassengersi, fromi, toi]</code> 表示第 <code>i</code> 次旅行有 <code>numPassengersi</code> 乘客，接他们和放他们的位置分别是 <code>fromi</code> 和 <code>toi</code> 。这些位置是从汽车的初始位置向东的公里数。</p>
@@ -2792,6 +2737,64 @@ pybind11 支持 STL 容器自动转换，当需要处理 STL 容器时，只要�
       <tags>
         <tag>C++</tag>
         <tag>算法题</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>算法分析与设计：动态规划（空间复杂度优化）</title>
+    <url>/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%EF%BC%88%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%BC%98%E5%8C%96%EF%BC%89/</url>
+    <content><![CDATA[<h2 id="背包问题">背包问题</h2>
+<p>  由于高数巨养的喵星人太傲娇了，要天天吃新鲜猫粮而且还经常欺负高数巨，所以高数巨决定买几条哈士奇尝尝鲜。这天高数巨来到了二手狗市场买哈士奇，高数巨看完了所有的哈士奇，记下了每条哈士奇的价格，并根据对它们的好感程度给它们每只都赋予了一个萌值。高数现在手里有 <code>X</code> 元，她想通过购买若干条哈士奇来获得尽可能多的萌值。现在给定高数巨手里的钱 <code>X</code> 以及 <code>N</code> 条哈士奇的价格和萌值，求高数巨最多可获得多少萌值。</p>
+<span id="more"></span>
+<h4 id="input">Input</h4>
+<p>  多组输入。对于每组输入，第一行有两个整数 <code>N,X(1 \leq N \leq 100，1 \leq X\leq1000)</code>，分别表示哈士奇的数量和高数巨的钱数。接下来的 <code>N</code> 行每行有两个整数 <code>P_i</code>，<code>M_i (1 \leq Pi,Mi \leq 100)</code>，分别表示第 <code>i</code> 条哈士奇的价格和萌值。</p>
+<h4 id="output">Output</h4>
+<p>对于每组数据，输出一个整数，表示高数巨最多可以获得的萌值，每组输出占一行。</p>
+<h4 id="sample-input">Sample Input</h4>
+<p>2 100 50 20 60 40 3 100 20 55 20 35 90 95 1 10 20 50</p>
+<h4 id="sample-output">Sample Output</h4>
+<p>40 95 0</p>
+<h4 id="实例代码">实例代码</h4>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n, v;</span><br><span class="line">    <span class="type">int</span> w[<span class="number">1001</span>], p[<span class="number">1001</span>];</span><br><span class="line">    <span class="keyword">while</span> (~<span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;n, &amp;v)) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="comment">// w 重量  | p 价值</span></span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;w[i], &amp;p[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 重新初始化最优值结果数组</span></span><br><span class="line">        <span class="type">int</span> res[<span class="number">1001</span>] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123; <span class="comment">// 存储的物品个数</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> k = v; k &gt;= w[i]; k--) &#123; <span class="comment">// 从所需要的重量到当前重量</span></span><br><span class="line">                res[k] = <span class="built_in">max</span>(res[k], res[k - w[i]] + p[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, res[v]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="最少硬币问题">最少硬币问题</h2>
+<h4 id="problem-description">Problem Description</h4>
+<p>  设有 <code>n</code> 种不同面值的硬币，各硬币的面值存于数组 <code>T[1:n]</code> 中。现要用这些面值的硬币来找钱。可以使用的各种面值的硬币个数存于数组 <code>Coins[1:n]</code> 中。 对任意钱数 <code>0 \leq m \leq 20001</code>，设计一个用最少硬币找钱 <code>m</code> 的方法。 对于给定的 <code>1 \leq n \leq 10</code>，硬币面值数组 <code>T</code> 和可以使用的各种面值的硬币个数数组 <code>Coins</code> ，以及钱数 <code>m</code> ，<code>0 \leq m \leq 20001</code> ，计算找钱 <code>m</code> 的最少硬币数。</p>
+<h4 id="input">Input</h4>
+<p>  输入数据第一行中只有 1 个整数给出 <code>n</code> 的值, 第 2 行起每行 2 个数，分别是 <code>T[j]</code> 和 <code>Coins[j]</code> 。最后 1 行是要找的钱数 <code>m</code>。</p>
+<h4 id="output">Output</h4>
+<p>  输出数据只有一个整数，表示计算出的最少硬币数。问题无解时输出 -1。</p>
+<h4 id="sample-input">Sample Input</h4>
+<p>3 1 3 2 3 5 3 18</p>
+<h4 id="sample-output">Sample Output</h4>
+<p>5</p>
+<h4 id="实例代码">实例代码</h4>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INF 0x3f3f3f3f</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> m, n, T[<span class="number">20001</span>], Coin[<span class="number">20001</span>];</span><br><span class="line">    <span class="type">int</span> res[<span class="number">20001</span>];</span><br><span class="line">    <span class="built_in">memset</span>(res, INF, <span class="built_in">sizeof</span>(res));</span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cin &gt;&gt; T[i] &gt;&gt; Coin[i];</span><br><span class="line">    &#125;</span><br><span class="line">    cin &gt;&gt; m;</span><br><span class="line">    <span class="comment">// res[目标面额] = 最小需求个数</span></span><br><span class="line">    res[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 遍历面额值</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">        <span class="comment">// 遍历每种面额内有几张</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= Coin[i]; j++)</span><br><span class="line">            <span class="comment">// 遍历目标金额，选择当前这枚硬币是要还是不要</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> k = m; k &gt;= T[i]; k--)</span><br><span class="line">                <span class="comment">// 将所有硬币依次拆分成单个，</span></span><br><span class="line">                <span class="comment">// res[目标面额] = min(res[目标面额 - 当前面额]+1，res[目标面额])，</span></span><br><span class="line">                <span class="comment">// 前一个是将该面额放入该组合中，后一个是不采用当前面额，选取数值最小的。</span></span><br><span class="line">                res[k] = <span class="built_in">min</span>(res[k - T[i]] + <span class="number">1</span>, res[k]);</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; (res[m] &lt; INF ? res[m] : <span class="number">-1</span>) &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="与 - 背包问题 - 的对比与分析">与“背包问题”的对比与分析</h4>
+<ol>
+<li>“背包”中给出了“损失”与“收益”，但其都是对于单个物品，求最大收益；“硬币”中给出的是“收益”、“个数”与“最终收益”，求最小组合。</li>
+<li>依旧采用一维数组 <code>res[目标面额]= 最小需求个数</code> 来存储最终结果。</li>
+<li>将所有硬币依次拆分成单个，<code>res[目标面额] = min(res[目标面额 - 当前面额]+1，res[目标面额])</code>，前一个是将该面额放入该组合中，后一个是不采用当前面额，选取数值最小的。</li>
+</ol>
+<hr>
+<h2 id="空间复杂度优化 - 以背包问题为例">空间复杂度优化 （以背包问题为例）</h2>
+<p>  有很多人采用二维数组 <code>res[i][j]</code> 静态地更新来解决背包问题，使用二维数组更加直观，但是空间复杂度较高。</p>
+<p>  如果采用一维数组动态更新看起来比较难理解，但使用范围比较广。(比如，最少硬币问题中，三重循环，也可以采用一维数组来解决，但如果使用二维的话，对应地应该上升到三维)。</p>
+<h4 id="难点：">难点：</h4>
+<p><strong>“k:v-&gt;w[i]，依次递减”</strong>，这可能比较难以理解，在我们默认从小到大，而这里，必须从大到小，否则就是错误。</p>
+<h4 id="难点解答：">难点解答：</h4>
+<p>  产生上述问题，本质就是对 <code>res[]</code> 数组在某一时间其存储的值的不理解。</p>
+<p>  对于每一次更新开始，<code>res[]</code>存储着的是“放入这个物品之前的最优解”，而我们比较的是 <code>res[k]</code> 与 <code>res[k - w[i]] + p[i]</code> (背包问题)，其中 <code>res[k-w[i]]</code>是之前的最优解。</p>
+<p>  因为一定存在 <code>k &gt; k-w[i]</code>，如果从小到大，则一定会先与 <code>res[k]</code> 更新 <code>res[k-w[i]]</code>，这就会导致比较错误。此时 <code>res[k-w[i]]</code> 已经变为“将该商品放入之后的最优价值”，在这价值基础之上，在加 <code>p[i]</code> ，其价值大概率会比 <code>res[k]</code> 高，而更新，这样，越来越大，完全背离了我们实际的意思。 因此，必须从后往前，因为前面存储着的是过去的值（不放第 <code>i</code> 件物品时的值）进行比较。</p>
+<p><br/><br/><br/><br/></p>
+]]></content>
+      <categories>
+        <category>技术笔记</category>
+        <category>算法分析与设计</category>
+      </categories>
+      <tags>
+        <tag>背包问题</tag>
+        <tag>最小硬币问题</tag>
+        <tag>动态规划</tag>
       </tags>
   </entry>
   <entry>
