@@ -44,7 +44,8 @@
           font-size: 1.6rem;
         }
       </style>
-    </head>
+    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml">
+</head>
   </html>
 </html>
 
@@ -135,7 +136,7 @@
 <blockquote>
 <ul>
 <li>一个空的核函数会占用 <code>2 registers，32bytes cmem[0]</code></li>
-<li><strong>例子</strong>：每个 Thread 占用0个寄存器，每个Block有个128线程，且每个Block占用48KB共享内存。由于SM内共享内存大小限制，此时一个SM只能并发2个Block，即可并发2*128&#x2F;32&#x3D;8个Warp，该情况下的 SM Occupany &#x3D; 8&#x2F;64 &#x3D; 12.5%，可见SM的利用率极低。对于 Tesla M6，为了将SM利用率达到100%，在块数够多的情况下，则：<ul>
+<li><strong>例子</strong>：每个 Thread 占用0个寄存器，每个Block有个128线程，且每个Block占用48KB共享内存。由于SM内共享内存大小限制，此时一个SM只能并发2个Block，即可并发2*128/32=8个Warp，该情况下的 SM Occupany = 8/64 = 12.5%，可见SM的利用率极低。对于 Tesla M6，为了将SM利用率达到100%，在块数够多的情况下，则：<ul>
 <li>每个Block有1024个Thread时，每个Block占用共享内存需小于等于48KB</li>
 <li>每个Block有512个Thread时，每个Block占用共享内存需小于等于24KB</li>
 <li>每个Block有256个Thread时，每个Block占用共享内存需小于等于12KB</li>
@@ -162,7 +163,7 @@
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">b <span class="number">53</span></span><br><span class="line">c</span><br></pre></td></tr></table></figure>
 <p>查看变量值</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">p val_num</span><br></pre></td></tr></table></figure>
-<p>变换threads：跳到threadsIdx.x&#x3D;0, threadsIdx.y&#x3D;7的线程</p>
+<p>变换threads：跳到threadsIdx.x=0, threadsIdx.y=7的线程</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cuda <span class="title">thread</span> <span class="params">(<span class="number">0</span>,<span class="number">7</span>,<span class="number">0</span>)</span></span></span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/CUDA%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E8%B0%83%E8%AF%95%E5%B8%B8%E7%94%A8%E5%8F%82%E6%95%B0.png" alt="调试常用参数"></p>
@@ -183,17 +184,24 @@
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kernel&lt;&lt;&lt;grid, block, <span class="function">isize * <span class="title">sizeof</span><span class="params">(<span class="type">int</span>)</span>&gt;&gt;&gt;<span class="params">(...)</span></span></span><br></pre></td></tr></table></figure>
 
 <ul>
-<li><strong>位置</strong>：设备内存。</li>
-<li><strong>形式</strong>：关键字<code>__**shared__**</code>添加到变量声明中。如<code>__**shared__** float cache[10]</code>。</li>
-<li><strong>目的</strong>：对于GPU上启动的每个线程块，CUDA C编译器都将创建该共享变量的一个副本。线程块中的每个线程都共享这块内存，但线程却无法看到也不能修改其他线程块的变量副本。这样使得一个线程块中的多个线程能够在计算上通信和协作。</li>
-</ul>
-<h3 id="常量内存"><a href="#常量内存" class="headerlink" title="常量内存"></a>常量内存</h3><ul>
-<li><strong>位置</strong>：设备内存</li>
-<li><strong>形式</strong>：关键字<code>__**constant__**</code>添加到变量声明中。如<code>__**constant__** float s[10];</code>。</li>
-<li><strong>目的</strong>：为了提升性能。常量内存采取了不同于标准全局内存的处理方式。在某些情况下，用常量内存替换全局内存能有效地减少内存带宽。</li>
-<li><strong>特点</strong>：常量内存用于保存在核函数执行期间不会发生变化的数据。变量的访问限制为只读。NVIDIA硬件提供了64KB的常量内存。不再需要cudaMalloc()或者cudaFree()，而是在编译时，静态地分配空间。</li>
-<li><strong>要求</strong>：当我们需要拷贝数据到常量内存中应该使用cudaMemcpyToSymbol()，而cudaMemcpy()会复制到全局内存。</li>
-<li>性能提升的原因：<br>&emsp;&emsp;对常量内存的单次读操作可以广播到其他的“邻近”线程。这将节约15次读取操作。（为什么是15，因为“邻近”指半个线程束，一个线程束包含32个线程的集合。）<br>常量内存的数据将缓存起来，因此对相同地址的连续读操作将不会产生额外的内存通信量。</li>
+<li><p><strong>位置</strong>：设备内存。</p>
+</li>
+<li><p><strong>形式</strong>：关键字<code>__**shared__**</code>添加到变量声明中。如<code>__**shared__** float cache[10]</code>。</p>
+</li>
+<li><p><strong>目的</strong>：对于GPU上启动的每个线程块，CUDA C编译器都将创建该共享变量的一个副本。线程块中的每个线程都共享这块内存，但线程却无法看到也不能修改其他线程块的变量副本。这样使得一个线程块中的多个线程能够在计算上通信和协作。</p>
+<h3 id="常量内存"><a href="#常量内存" class="headerlink" title="常量内存"></a>常量内存</h3></li>
+<li><p><strong>位置</strong>：设备内存</p>
+</li>
+<li><p><strong>形式</strong>：关键字<code>__**constant__**</code>添加到变量声明中。如<code>__**constant__** float s[10];</code>。</p>
+</li>
+<li><p><strong>目的</strong>：为了提升性能。常量内存采取了不同于标准全局内存的处理方式。在某些情况下，用常量内存替换全局内存能有效地减少内存带宽。</p>
+</li>
+<li><p><strong>特点</strong>：常量内存用于保存在核函数执行期间不会发生变化的数据。变量的访问限制为只读。NVIDIA硬件提供了64KB的常量内存。不再需要cudaMalloc()或者cudaFree()，而是在编译时，静态地分配空间。</p>
+</li>
+<li><p><strong>要求</strong>：当我们需要拷贝数据到常量内存中应该使用cudaMemcpyToSymbol()，而cudaMemcpy()会复制到全局内存。</p>
+</li>
+<li><p>性能提升的原因：<br>&emsp;&emsp;对常量内存的单次读操作可以广播到其他的“邻近”线程。这将节约15次读取操作。（为什么是15，因为“邻近”指半个线程束，一个线程束包含32个线程的集合。）<br>常量内存的数据将缓存起来，因此对相同地址的连续读操作将不会产生额外的内存通信量。</p>
+</li>
 </ul>
 <h3 id="纹理内存（Texture-Cache）"><a href="#纹理内存（Texture-Cache）" class="headerlink" title="纹理内存（Texture Cache）"></a>纹理内存（Texture Cache）</h3><ul>
 <li>位置：设备内存</li>
@@ -221,11 +229,11 @@
 <h1 id="CUDA-优化"><a href="#CUDA-优化" class="headerlink" title="CUDA 优化"></a>CUDA 优化</h1><h2 id="CUDA核函数中的printf原理"><a href="#CUDA核函数中的printf原理" class="headerlink" title="CUDA核函数中的printf原理"></a>CUDA核函数中的printf原理</h2><p>&emsp;&emsp;printf就是GPU往CPU回传数据，然后显示在终端窗口里。由CUDA负责安排多个线程之间的都有哪些数据需要被准备，又是什么格式的，当前kernel运行期间因为不能暂停，临时性的又将数据放到哪里。kernel结束后，检查是否又有需要回传的东西，回传，然后调用host上的printf。</p>
 <h2 id="优化-Host-和-GPU-之间的内存传输"><a href="#优化-Host-和-GPU-之间的内存传输" class="headerlink" title="优化 Host 和 GPU 之间的内存传输"></a>优化 Host 和 GPU 之间的内存传输</h2><h3 id="常规传输方式-cudaMemcpy"><a href="#常规传输方式-cudaMemcpy" class="headerlink" title="常规传输方式 cudaMemcpy"></a>常规传输方式 cudaMemcpy</h3><p>&emsp;&emsp;在很多情况下都是最慢的方式，但他近乎适用于所有情况，所以也可能是被使用最多的方式。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemcpy</span> ( <span class="type">void</span>* dst, <span class="type">const</span> <span class="type">void</span>* src, <span class="type">size_t</span> count, cudaMemcpyKind kind )</span><br></pre></td></tr></table></figure>
-<h3 id="高维矩阵传输-cudaMemcpy2D-cudaMalloc3D"><a href="#高维矩阵传输-cudaMemcpy2D-cudaMalloc3D" class="headerlink" title="高维矩阵传输 cudaMemcpy2D &#x2F; cudaMalloc3D"></a>高维矩阵传输 cudaMemcpy2D &#x2F; cudaMalloc3D</h3><p>&emsp;&emsp;以二维矩阵为例，可以用<code>cudaMalloc</code>来分配一维数组来存储一张图像数据，但这不是效率最快的方案，推荐的方式是使用<code>cudaMallocPitch</code>来分配一个二维数组，存取效率更快。<code>cudaMallocPitch</code>有一个非常好的特性是二维矩阵的每一行是内存对齐的，访问效率比一维数组更高。而通过<code>cudaMallocPitch</code>分配的内存必须配套使用<code>cudaMemcpy2D</code>完成数据传输。</p>
+<h3 id="高维矩阵传输-cudaMemcpy2D-cudaMalloc3D"><a href="#高维矩阵传输-cudaMemcpy2D-cudaMalloc3D" class="headerlink" title="高维矩阵传输 cudaMemcpy2D / cudaMalloc3D"></a>高维矩阵传输 cudaMemcpy2D / cudaMalloc3D</h3><p>&emsp;&emsp;以二维矩阵为例，可以用<code>cudaMalloc</code>来分配一维数组来存储一张图像数据，但这不是效率最快的方案，推荐的方式是使用<code>cudaMallocPitch</code>来分配一个二维数组，存取效率更快。<code>cudaMallocPitch</code>有一个非常好的特性是二维矩阵的每一行是内存对齐的，访问效率比一维数组更高。而通过<code>cudaMallocPitch</code>分配的内存必须配套使用<code>cudaMemcpy2D</code>完成数据传输。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMallocPitch</span> ( <span class="type">void</span>** devPtr, <span class="type">size_t</span>* pitch, <span class="type">size_t</span> width, <span class="type">size_t</span> height )</span><br></pre></td></tr></table></figure>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemcpy2D</span> ( <span class="type">void</span>* dst, <span class="type">size_t</span> dpitch, <span class="type">const</span> <span class="type">void</span>* src, <span class="type">size_t</span> spitch, <span class="type">size_t</span> width, <span class="type">size_t</span> height, cudaMemcpyKind kind )</span><br></pre></td></tr></table></figure>
 <p>&emsp;&emsp;相比于普通的<code>cudaMemcpy</code>，<code>cudaMemcpy2D</code>多了两个参数<code>dpitch</code>和<code>spitch</code>，他们是每一行的实际字节数，是对齐分配<code>cudaMallocPitch</code>返回的值。</p>
-<h3 id="异步传输-cudaMemcpyAsync-cudaMemcpy2DAsync-cudaMemcpy3DAsync"><a href="#异步传输-cudaMemcpyAsync-cudaMemcpy2DAsync-cudaMemcpy3DAsync" class="headerlink" title="异步传输 cudaMemcpyAsync &#x2F; cudaMemcpy2DAsync &#x2F; cudaMemcpy3DAsync"></a>异步传输 cudaMemcpyAsync &#x2F; cudaMemcpy2DAsync &#x2F; cudaMemcpy3DAsync</h3><p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697100322397-33ce42bf-7542-4061-a3db-3a75879a17b4.png#clientId=uf86abeb8-28e2-4&from=paste&height=85&id=u967794ea&originHeight=181&originWidth=1353&originalType=binary&ratio=1&rotation=0&showTitle=false&size=75812&status=done&style=none&taskId=u4a20f5be-b99b-4aed-b9bb-36520f395ba&title=&width=637" alt="image.png"></p>
+<h3 id="异步传输-cudaMemcpyAsync-cudaMemcpy2DAsync-cudaMemcpy3DAsync"><a href="#异步传输-cudaMemcpyAsync-cudaMemcpy2DAsync-cudaMemcpy3DAsync" class="headerlink" title="异步传输 cudaMemcpyAsync / cudaMemcpy2DAsync / cudaMemcpy3DAsync"></a>异步传输 cudaMemcpyAsync / cudaMemcpy2DAsync / cudaMemcpy3DAsync</h3><p><img src="https://intranetproxy.alipay.com/skylark/lark/0/2023/png/105957079/1697100322397-33ce42bf-7542-4061-a3db-3a75879a17b4.png#clientId=uf86abeb8-28e2-4&from=paste&height=85&id=u967794ea&originHeight=181&originWidth=1353&originalType=binary&ratio=1&rotation=0&showTitle=false&size=75812&status=done&style=none&taskId=u4a20f5be-b99b-4aed-b9bb-36520f395ba&title=&width=637" alt="image.png"></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemsetAsync</span> ( <span class="type">void</span>* devPtr, <span class="type">int</span>  value, <span class="type">size_t</span> count, cudaStream_t stream = <span class="number">0</span> )</span><br></pre></td></tr></table></figure>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemcpy2DAsync</span> ( <span class="type">void</span>* dst, <span class="type">size_t</span> dpitch, <span class="type">const</span> <span class="type">void</span>* src, <span class="type">size_t</span> spitch, <span class="type">size_t</span> width, <span class="type">size_t</span> height, cudaMemcpyKind kind, cudaStream_t stream = <span class="number">0</span> )</span><br></pre></td></tr></table></figure>
 
@@ -271,7 +279,7 @@
 </ol>
 <h2 id="cuSPARSE"><a href="#cuSPARSE" class="headerlink" title="cuSPARSE"></a>cuSPARSE</h2><p><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cusparse/index.html">https://docs.nvidia.com/cuda/cusparse/index.html</a></p>
 <p><br/><br/></p>
-<h1 id="CUDA-的版本敏感性"><a href="#CUDA-的版本敏感性" class="headerlink" title="CUDA 的版本敏感性"></a>CUDA 的版本敏感性</h1><p>&emsp;&emsp;版本冲突记录（10.1、11.2、11.4）：cusparseScsrmv、cusparseDcsrmv 替换成 cusparseSpMV，参考链接：<br><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/11.2.0/index.html">CUDA Toolkit Documentation-11.2</a><br><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/10.1/index.html">CUDA Toolkit Documentation-10.1（POGS）</a><br><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/CUDALibrarySamples/blob/master/cuSPARSE/spmv_csr/spmv_csr_example.c">CUDALibrarySamples&#x2F;cuSPARSE&#x2F;spmv_csr&#x2F;spmv_csr_example.c at master · NVIDIA&#x2F;CUDALibrarySamples</a></p>
+<h1 id="CUDA-的版本敏感性"><a href="#CUDA-的版本敏感性" class="headerlink" title="CUDA 的版本敏感性"></a>CUDA 的版本敏感性</h1><p>&emsp;&emsp;版本冲突记录（10.1、11.2、11.4）：cusparseScsrmv、cusparseDcsrmv 替换成 cusparseSpMV，参考链接：<br><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/11.2.0/index.html">CUDA Toolkit Documentation-11.2</a><br><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/archive/10.1/index.html">CUDA Toolkit Documentation-10.1（POGS）</a><br><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/CUDALibrarySamples/blob/master/cuSPARSE/spmv_csr/spmv_csr_example.c">CUDALibrarySamples/cuSPARSE/spmv_csr/spmv_csr_example.c at master · NVIDIA/CUDALibrarySamples</a></p>
 <ul>
 <li>cusparseScsr2csc (10.1) ➡️ cusparseCsr2cscEx2 (11.2)</li>
 <li>cusparseDcsrmv (10.1) ➡️ cusparseSpMV (11.2)</li>
@@ -816,6 +824,15 @@
     
 
   </div>
-</body>
+<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
+    
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载swiper')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
+<style></style><!-- hexo injector body_end end --></body>
 
 </html>

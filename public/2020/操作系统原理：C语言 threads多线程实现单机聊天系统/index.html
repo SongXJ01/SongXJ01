@@ -44,7 +44,8 @@
           font-size: 1.6rem;
         }
       </style>
-    </head>
+    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml">
+</head>
   </html>
 </html>
 
@@ -131,8 +132,9 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="type">pthread_t</span> tid1, tid2;	<span class="comment">//线程ID</span></span><br><span class="line">	<span class="type">pthread_attr_t</span> attr;	<span class="comment">//线程属性</span></span><br><span class="line">	pthread_attr_init(&amp;attr); <span class="comment">//设置默认线程属性</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//执行两个线程分别进行收发</span></span><br><span class="line">	pthread_create(&amp;tid1, &amp;attr, send, <span class="literal">NULL</span>);</span><br><span class="line">	pthread_create(&amp;tid2, &amp;attr, receive, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//等待两个线程</span></span><br><span class="line">	pthread_join(tid1, <span class="literal">NULL</span>);</span><br><span class="line">	pthread_join(tid2, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
 <hr>
 <h2 id="程序运行过程截图"><a href="#程序运行过程截图" class="headerlink" title="程序运行过程截图"></a>程序运行过程截图</h2><ol>
-<li><p>等待连接<br><img src="/images/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86_C%E8%AF%AD%E8%A8%80threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/%E7%AD%89%E5%BE%85%E8%BF%9E%E6%8E%A5.png" alt="等待连接"></p>
-</li>
+<li>等待连接<br><img src="/images/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86_C%E8%AF%AD%E8%A8%80threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/%E7%AD%89%E5%BE%85%E8%BF%9E%E6%8E%A5.png" alt="等待连接"></li>
+</ol>
+<ol start="2">
 <li><p>管道连接成功<br><img src="/images/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86_C%E8%AF%AD%E8%A8%80threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/%E7%AE%A1%E9%81%93%E8%BF%9E%E6%8E%A5%E6%88%90%E5%8A%9F.png" alt="管道连接成功"></p>
 </li>
 <li><p>进行全工聊天<br><img src="/images/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86_C%E8%AF%AD%E8%A8%80threads%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8D%95%E6%9C%BA%E8%81%8A%E5%A4%A9%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E8%A1%8C%E5%85%A8%E5%B7%A5%E8%81%8A%E5%A4%A9.png" alt="进行全工聊天"></p>
@@ -692,6 +694,15 @@
     
 
   </div>
-</body>
+<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
+    
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载swiper')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
+<style></style><!-- hexo injector body_end end --></body>
 
 </html>

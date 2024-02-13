@@ -44,7 +44,8 @@
           font-size: 1.6rem;
         }
       </style>
-    </head>
+    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml">
+</head>
   </html>
 </html>
 
@@ -117,7 +118,7 @@
 <p>&emsp;&emsp;稀疏矩阵的存储涉及到多种数据结构的设计与选择。各种不同的稀疏数据结构都具有各自的优点和缺点。目前流行的稀疏数据结构包括COO（Coordinate）、CSR（Compressed Sparse Row）、CSC（Compressed Sparse Column）、LIL（Row-based List of Lists）、DIA（DIAgonal storage）、BSR（Block Sparse Row）、ELL（ELLPACK）等。COO 格式通过使用三个数组来表示非零元素的坐标和值，适用于具有任意分布的非零元素的稀疏矩阵；CSR 和 CSC 格式则分别以行和列为主导，使用压缩行和压缩列的方式存储非零元素，适合于以行或列为基础的操作，如矩阵向量乘法和 LU 分解；LIL 格式通过链表的方式按行存储非零元素，提供了灵活的插入和修改操作；DIA 格式则仅存储对角线元素和每个对角线的偏移量，实现了压缩存储；BSR 提供了良好的分块特性；ELL格式则将非零元素对齐存储在二维数组中，具有高效的空间和访问效率。</p>
 <p>&emsp;&emsp;在选择稀疏矩阵的数据结构时，应综合考虑应用场景和需求。不同的数据结构在不同矩阵规模下可能呈现不同的特性和效率。因此，深入了解各种数据结构的优势和限制，根据实际情况选择合适的数据结构至关重要。这样可以确保在稀疏矩阵的存储、操作和计算过程中获得最佳的性能和效率。</p>
 <blockquote>
-<p>下文中会多次提到稀疏矩阵的向量内积（SpMV，Sparse Matrix-vector Product）操作，在此强调定义并复习一下其具体的过程。假设 $A \in \mathbb{R}^{m \times n}$，以及 $x \in \mathbb{R}^{n}$，$y&#x3D;Ax$ 即为 SpMV 运算，其计算结果是一个长度为 $m$ 的向量，按照正常的稠密矩阵的算法需要进行 $mn^2$ 次乘法，且需要 $x$ 中的每个元素都需要被重复检索 $m$ 次。<br>若 $A$ 是一个 CSR 格式的稀疏矩阵，我们只需要计算矩阵 $A$ 中非零元所在行即可；<br>若 $A$ 是一个 CSC 格式的稀疏矩阵，我们只需要检索矩阵 $A$ 中非零元所在列索引对应的 $x[i]$ 即可；<br>若 $A$ 是一个 ELL 格式的稀疏矩阵，其使用两个矩阵分别存储非零元素的列索引和对应的数值。在进行 SpMV 运算时，ELL 格式可以通过并行计算同时访问每一行的非零元素和对应的向量元素，减少了数据依赖性，提高了计算效率。</p>
+<p>下文中会多次提到稀疏矩阵的向量内积（SpMV，Sparse Matrix-vector Product）操作，在此强调定义并复习一下其具体的过程。假设 $A \in \mathbb{R}^{m \times n}$，以及 $x \in \mathbb{R}^{n}$，$y=Ax$ 即为 SpMV 运算，其计算结果是一个长度为 $m$ 的向量，按照正常的稠密矩阵的算法需要进行 $mn^2$ 次乘法，且需要 $x$ 中的每个元素都需要被重复检索 $m$ 次。<br>若 $A$ 是一个 CSR 格式的稀疏矩阵，我们只需要计算矩阵 $A$ 中非零元所在行即可；<br>若 $A$ 是一个 CSC 格式的稀疏矩阵，我们只需要检索矩阵 $A$ 中非零元所在列索引对应的 $x[i]$ 即可；<br>若 $A$ 是一个 ELL 格式的稀疏矩阵，其使用两个矩阵分别存储非零元素的列索引和对应的数值。在进行 SpMV 运算时，ELL 格式可以通过并行计算同时访问每一行的非零元素和对应的向量元素，减少了数据依赖性，提高了计算效率。</p>
 </blockquote>
 <p><br/><br/></p>
 <h1 id="COO，Coordinate"><a href="#COO，Coordinate" class="headerlink" title="COO，Coordinate"></a>COO，Coordinate</h1><p>&emsp;&emsp;COO（Coordinate）通过使用三个数组来表示矩阵的非零元素的坐标和对应的值，从而实现高效的存储和操作。其中，数组 row 存储行坐标，数组 col 存储列坐标，数组 data 存储对应的值。COO 格式适用于具有任意分布的非零元素的稀疏矩阵，但在稀疏性较高且需要频繁访问的情况下可能效率较低，因为元素的访问需要通过遍历数组来找到特定位置的元素。</p>
@@ -211,11 +212,9 @@
 </ul>
 <p><strong>属性的特征：</strong></p>
 <ul>
-<li>矩阵行数 &#x3D; <code>indptr</code> 数组的长度 - 1</li>
-<li>矩阵列数 &#x3D; <code>indices</code> 数组中最大的元素数值 + 1</li>
-<li><code>indices</code> 和 <code>data</code> 的数组长度相同，且其长度即为 <code>nnz</code></li>
-</ul>
-<h2 id="示例-1"><a href="#示例-1" class="headerlink" title="示例"></a>示例</h2><table>
+<li>矩阵行数 = <code>indptr</code> 数组的长度 - 1</li>
+<li>矩阵列数 = <code>indices</code> 数组中最大的元素数值 + 1</li>
+<li><code>indices</code> 和 <code>data</code> 的数组长度相同，且其长度即为 <code>nnz</code><h2 id="示例-1"><a href="#示例-1" class="headerlink" title="示例"></a>示例</h2><table>
 <thead>
 <tr>
 <th></th>
@@ -243,6 +242,8 @@
 <td><strong>6</strong></td>
 </tr>
 </tbody></table>
+</li>
+</ul>
 <p>将上述矩阵 $A$ 转换成 CSR 格式，结果如下所示。CSR 的数值数组 <code>data</code> 和列索引数组 <code>indices</code> 与 COO 格式的表示一致，行指针偏移数组表示每一行的第一个元素在 <code>data</code> 数组中的起始偏移位置，即前面每行包含的非零元素个数的总和。如下所示的 <code>indptr</code>：</p>
 <ul>
 <li><strong>row[0]：</strong> 因为第一行的非零元素是矩阵中的第一个非零元素，所以是 0 偏移，即<code>indptr[0]=0</code>；</li>
@@ -310,8 +311,8 @@
 <p><strong>属性的特征：</strong></p>
 <ul>
 <li>CSC和CSR的表示互为转置，即矩阵$A$的CSC表示就是矩阵$A^T$的CSR表示；</li>
-<li>矩阵列数 &#x3D; <code>indptr</code> 数组的长度 - 1 ；</li>
-<li>矩阵行数 &#x3D; <code>indices</code> 数组中最大的元素数值 + 1 ；</li>
+<li>矩阵列数 = <code>indptr</code> 数组的长度 - 1 ；</li>
+<li>矩阵行数 = <code>indices</code> 数组中最大的元素数值 + 1 ；</li>
 <li><code>indices</code> 和 <code>data</code> 的数组长度相同，且其长度即为 <code>nnz</code> 。</li>
 </ul>
 <h2 id="示例-2"><a href="#示例-2" class="headerlink" title="示例"></a>示例</h2><table>
@@ -467,7 +468,7 @@
 <ul>
 <li>运算 LIL + LIL 的时候比较慢（可以考虑 CSR 或 CSC）；</li>
 <li>列切片操作较慢（列切片考虑 CSC）；</li>
-<li>进行 SpMV 运算操作较慢（可以考虑 CSR&#x2F;CSC ）；</li>
+<li>进行 SpMV 运算操作较慢（可以考虑 CSR/CSC ）；</li>
 <li>当矩阵很大时，考虑使用 COO。</li>
 </ul>
 <h1 id="DIA，DIAgonal-storage"><a href="#DIA，DIAgonal-storage" class="headerlink" title="DIA，DIAgonal storage"></a>DIA，DIAgonal storage</h1><p>&emsp;&emsp;DIA（DIAgonal storage）通过仅存储对角线元素和每个对角线的偏移量来实现压缩存储。</p>
@@ -1483,6 +1484,15 @@
     
 
   </div>
-</body>
+<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
+    
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载swiper')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
+<style></style><!-- hexo injector body_end end --></body>
 
 </html>

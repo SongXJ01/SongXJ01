@@ -44,7 +44,8 @@
           font-size: 1.6rem;
         }
       </style>
-    </head>
+    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml">
+</head>
   </html>
 </html>
 
@@ -127,10 +128,8 @@
 <h2 id="4-设置坐标轴刻度，稀疏化坐标轴刻度"><a href="#4-设置坐标轴刻度，稀疏化坐标轴刻度" class="headerlink" title="4. 设置坐标轴刻度，稀疏化坐标轴刻度"></a>4. 设置坐标轴刻度，稀疏化坐标轴刻度</h2><p>如果我们的数据是100 X 100 的二维矩阵，如果将所有的刻度都显示在坐标轴上，那么必会变得密密麻麻，所以我们需要将坐标刻度稀疏化，并用自己想要的方式展现出来。<br>使用<code>xticks(x, _x)</code>设置X坐标轴刻度（Y轴同理，但是不能设置Z轴）：</p>
 <ul>
 <li>第一个参数：刻度值列表</li>
-<li>第二个参数：需要展示的出来的经过处理的刻度值列表。这里可以对刻度自定义，比如统一扩大10倍或缩小十倍（本例中以0.1为步长取的数据，所以在刻度上要乘上步长，即缩小为0.1倍），同时也可以设置为字符串。<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(arrX)))[::<span class="built_in">int</span>(<span class="built_in">len</span>(arrX) / <span class="number">10</span>)]</span><br><span class="line">_x = [<span class="built_in">int</span>(i * stepValue) <span class="keyword">for</span> i <span class="keyword">in</span> x]</span><br><span class="line">plt.xticks(x, _x)</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="5-设置图片名称并保存"><a href="#5-设置图片名称并保存" class="headerlink" title="5. 设置图片名称并保存"></a>5. 设置图片名称并保存</h2><p>使用<code>xlabel</code>设置X轴名称（Y轴同理，但是不能设置Z轴）：</p>
-<ul>
+<li>第二个参数：需要展示的出来的经过处理的刻度值列表。这里可以对刻度自定义，比如统一扩大10倍或缩小十倍（本例中以0.1为步长取的数据，所以在刻度上要乘上步长，即缩小为0.1倍），同时也可以设置为字符串。<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(arrX)))[::<span class="built_in">int</span>(<span class="built_in">len</span>(arrX) / <span class="number">10</span>)]</span><br><span class="line">_x = [<span class="built_in">int</span>(i * stepValue) <span class="keyword">for</span> i <span class="keyword">in</span> x]</span><br><span class="line">plt.xticks(x, _x)</span><br></pre></td></tr></table></figure>
+<h2 id="5-设置图片名称并保存"><a href="#5-设置图片名称并保存" class="headerlink" title="5. 设置图片名称并保存"></a>5. 设置图片名称并保存</h2>使用<code>xlabel</code>设置X轴名称（Y轴同理，但是不能设置Z轴）：</li>
 <li>第一个参数：X轴名称的字符串</li>
 <li>第二个参数（<code>labelpad</code>）：X轴名称与X轴之间的间隔距离</li>
 </ul>
@@ -675,6 +674,15 @@
     
 
   </div>
-</body>
+<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
+    
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载swiper')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
+<style></style><!-- hexo injector body_end end --></body>
 
 </html>

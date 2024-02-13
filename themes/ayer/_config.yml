@@ -12,12 +12,10 @@ menu:
 # https://github.com/mattboldt/typed.js
 subtitle:
   enable: true # 是否开启动效
-  text: 以代码为画笔，绘就世界的无限可能 ——— # 显示的文字
-  text2:
-  text3:
+  text: 以代码为画笔，绘就世界的无限可能 —— # 显示的文字
   startDelay: 0 # 延迟时间
-  typeSpeed: 220 # 打字速度
-  loop: true # 是否循环
+  typeSpeed: 180 # 打字速度
+  loop: false # 是否循环
   backSpeed: 10000000 # 回退速度
   showCursor: true # 是否显示光标
 
@@ -113,7 +111,7 @@ click_effect: 1
 
 # 页面宽度自定义（不建议修改，可能造成布局混乱），article_width文章宽度，sidebar_width侧边栏宽度
 layout:
-  article_width: 80rem
+  article_width: 75rem
   sidebar_width: 8rem
 
 # GitHub Ribbons-封面右上角的forkme，换样式直接在source/images目录下替换forkme图片

@@ -108,35 +108,40 @@ deploy:
   repo: https://gitee.com/songxj01/songxj01
   branch: master
 
-# hexo-generator-searchdb
+# 支持本地搜索 hexo-generator-searchdb
 search:
   path: search.xml
   field: post
   format: html  
   
-feed:
-  type: atom
-  path: atom.xml
-  limit: 20
-  hub:
-  content:
-  content_limit: 140
-  content_limit_delim: " "
-  order_by: -date
-
 # 搜索引擎索引
 sitemap:
   path: sitemap.xml
 baidusitemap:
   path: baidusitemap.xml
 
-# 懒加载
-lazyload:
+# 夜间模式
+darkmode:
   enable: true
-  onlypost: false
-  loadingImg: /images/loading.gif
-  preloadRatio: 3
-  isSPA: true
+
+# RSS
+# feed:
+#   type: atom
+#   path: atom.xml
+#   limit: 20
+#   hub:
+#   content:
+#   content_limit: 140
+#   content_limit_delim: " "
+#   order_by: -date
+
+# 懒加载
+# lazyload:
+#   enable: false
+#   onlypost: true
+#   loadingImg: /images/loading.gif
+#   preloadRatio: 5
+#   isSPA: true
 
 # 置顶轮播
 swiper:
@@ -150,6 +155,3 @@ swiper:
   temple_html: '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container">${temple_html_item}</div></div>'
   plus_style: ""
 
-# 夜间模式
-darkmode:
-  enable: true

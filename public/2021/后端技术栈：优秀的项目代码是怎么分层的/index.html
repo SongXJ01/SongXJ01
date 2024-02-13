@@ -44,7 +44,8 @@
           font-size: 1.6rem;
         }
       </style>
-    </head>
+    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml">
+</head>
   </html>
 </html>
 
@@ -140,7 +141,7 @@
 <p>然后接下来<code>/src/main/resources</code>目录，里面主要存放静态配置文件和页面静态资源等东西：</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">|_mapper：存放mybatis的XML映射文件（如果是mybatis项目）</span><br><span class="line">|_static：存放网页静态资源，比如下面的js/css/img</span><br><span class="line">   |__js：</span><br><span class="line">   |__css：</span><br><span class="line">   |__img：</span><br><span class="line">   |__font：</span><br><span class="line">   |__等等</span><br><span class="line">|_template：存放网页模板，比如thymeleaf/freemarker模板等</span><br><span class="line">   |__header</span><br><span class="line">   |__sidebar</span><br><span class="line">   |__bottom</span><br><span class="line">   |__XXX.html等等</span><br><span class="line">|_application.yml       基本配置文件</span><br><span class="line">|_application-dev.yml   开发环境配置文件</span><br><span class="line">|_application-test.yml  测试环境配置文件</span><br><span class="line">|_application-prod.yml  生产环境配置文件</span><br></pre></td></tr></table></figure>
 
-<p>当然，这地方估计有一个很多人都会纠结的关于 DTO&#x2F;VO&#x2F;DO 等数据模型定义的区分。这在《阿里巴巴Java开发手册》中倒是做了一个所谓的严格区分，那本书上是这样去定义的：</p>
+<p>当然，这地方估计有一个很多人都会纠结的关于 DTO/VO/DO 等数据模型定义的区分。这在《阿里巴巴Java开发手册》中倒是做了一个所谓的严格区分，那本书上是这样去定义的：</p>
 <ul>
 <li><strong>DO（Data Object）</strong>：与数据库表结构一一对应，通过 DAO 层向上传输数据源对象。</li>
 <li><strong>DTO（Data Transfer Object）</strong>：数据传输对象，Service 或 Manager 向外传输的对象。</li>
@@ -241,19 +242,19 @@
    
   <nav class="article-nav">
     
-      <a href="/2021/%E5%89%8D%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9AVue-%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A/" class="article-nav-link">
+      <a href="/2021/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F%EF%BC%9A%E2%80%9C%E5%86%99%E4%BD%9C%E2%80%9D%E4%B8%8E%E2%80%9C%E5%86%99%E4%BB%A3%E7%A0%81%E2%80%9D/" class="article-nav-link">
         <strong class="article-nav-caption">上一篇</strong>
         <div class="article-nav-title">
           
-            前端技术栈：Vue 双向绑定
+            程序人生：“写作”与“写代码”
           
         </div>
       </a>
     
     
-      <a href="/2021/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%EF%BC%88%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%BC%98%E5%8C%96%EF%BC%89/" class="article-nav-link">
+      <a href="/2021/%E5%89%8D%E7%AB%AF%E6%8A%80%E6%9C%AF%E6%A0%88%EF%BC%9AVue-%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A/" class="article-nav-link">
         <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">算法分析与设计：动态规划（空间复杂度优化）</div>
+        <div class="article-nav-title">前端技术栈：Vue 双向绑定</div>
       </a>
     
   </nav>
@@ -690,6 +691,15 @@
     
 
   </div>
-</body>
+<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
+    
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载swiper')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
+<style></style><!-- hexo injector body_end end --></body>
 
 </html>
