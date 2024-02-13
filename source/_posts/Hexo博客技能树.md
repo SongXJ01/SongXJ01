@@ -170,7 +170,7 @@ Class01 : int gorilla
 Class08 <--> C2: Cool label
 ```
 
-更多的 Mermaid 使用方式可以参考：![https://mermaid.js.org/intro/](https://mermaid.js.org/intro/)
+更多的 Mermaid 使用方式可以参考：[https://mermaid.js.org/intro/](https://mermaid.js.org/intro/)
 
 
 
