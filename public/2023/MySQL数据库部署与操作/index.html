@@ -45,7 +45,7 @@
         }
       </style>
     <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml">
-</head>
+<link href="https://cdn.bootcss.com/KaTeX/0.11.1/katex.min.css" rel="stylesheet" /></head>
   </html>
 </html>
 
@@ -114,108 +114,126 @@
        
   <p>本次的实验环境是<code>CentOS 7.9</code> 已经安装了宝塔面板，并安装了<code>Docker管理器3.9.1</code>。</p>
 <span id="more"></span>
-
-
 <hr>
-<h1 id="MySQL的安装与部署"><a href="#MySQL的安装与部署" class="headerlink" title="MySQL的安装与部署"></a>MySQL的安装与部署</h1><h2 id="1-在Docker中安装MySQL"><a href="#1-在Docker中安装MySQL" class="headerlink" title="1. 在Docker中安装MySQL"></a>1. 在Docker中安装MySQL</h2><p><strong>【将Docker中MySQL数据库挂载到服务器】</strong><br>将Docker中的数据以及配置文件映射到服务器的文件系统上，这样当删除了Docker容器后，之前的数据记录依然存在。</p>
+<h1>MySQL的安装与部署</h1>
+<h2 id="1-在docker中安装mysql">1. 在Docker中安装MySQL</h2>
+<p><strong>【将Docker中MySQL数据库挂载到服务器】</strong><br>
+将Docker中的数据以及配置文件映射到服务器的文件系统上，这样当删除了Docker容器后，之前的数据记录依然存在。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker run --restart=always --privileged=true -d \</span><br><span class="line">-v /dockerImageFile/mysql/data:/var/lib/mysql \</span><br><span class="line">-v /dockerImageFile/mysql/conf:/etc/mysql/conf.d \</span><br><span class="line">-v /dockerImageFile/mysql/my.cnf:/etc/mysql/my.cnf </span><br><span class="line">-p 3306:3306 \</span><br><span class="line">--name mysql \</span><br><span class="line">-e MYSQL_ROOT_PASSWORD=123456 \</span><br><span class="line">mysql:5.7</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li><code>-v</code>：文件挂载（<code>宿主机文件路径</code>:<code>Docker容器文件路径</code>）；</li>
 <li><code>-p</code>：端口映射（<code>对外暴露端口</code>:<code>Docker容器内部端口</code>）；</li>
 <li><code>--name</code>：容器名称；</li>
-<li> <code>MYSQL_ROOT_PASSWORD=123456</code>：设置MySQL数据库的初始root密码为<code>123456</code>；</li>
+<li><code>MYSQL_ROOT_PASSWORD=123456</code>：设置MySQL数据库的初始root密码为<code>123456</code>；</li>
 <li><code>mysql:5.7</code>：指定MySQL版本为5.7。</li>
 </ul>
 <p><strong>【若不需要挂载的话可以正常运行下面的命令】</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7</span><br></pre></td></tr></table></figure>
-
-
 <p><strong>【注意】</strong>：上述指令只适用于Linux、Windows系统等x86架构芯片的机器，若为M1芯片，需要使用如下命令安装较新的MySQL版本。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql/mysql-server</span><br></pre></td></tr></table></figure>
-
-<h3 id="可能会遇到的错误"><a href="#可能会遇到的错误" class="headerlink" title="可能会遇到的错误"></a>可能会遇到的错误</h3><h4 id="※-数据库管理工具连接错误"><a href="#※-数据库管理工具连接错误" class="headerlink" title="※ 数据库管理工具连接错误"></a>※ 数据库管理工具连接错误</h4><p><strong>错误提示</strong>：<code>Host &#39;172.17.0.1&#39; is not allowed to connect to this MySQL server</code></p>
+<h3 id="可能会遇到的错误">可能会遇到的错误</h3>
+<h4 id="数据库管理工具连接错误">※ 数据库管理工具连接错误</h4>
+<p><strong>错误提示</strong>：<code>Host '172.17.0.1' is not allowed to connect to this MySQL server</code></p>
 <p>说明所连接的用户帐号没有远程连接的权限，只能在本机（localhost）登录，需更改 MySQL 数据库里的 user 表里的 host 项。</p>
 <ul>
-<li>进入容器：<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">exec</span> <span class="operator">-</span>it mysql <span class="operator">/</span>bin<span class="operator">/</span>bash</span><br></pre></td></tr></table></figure></li>
+<li>进入容器：</li>
 </ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">exec</span> <span class="operator">-</span>it mysql <span class="operator">/</span>bin<span class="operator">/</span>bash</span><br></pre></td></tr></table></figure>
 <ul>
-<li><p>登录MySQL：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql <span class="operator">-</span>uroot <span class="operator">-</span>p123456</span><br></pre></td></tr></table></figure></li>
-<li><p>修改权限表格</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use mysql;</span><br><span class="line"><span class="keyword">update</span> <span class="keyword">user</span> <span class="keyword">set</span> host <span class="operator">=</span> <span class="string">&#x27;%&#x27;</span> <span class="keyword">where</span> <span class="keyword">user</span> <span class="operator">=</span> &quot;root&quot;;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
-<h4 id="※-无修改权限"><a href="#※-无修改权限" class="headerlink" title="※ 无修改权限"></a>※ 无修改权限</h4></li>
+<li>登录MySQL：</li>
 </ul>
-<p><strong>错误提示</strong>：<code>Access denied for user &#39;dorm&#39;@&#39;%to database &#39;xxx&#39;</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql <span class="operator">-</span>uroot <span class="operator">-</span>p123456</span><br></pre></td></tr></table></figure>
+<ul>
+<li>修改权限表格</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use mysql;</span><br><span class="line"><span class="keyword">update</span> <span class="keyword">user</span> <span class="keyword">set</span> host <span class="operator">=</span> <span class="string">&#x27;%&#x27;</span> <span class="keyword">where</span> <span class="keyword">user</span> <span class="operator">=</span> &quot;root&quot;;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
+<h4 id="无修改权限">※ 无修改权限</h4>
+<p><strong>错误提示</strong>：<code>Access denied for user 'dorm'@'%to database 'xxx'</code></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> privileges <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;dorm&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="2-在Docker中安装phpMyAdmin"><a href="#2-在Docker中安装phpMyAdmin" class="headerlink" title="2. 在Docker中安装phpMyAdmin"></a>2. 在Docker中安装phpMyAdmin</h2><p>phpMyAdmin 是一种 MySQL图形化 管理工具，该工具是基于 Web 跨平台的管理程序，并且支持简体中文。在宿主机的命令行运行下面的代码即可安装。</p>
+<h2 id="2-在docker中安装phpmyadmin">2. 在Docker中安装phpMyAdmin</h2>
+<p>phpMyAdmin 是一种 MySQL图形化 管理工具，该工具是基于 Web 跨平台的管理程序，并且支持简体中文。在宿主机的命令行运行下面的代码即可安装。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name phpmyadmin -p 8080:80 --link mysql:db -d phpmyadmin/phpmyadmin:latest</span><br></pre></td></tr></table></figure>
 <ul>
 <li><code>phpmyadmin</code>：容器名称；</li>
 <li><code>8080:80</code>：开放端口 8080 来映射宿主机的 80 端口；</li>
 <li><code>mysql</code>：刚才设置的MySQL的容器名称，如果刚才修改容器名称的话，一定记得要在这里修改。</li>
 </ul>
-<p>安装完成后，通过 <code>公网IP:8080</code> 即可访问如下页面，初始账号为 root，密码为刚才设置的<code>MYSQL_ROOT_PASSWORD=</code>后面的内容（<code>123456</code>）<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/PHPMyAdmin.png" alt="PHPMyAdmin"></p>
-<h3 id="可能会遇到的问题"><a href="#可能会遇到的问题" class="headerlink" title="可能会遇到的问题"></a>可能会遇到的问题</h3><h4 id="※-无法访问phpMyAdmin"><a href="#※-无法访问phpMyAdmin" class="headerlink" title="※ 无法访问phpMyAdmin"></a>※ 无法访问phpMyAdmin</h4><p>这种情况大多数是因为防火墙（或服务器的安全组规则）导致的。因为刚才自定义的 <code>8080</code> 端口在服务器中是默认不开放的，所以要配置服务器的安全组，将其开放。<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E6%94%BE%E5%AE%89%E5%85%A8%E7%BB%84.png" alt="腾讯云开放安全组"></p>
-<h2 id="3-创建账户与数据库"><a href="#3-创建账户与数据库" class="headerlink" title="3. 创建账户与数据库"></a>3. 创建账户与数据库</h2><p> 新建一个项目账户（dorm），如下图所示。<br> <img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E6%96%B0%E5%A2%9E%E9%A1%B9%E7%9B%AE%E7%94%A8%E6%88%B7.png" alt="新增项目用户"></p>
+<p>安装完成后，通过 <code>公网IP:8080</code> 即可访问如下页面，初始账号为 root，密码为刚才设置的<code>MYSQL_ROOT_PASSWORD=</code>后面的内容（<code>123456</code>）<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/PHPMyAdmin.png" alt="PHPMyAdmin"></p>
+<h3 id="可能会遇到的问题">可能会遇到的问题</h3>
+<h4 id="无法访问phpmyadmin">※ 无法访问phpMyAdmin</h4>
+<p>这种情况大多数是因为防火墙（或服务器的安全组规则）导致的。因为刚才自定义的 <code>8080</code> 端口在服务器中是默认不开放的，所以要配置服务器的安全组，将其开放。<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E8%85%BE%E8%AE%AF%E4%BA%91%E5%BC%80%E6%94%BE%E5%AE%89%E5%85%A8%E7%BB%84.png" alt="腾讯云开放安全组"></p>
+<h2 id="3-创建账户与数据库">3. 创建账户与数据库</h2>
+<p>新建一个项目账户（dorm），如下图所示。<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E6%96%B0%E5%A2%9E%E9%A1%B9%E7%9B%AE%E7%94%A8%E6%88%B7.png" alt="新增项目用户"></p>
 <p><strong>【注意】：在项目中尽量不要使用root用户管理项目，而是单独创建以该项目名称为命名的数据库账户，并建立同名的数据库进行管理。</strong></p>
-<h2 id="4-本地MySQL的安装与操作"><a href="#4-本地MySQL的安装与操作" class="headerlink" title="4. 本地MySQL的安装与操作"></a>4. 本地MySQL的安装与操作</h2><p>本人使用的是 M1 的 Mac 环境，因此对应安装了 M1 版本的 Docker 和 MySQL，具体步骤和①两步类似，所以这里就不再赘述。<br>本地是数据库管理软件我使用的的是免费开源的数据库管理软件“Sequel Ace”，它具有数据库管理软件的基本功能，在AppStore中就可以搜索到，而且是完全免费的。<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/Sequel_Ace.png" alt="Sequel Ace"></p>
+<h2 id="4-本地mysql的安装与操作">4. 本地MySQL的安装与操作</h2>
+<p>本人使用的是 M1 的 Mac 环境，因此对应安装了 M1 版本的 Docker 和 MySQL，具体步骤和①两步类似，所以这里就不再赘述。<br>
+本地是数据库管理软件我使用的的是免费开源的数据库管理软件“Sequel Ace”，它具有数据库管理软件的基本功能，在AppStore中就可以搜索到，而且是完全免费的。<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/Sequel_Ace.png" alt="Sequel Ace"></p>
 <p><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E8%AE%BE%E8%AE%A1%E6%95%B0%E6%8D%AE%E5%BA%93.png" alt="设计数据库"></p>
 <hr>
-<h1 id="SpringBoot-连接-MySQL"><a href="#SpringBoot-连接-MySQL" class="headerlink" title="SpringBoot 连接 MySQL"></a>SpringBoot 连接 MySQL</h1><h2 id="1-porm-xml-文件"><a href="#1-porm-xml-文件" class="headerlink" title="1. porm.xml 文件"></a>1. porm.xml 文件</h2><p>在 porm.xml 文件中的<code>&lt;dependencies&gt;</code>中添加 JDBC 的依赖。</p>
+<h1>SpringBoot 连接 MySQL</h1>
+<h2 id="1-porm-xml-文件">1. porm.xml 文件</h2>
+<p>在 porm.xml 文件中的<code>&lt;dependencies&gt;</code>中添加 JDBC 的依赖。</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-jdbc<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <p>更新 Maven 依赖。</p>
-<h2 id="2-application-yml-文件"><a href="#2-application-yml-文件" class="headerlink" title="2. application.yml 文件"></a>2. application.yml 文件</h2><p>修改SpringBoot配置文件，application.yml 文件，增加数据库相关信息。</p>
+<h2 id="2-application-yml-文件">2. application.yml 文件</h2>
+<p>修改SpringBoot配置文件，application.yml 文件，增加数据库相关信息。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">server:  </span><br><span class="line">  port: <span class="number">8090</span></span><br><span class="line">spring:</span><br><span class="line">  datasource:</span><br><span class="line">	# url: jdbc:mysql:<span class="comment">//127.0.0.1:3306/DORM  # 本地测试环境</span></span><br><span class="line">    url: jdbc:mysql:<span class="comment">//42.194.xxx.xx:3306/dorm	# 服务器环境</span></span><br><span class="line">    username: dorm</span><br><span class="line">    password: dorm</span><br><span class="line">    driver-class-name: com.mysql.cj.jdbc.Driver</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="3-Java类文件"><a href="#3-Java类文件" class="headerlink" title="3. Java类文件"></a>3. Java类文件</h2><p>添加Java类文件，DormInfo.java。</p>
+<h2 id="3-java类文件">3. Java类文件</h2>
+<p>添加Java类文件，DormInfo.java。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.songxj.dormitory_system.api;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line"><span class="keyword">import</span> org.springframework.jdbc.core.JdbcTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Controller;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMethod;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.ResponseBody;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DormInfo</span> &#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> JdbcTemplate jdbcTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/dormInfo&quot;, method = RequestMethod.GET)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;Map&lt;String, Object&gt;&gt; <span class="title function_">getDormInfo</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">sql</span> <span class="operator">=</span> <span class="string">&quot;select * from dorm&quot;</span>; <span class="comment">// SQL查询语句</span></span><br><span class="line">        <span class="keyword">return</span> jdbcTemplate.queryForList(sql);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="4-本地测试"><a href="#4-本地测试" class="headerlink" title="4. 本地测试"></a>4. 本地测试</h2><p>本地测试结果如下：<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E6%9C%AC%E5%9C%B0%E6%B5%8B%E8%AF%95.png" alt="本地测试"></p>
-<h2 id="5-打包-jar-包"><a href="#5-打包-jar-包" class="headerlink" title="5. 打包 jar 包"></a>5. 打包 jar 包</h2><p><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E6%89%93jar%E5%8C%85.png" alt="打jar包"></p>
-<h2 id="6-本地开发环境连接服务器Docker"><a href="#6-本地开发环境连接服务器Docker" class="headerlink" title="6. 本地开发环境连接服务器Docker"></a>6. 本地开发环境连接服务器Docker</h2><p>连接Docker宿主机，修改Docker服务文件</p>
+<h2 id="4-本地测试">4. 本地测试</h2>
+<p>本地测试结果如下：<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E6%9C%AC%E5%9C%B0%E6%B5%8B%E8%AF%95.png" alt="本地测试"></p>
+<h2 id="5-打包-jar-包">5. 打包 jar 包</h2>
+<p><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E6%89%93jar%E5%8C%85.png" alt="打jar包"></p>
+<h2 id="6-本地开发环境连接服务器docker">6. 本地开发环境连接服务器Docker</h2>
+<p>连接Docker宿主机，修改Docker服务文件</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi  /lib/systemd/system/docker.service</span><br></pre></td></tr></table></figure>
-
 <p>将原来的<code>ExecStart</code>前面加上<code>#</code>号注释掉，然后在下面追加一行</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ExecStart=/usr/bin/dockerd    -H tcp://0.0.0.0:2375    -H unix:///var/run/docker.sock</span><br></pre></td></tr></table></figure>
 <p>重新加载配置</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure>
-
 <p>重启Docker服务</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart docker.service</span><br></pre></td></tr></table></figure>
-
-<p>开放宿主机安全组中的 2375 端口<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E5%BC%80%E6%94%BE%E5%AE%BF%E4%B8%BB%E6%9C%BA%E5%AE%89%E5%85%A8%E7%BB%84%E4%B8%AD%E7%9A%842375%E7%AB%AF%E5%8F%A3.png" alt="开放宿主机安全组中的2375端口"></p>
-<p>在IDEA中安装Docker插件。<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/Docker%E6%8F%92%E4%BB%B6.png" alt="Docker插件"></p>
-<p>在Docker插件中连接宿主机服务器<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E9%85%8D%E7%BD%AEDocker.png" alt="配置Docker"></p>
-<h2 id="7-Docker-在本地创建（build）并运行（run）镜像"><a href="#7-Docker-在本地创建（build）并运行（run）镜像" class="headerlink" title="7. Docker 在本地创建（build）并运行（run）镜像"></a>7. Docker 在本地创建（build）并运行（run）镜像</h2><ul>
-<li><p>创建镜像</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t dorm_sys:1.0.0 . </span><br></pre></td></tr></table></figure></li>
-<li><p>运行镜像</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 10110:8090 --name dorm_sys dorm_sys:1.0.0</span><br></pre></td></tr></table></figure></li>
+<p>开放宿主机安全组中的 2375 端口<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E5%BC%80%E6%94%BE%E5%AE%BF%E4%B8%BB%E6%9C%BA%E5%AE%89%E5%85%A8%E7%BB%84%E4%B8%AD%E7%9A%842375%E7%AB%AF%E5%8F%A3.png" alt="开放宿主机安全组中的2375端口"></p>
+<p>在IDEA中安装Docker插件。<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/Docker%E6%8F%92%E4%BB%B6.png" alt="Docker插件"></p>
+<p>在Docker插件中连接宿主机服务器<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E9%85%8D%E7%BD%AEDocker.png" alt="配置Docker"></p>
+<h2 id="7-docker-在本地创建-build-并运行-run-镜像">7. Docker 在本地创建（build）并运行（run）镜像</h2>
+<ul>
+<li>创建镜像</li>
 </ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t dorm_sys:1.0.0 . </span><br></pre></td></tr></table></figure>
+<ul>
+<li>运行镜像</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 10110:8090 --name dorm_sys dorm_sys:1.0.0</span><br></pre></td></tr></table></figure>
 <p><strong>【M1芯片打包的jar包在Linux环境无法运行】</strong></p>
 <ul>
-<li>M1芯片（arm64）构建Linux（amd64）可运行的镜像<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build --platform linux/amd64 -t dorm_sys:1.0.0 . </span><br></pre></td></tr></table></figure></li>
+<li>M1芯片（arm64）构建Linux（amd64）可运行的镜像</li>
 </ul>
-<h2 id="8-上传本地镜像到阿里云"><a href="#8-上传本地镜像到阿里云" class="headerlink" title="8. 上传本地镜像到阿里云"></a>8. 上传本地镜像到阿里云</h2><p>首先在阿里云免费申请容器镜像服务（<a target="_blank" rel="noopener" href="https://cr.console.aliyun.com/repository/">https://cr.console.aliyun.com/repository/</a>）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build --platform linux/amd64 -t dorm_sys:1.0.0 . </span><br></pre></td></tr></table></figure>
+<h2 id="8-上传本地镜像到阿里云">8. 上传本地镜像到阿里云</h2>
+<p>首先在阿里云免费申请容器镜像服务（<a target="_blank" rel="noopener" href="https://cr.console.aliyun.com/repository/">https://cr.console.aliyun.com/repository/</a>）</p>
 <ul>
-<li><p>登录阿里云容器镜像服务</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker login --username=songxj01 registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure></li>
-<li><p>上传镜像</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker tag dorm_sys:1.0.0 registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br><span class="line">docker push registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br></pre></td></tr></table></figure></li>
+<li>登录阿里云容器镜像服务</li>
 </ul>
-<h2 id="9-在服务器拉取镜像并运行"><a href="#9-在服务器拉取镜像并运行" class="headerlink" title="9. 在服务器拉取镜像并运行"></a>9. 在服务器拉取镜像并运行</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br></pre></td></tr></table></figure>
-
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker login --username=songxj01 registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure>
+<ul>
+<li>上传镜像</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker tag dorm_sys:1.0.0 registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br><span class="line">docker push registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br></pre></td></tr></table></figure>
+<h2 id="9-在服务器拉取镜像并运行">9. 在服务器拉取镜像并运行</h2>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br></pre></td></tr></table></figure>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 10110:8090 --name dorm_sys registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br></pre></td></tr></table></figure>
-
-<p>在线测试：<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E5%9C%A8%E7%BA%BF%E6%B5%8B%E8%AF%95.png" alt="在线测试"></p>
+<p>在线测试：<br>
+<img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E5%9C%A8%E7%BA%BF%E6%B5%8B%E8%AF%95.png" alt="在线测试"></p>
 <p><br/><br/><br/><br/></p>
  
       <!-- reward -->
@@ -665,7 +683,17 @@
 </script>
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
+        
+            <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css">
+        
+    
+ 
 <!-- busuanzi  -->
  
 <script src="/js/busuanzi-2.3.pure.min.js"></script>

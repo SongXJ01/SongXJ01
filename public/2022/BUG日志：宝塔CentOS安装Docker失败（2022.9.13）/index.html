@@ -45,7 +45,7 @@
         }
       </style>
     <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml">
-</head>
+<link href="https://cdn.bootcss.com/KaTeX/0.11.1/katex.min.css" rel="stylesheet" /></head>
   </html>
 </html>
 
@@ -88,7 +88,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> 字数统计:</span>
-            <span class="post-count">287</span>
+            <span class="post-count">288</span>
         </span>
     </span>
 
@@ -115,17 +115,20 @@
   <p>报错内容</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;class/panelPlugin.py&quot;</span>, line 2788, <span class="keyword">in</span> a</span><br><span class="line">    <span class="built_in">return</span> p.exec_fun(get)</span><br><span class="line">  File <span class="string">&quot;class/pluginAuth.py&quot;</span>, line 67, <span class="keyword">in</span> exec_fun</span><br><span class="line">    raise public.PanelError(res[<span class="string">&#x27;msg&#x27;</span>])</span><br><span class="line">public.PanelError: 面板运行时发生错误: Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;/www/server/panel/plugin/docker/docker_main.py&quot;</span>, line 57, <span class="keyword">in</span> GetConList</span><br><span class="line">    <span class="keyword">for</span> con <span class="keyword">in</span> self.__docker.containers.list(all=True):</span><br><span class="line">AttributeError: <span class="string">&#x27;NoneType&#x27;</span> object has no attribute <span class="string">&#x27;containers&#x27;</span></span><br></pre></td></tr></table></figure>
 <span id="more"></span>
-
 <hr>
-<h1 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h1><h2 id="1-卸载已经安装的-Docker"><a href="#1-卸载已经安装的-Docker" class="headerlink" title="1. 卸载已经安装的 Docker"></a>1. 卸载已经安装的 Docker</h2><p>如果已经安装了未运行成功的 Docker，错误如下图所示，那么请将这个 Docker 卸载。</p>
+<h1>解决方式</h1>
+<h2 id="1-卸载已经安装的-docker">1. 卸载已经安装的 Docker</h2>
+<p>如果已经安装了未运行成功的 Docker，错误如下图所示，那么请将这个 Docker 卸载。</p>
 <p><img src="/images/BUG%E6%97%A5%E5%BF%97_%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5/bug_docker_1.png" alt="错误页面"></p>
-<h2 id="2-在-etc-docker-路径下创建-daemon-配置文件"><a href="#2-在-etc-docker-路径下创建-daemon-配置文件" class="headerlink" title="2. 在 /etc/docker 路径下创建 daemon 配置文件"></a>2. 在 <code>/etc/docker</code> 路径下创建 daemon 配置文件</h2><p><img src="/images/BUG%E6%97%A5%E5%BF%97_%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5/bug_docker_2.png" alt="daemon 配置文件"></p>
+<h2 id="2-在-etc-docker-路径下创建-daemon-配置文件">2. 在 <code>/etc/docker</code> 路径下创建 daemon 配置文件</h2>
+<p><img src="/images/BUG%E6%97%A5%E5%BF%97_%E5%AE%9D%E5%A1%94CentOS%E5%AE%89%E8%A3%85Docker%E5%A4%B1%E8%B4%A5/bug_docker_2.png" alt="daemon 配置文件"></p>
 <p>在 <code>daemon.json</code> 文件中提前配置好 Docker 的镜像源，即将下面这段代码粘贴到 <code>daemon.json</code> 文件中。 <code>daemon.conf</code> 文件此时保持空即可。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;https://docker.mirrors.ustc.edu.cn&quot;</span>]&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-重新安装-Docker"><a href="#3-重新安装-Docker" class="headerlink" title="3. 重新安装 Docker"></a>3. 重新安装 Docker</h2><p>我安装的是宝塔软件商店中的 3.9.1 的版本。</p>
+<h2 id="3-重新安装-docker">3. 重新安装 Docker</h2>
+<p>我安装的是宝塔软件商店中的 3.9.1 的版本。</p>
 <hr>
-<h1 id="BUG原因分析"><a href="#BUG原因分析" class="headerlink" title="BUG原因分析"></a>BUG原因分析</h1><p>可能是因为宝塔提供的镜像源和CentOS的版本不匹配，因为CentOS基于Python2.7运行的，Docker 3.9.1 的运行环境好像是Python3，所以要更新一下镜像源。</p>
+<h1>BUG原因分析</h1>
+<p>可能是因为宝塔提供的镜像源和CentOS的版本不匹配，因为CentOS基于Python2.7运行的，Docker 3.9.1 的运行环境好像是Python3，所以要更新一下镜像源。</p>
 <p><br/><br/><br/><br/></p>
  
       <!-- reward -->
@@ -575,7 +578,17 @@
 </script>
 
 <!-- Katex -->
-
+ 
+    
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
+        
+            <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css">
+        
+    
+ 
 <!-- busuanzi  -->
  
 <script src="/js/busuanzi-2.3.pure.min.js"></script>

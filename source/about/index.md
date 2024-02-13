@@ -10,7 +10,6 @@ no_copyright: true
   <i class="fas fa-user"></i> &ensp; **姓名**：Xingjian Song
   <i class="fas fa-map-marker-alt"></i> &ensp; **现居**：杭州
   <i class="fas fa-graduation-cap"></i>&ensp;**学校**：PKU
-  <i class="fab fa-qq"></i> &ensp;  **QQ**: [2571009323](tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=2571009323&website=www.oicqzone.com)
   <i class="fas fa-envelope"></i> &ensp;  **Email**: songxj01@126.com 
   <i class="fab fa-github"></i>  &ensp;  **GitHub**: [https://github.com/SongXJ01](https://github.com/SongXJ01)
   <i class="fab fa-git-alt"></i>  &ensp; **Gitee**: [https://gitee.com/songxj01](https://gitee.com/songxj01)
