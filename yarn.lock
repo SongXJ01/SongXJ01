@@ -1067,6 +1067,13 @@
     "moment" "^2.18.0"
     "nunjucks" "^3.2.1"
 
+"hexo-filter-auto-spacing@^0.2.1":
+  "integrity" "sha512-CVD0zDTy7ubd5NRtl7zewvM9/qT3gFlbIkp2Y3D4rf39KpO0fsUg/mWOMuh5NzwjYP4fQIleuLKeZmWpYdNdSg=="
+  "resolved" "https://registry.npmmirror.com/hexo-filter-auto-spacing/-/hexo-filter-auto-spacing-0.2.1.tgz"
+  "version" "0.2.1"
+  dependencies:
+    "pangunode" "^0.1.0"
+
 "hexo-filter-mermaid-diagrams@^1.0.5":
   "integrity" "sha512-/IkIMKn4V7PBAzMJGNDPSoBFlv1JGvIELXm5AWkR8N5N44kDTNJLtabb4h095UhZQIXOrF9zA1WYhi6wrWLW5Q=="
   "resolved" "https://registry.npmmirror.com/hexo-filter-mermaid-diagrams/-/hexo-filter-mermaid-diagrams-1.0.5.tgz"
@@ -2193,6 +2200,11 @@
   "integrity" "sha512-B5JU3cabzk8c67mRRd3ECmROafjYMXbuzlwtqdM8IbS8ktlTix8aFGb2bAGKrSRIlnfKwovGUUr72JUPyOb6kQ=="
   "resolved" "https://registry.npmmirror.com/os-homedir/-/os-homedir-1.0.2.tgz"
   "version" "1.0.2"
+
+"pangunode@^0.1.0":
+  "integrity" "sha512-Vs4udXXLjaZnBeFGuLIrauj78Y7Kh9Bif9pDk+Wf/9jCjbnC7HHY4qXOcL2GI9vTDAX0uJ6Y5Wzf3Cj58avapA=="
+  "resolved" "https://registry.npmmirror.com/pangunode/-/pangunode-0.1.0.tgz"
+  "version" "0.1.0"
 
 "param-case@^2.1.1":
   "integrity" "sha512-eQE845L6ot89sk2N8liD8HAuH4ca6Vvr7VWAWwt7+kvvG5aBcPmmphQ68JsEG2qa9n1TykS2DLeMt363AAH8/w=="

@@ -34,7 +34,9 @@ skip_render:
 # Writing
 new_post_name: :title.md # File name of new posts
 default_layout: post
-auto_spacing: true # 在中文和英文之间加入空格
+# hexo 中英文之间自动加空格 
+auto_spacing:
+  enable: true
 titlecase: false # Transform title into titlecase
 external_link:
   enable: true # Open external links in new tab
