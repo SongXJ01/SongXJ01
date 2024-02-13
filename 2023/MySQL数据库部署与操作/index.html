@@ -44,7 +44,8 @@
           font-size: 1.6rem;
         }
       </style>
-    </head>
+    <!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml">
+</head>
   </html>
 </html>
 
@@ -123,7 +124,7 @@
 <li><code>-v</code>：文件挂载（<code>宿主机文件路径</code>:<code>Docker容器文件路径</code>）；</li>
 <li><code>-p</code>：端口映射（<code>对外暴露端口</code>:<code>Docker容器内部端口</code>）；</li>
 <li><code>--name</code>：容器名称；</li>
-<li><code>MYSQL_ROOT_PASSWORD=123456</code>：设置MySQL数据库的初始root密码为<code>123456</code>；</li>
+<li> <code>MYSQL_ROOT_PASSWORD=123456</code>：设置MySQL数据库的初始root密码为<code>123456</code>；</li>
 <li><code>mysql:5.7</code>：指定MySQL版本为5.7。</li>
 </ul>
 <p><strong>【若不需要挂载的话可以正常运行下面的命令】</strong></p>
@@ -136,17 +137,16 @@
 <h3 id="可能会遇到的错误"><a href="#可能会遇到的错误" class="headerlink" title="可能会遇到的错误"></a>可能会遇到的错误</h3><h4 id="※-数据库管理工具连接错误"><a href="#※-数据库管理工具连接错误" class="headerlink" title="※ 数据库管理工具连接错误"></a>※ 数据库管理工具连接错误</h4><p><strong>错误提示</strong>：<code>Host &#39;172.17.0.1&#39; is not allowed to connect to this MySQL server</code></p>
 <p>说明所连接的用户帐号没有远程连接的权限，只能在本机（localhost）登录，需更改 MySQL 数据库里的 user 表里的 host 项。</p>
 <ul>
-<li><p>进入容器：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">exec</span> <span class="operator">-</span>it mysql <span class="operator">/</span>bin<span class="operator">/</span>bash</span><br></pre></td></tr></table></figure>
-
-</li>
-<li><p>登录MySQL：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql <span class="operator">-</span>uroot <span class="operator">-</span>p123456</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>修改权限表格</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use mysql;</span><br><span class="line"><span class="keyword">update</span> <span class="keyword">user</span> <span class="keyword">set</span> host <span class="operator">=</span> <span class="string">&#x27;%&#x27;</span> <span class="keyword">where</span> <span class="keyword">user</span> <span class="operator">=</span> &quot;root&quot;;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure></li>
+<li>进入容器：<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">exec</span> <span class="operator">-</span>it mysql <span class="operator">/</span>bin<span class="operator">/</span>bash</span><br></pre></td></tr></table></figure></li>
 </ul>
-<h4 id="※-无修改权限"><a href="#※-无修改权限" class="headerlink" title="※ 无修改权限"></a>※ 无修改权限</h4><p><strong>错误提示</strong>：<code>Access denied for user &#39;dorm&#39;@&#39;%to database &#39;xxx&#39;</code></p>
+<ul>
+<li><p>登录MySQL：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql <span class="operator">-</span>uroot <span class="operator">-</span>p123456</span><br></pre></td></tr></table></figure></li>
+<li><p>修改权限表格</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use mysql;</span><br><span class="line"><span class="keyword">update</span> <span class="keyword">user</span> <span class="keyword">set</span> host <span class="operator">=</span> <span class="string">&#x27;%&#x27;</span> <span class="keyword">where</span> <span class="keyword">user</span> <span class="operator">=</span> &quot;root&quot;;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
+<h4 id="※-无修改权限"><a href="#※-无修改权限" class="headerlink" title="※ 无修改权限"></a>※ 无修改权限</h4></li>
+</ul>
+<p><strong>错误提示</strong>：<code>Access denied for user &#39;dorm&#39;@&#39;%to database &#39;xxx&#39;</code></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">all</span> privileges <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;dorm&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br></pre></td></tr></table></figure>
 
 
@@ -196,8 +196,7 @@
 <p>在Docker插件中连接宿主机服务器<br><img src="/images/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%93%8D%E4%BD%9C/%E9%85%8D%E7%BD%AEDocker.png" alt="配置Docker"></p>
 <h2 id="7-Docker-在本地创建（build）并运行（run）镜像"><a href="#7-Docker-在本地创建（build）并运行（run）镜像" class="headerlink" title="7. Docker 在本地创建（build）并运行（run）镜像"></a>7. Docker 在本地创建（build）并运行（run）镜像</h2><ul>
 <li><p>创建镜像</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t dorm_sys:1.0.0 . </span><br></pre></td></tr></table></figure>
-</li>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t dorm_sys:1.0.0 . </span><br></pre></td></tr></table></figure></li>
 <li><p>运行镜像</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 10110:8090 --name dorm_sys dorm_sys:1.0.0</span><br></pre></td></tr></table></figure></li>
 </ul>
@@ -208,8 +207,7 @@
 <h2 id="8-上传本地镜像到阿里云"><a href="#8-上传本地镜像到阿里云" class="headerlink" title="8. 上传本地镜像到阿里云"></a>8. 上传本地镜像到阿里云</h2><p>首先在阿里云免费申请容器镜像服务（<a target="_blank" rel="noopener" href="https://cr.console.aliyun.com/repository/">https://cr.console.aliyun.com/repository/</a>）</p>
 <ul>
 <li><p>登录阿里云容器镜像服务</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker login --username=songxj01 registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure>
-</li>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker login --username=songxj01 registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure></li>
 <li><p>上传镜像</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker tag dorm_sys:1.0.0 registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br><span class="line">docker push registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0</span><br></pre></td></tr></table></figure></li>
 </ul>
@@ -751,6 +749,15 @@
     
 
   </div>
-</body>
+<!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && location.pathname =='/'){
+    
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载swiper')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script>
+<script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script>
+<style></style><!-- hexo injector body_end end --></body>
 
 </html>
