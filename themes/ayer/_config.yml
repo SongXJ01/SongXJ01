@@ -154,7 +154,7 @@ katex:
 
 # mermaid流程图 三个选项缺一不可(https://mermaid-js.github.io/mermaid/)
 mermaid:
-  enable: false
+  enable: true
   cdn: https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js
   theme: forest
 

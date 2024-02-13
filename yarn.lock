@@ -598,6 +598,13 @@
   "resolved" "https://registry.npmmirror.com/decode-uri-component/-/decode-uri-component-0.2.2.tgz"
   "version" "0.2.2"
 
+"deep-assign@^2.0.0":
+  "integrity" "sha512-2QhG3Kxulu4XIF3WL5C5x0sc/S17JLgm1SfvDfIRsR/5m7ZGmcejII7fZ2RyWhN0UWIJm0TNM/eKow6LAn3evQ=="
+  "resolved" "https://registry.npmmirror.com/deep-assign/-/deep-assign-2.0.0.tgz"
+  "version" "2.0.0"
+  dependencies:
+    "is-obj" "^1.0.0"
+
 "deepmerge@^4.2.2":
   "integrity" "sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A=="
   "resolved" "https://registry.npmmirror.com/deepmerge/-/deepmerge-4.3.1.tgz"
@@ -1043,6 +1050,13 @@
     "moment" "^2.18.0"
     "nunjucks" "^3.2.1"
 
+"hexo-filter-mermaid-diagrams@^1.0.5":
+  "integrity" "sha512-/IkIMKn4V7PBAzMJGNDPSoBFlv1JGvIELXm5AWkR8N5N44kDTNJLtabb4h095UhZQIXOrF9zA1WYhi6wrWLW5Q=="
+  "resolved" "https://registry.npmmirror.com/hexo-filter-mermaid-diagrams/-/hexo-filter-mermaid-diagrams-1.0.5.tgz"
+  "version" "1.0.5"
+  dependencies:
+    "deep-assign" "^2.0.0"
+
 "hexo-front-matter@^0.2.3":
   "integrity" "sha512-GL/pGfYqsvjMgxjhOWv1zAc7t4JoGUow+CH9Tes/5N2wKxxTzt2woKEMHz1+c01CmhdVYUR4lO3R1ZAcxc0caA=="
   "resolved" "https://registry.npmmirror.com/hexo-front-matter/-/hexo-front-matter-0.2.3.tgz"
@@ -1118,13 +1132,12 @@
     "hexo-util" "^2.1.0"
     "nunjucks" "^3.0.0"
 
-"hexo-generator-index@^2.0.0":
-  "integrity" "sha512-q/29Vj9BZs0dwBcF+s9IT8ymS4aYZsDwBEYDnh96C8tsX+KPY5v6TzCdttz58BchifaJpP/l9mi6u9rZuYqA0g=="
-  "resolved" "https://registry.npmmirror.com/hexo-generator-index/-/hexo-generator-index-2.0.0.tgz"
-  "version" "2.0.0"
+"hexo-generator-index-custom@^1.0.1":
+  "integrity" "sha512-qv/lP31kxX3Za5sNYBFDhosAo5Zq2HSavgRusUZhO+/Afx2Uxan+n0a4x9vqf0XCM/m+CygXiI6AsBDdsQpn0Q=="
+  "resolved" "https://registry.npmmirror.com/hexo-generator-index-custom/-/hexo-generator-index-custom-1.0.1.tgz"
+  "version" "1.0.1"
   dependencies:
-    "hexo-pagination" "1.0.0"
-    "timsort" "^0.3.0"
+    "hexo-pagination" "2.0.0"
 
 "hexo-generator-searchdb@^1.4.1":
   "integrity" "sha512-7m8IBpZbI6iKb2jRYxs4pghD6Ln8ylQSRGl6MIC4G9wws21vYSXSD8rvC3MoCO+pWBHs6E/mTA/rjG+p2AZfVg=="
@@ -1196,6 +1209,11 @@
   "integrity" "sha512-miEVFgxchPr2qNWxw0JWpJ9R/Yaf7HjHBZVjvCCcqfbsLyYtCvIfJDxcEwz1sDOC/fLzYPqNnhUI73uNxBHRSA=="
   "resolved" "https://registry.npmmirror.com/hexo-pagination/-/hexo-pagination-1.0.0.tgz"
   "version" "1.0.0"
+
+"hexo-pagination@2.0.0":
+  "integrity" "sha512-ZZQli5UwFWTW6bJNF4zwp2PCeGsipgoPxadud8+cPPxvygTP5GjTS5eVWcUTcfEaCluP+O1maxZCCWmYQoJkiQ=="
+  "resolved" "https://registry.npmmirror.com/hexo-pagination/-/hexo-pagination-2.0.0.tgz"
+  "version" "2.0.0"
 
 "hexo-renderer-ejs@^1.0.0":
   "integrity" "sha512-O925i69FG4NYO62oWORcPhRZZX0sPx1SXGKUS5DaR/lzajyiXH5i2sqnkj0ya0rNLXIy/D7Xmt7WbFyuQx/kKQ=="
@@ -1512,6 +1530,11 @@
   "integrity" "sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng=="
   "resolved" "https://registry.npmmirror.com/is-number/-/is-number-7.0.0.tgz"
   "version" "7.0.0"
+
+"is-obj@^1.0.0":
+  "integrity" "sha512-l4RyHgRqGN4Y3+9JHVrNqO+tN0rV5My76uW5/nuO4K1b6vw5G8d/cmFjP9tRfEsdhZNt0IFdZuK/c2Vr4Nb+Qg=="
+  "resolved" "https://registry.npmmirror.com/is-obj/-/is-obj-1.0.1.tgz"
+  "version" "1.0.1"
 
 "is-plain-object@^2.0.1", "is-plain-object@^2.0.4":
   "integrity" "sha512-h5PpgXkWitc38BBMYawTYMWJHFZJVnBquFE57xFpjB8pJFiF6gZ+bU+WyI/yqXiFR5mdLsgYNaPe8uao6Uv9Og=="
@@ -2645,11 +2668,6 @@
   "integrity" "sha512-Cc+OraorugtXNfs50hU9KS369rFXCfgGLpfCfvlc+Ud5u6VWmUQsOAa9HbTvheQdYnrdJqqv1e5oIqXppMYnSw=="
   "resolved" "https://registry.npmmirror.com/tildify/-/tildify-2.0.0.tgz"
   "version" "2.0.0"
-
-"timsort@^0.3.0":
-  "integrity" "sha512-qsdtZH+vMoCARQtyod4imc2nIJwg9Cc7lPRrw9CzF8ZKR0khdr8+2nX80PBhET3tcyTtJDxAffGh2rXH4tyU8A=="
-  "resolved" "https://registry.npmmirror.com/timsort/-/timsort-0.3.0.tgz"
-  "version" "0.3.0"
 
 "titlecase@^1.1.2":
   "integrity" "sha512-pQX4oiemzjBEELPqgK4WE+q0yhAqjp/yzusGtlSJsOuiDys0RQxggepYmo0BuegIDppYS3b3cpdegRwkpyN3hw=="
