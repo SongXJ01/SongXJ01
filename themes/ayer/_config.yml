@@ -156,7 +156,7 @@ katex:
 mermaid:
   enable: true
   cdn: https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js
-  theme: forest
+  theme: dark
 
 # 网站成立年份
 since: 2019

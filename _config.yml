@@ -45,6 +45,8 @@ render_drafts: false
 post_asset_folder: false
 relative_link: false
 future: true
+
+# 代码高亮
 highlight:
   enable: true
   line_number: true
@@ -155,3 +157,25 @@ swiper:
   temple_html: '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container">${temple_html_item}</div></div>'
   plus_style: ""
 
+# hexo-neat
+## Docs: https://github.com/rozbo/hexo-neat
+neat_enable: true
+# 压缩 html
+neat_html:
+  enable: true
+  exclude:
+# 压缩 css  
+neat_css:
+  enable: true
+  exclude:
+    - '**/*.min.css'
+# 压缩 js
+neat_js:
+  enable: true
+  mangle: true
+  output:
+  compress:
+  exclude:
+    - '**/*.min.js'
+    - '**/jquery.fancybox.pack.js'
+    - '**/index.js' 
