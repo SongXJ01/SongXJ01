@@ -26,17 +26,27 @@ categories:
 - 同一个 GPU 内的所有 SM 共享 50MB L2 Cache 和 80GB HBM3 Memory
 - 进一步向外看，同一个节点上的 GPU 通过 NVLink/NVSwitch 连接在一起
 
+
+<br/><br/>
+
+---
+
+<br/>
+
+
 ## H100结构与CUDA编程
 
 &emsp;&emsp;为了实现 GPU 并行加速计算，我们需要在 Host  上执行  `kernel launch`，让核函数在  Device 上的多个线程并发执行。CUDA 将核函数所定义的运算称为**线程（Thread）**，多个线程组成一个**块（Block）**，多个块组成**网格（Grid）**。具体的方式就是在调用核函数的时候通过`<<<grid, block>>>` 来指定核函数要执行的线程数量 N，之后 GPU 上的 N 个 Core 会并行执行核函数，并且每个线程会分配一个唯一的线程号 `threadID`，这个 ID 值可以通过核函数的内置变量 `threadIdx` 来获得。
 
 &emsp;&emsp;一个线程需要两个内置的坐标变量 `（blockIdx，threadIdx）` 来唯一标识，它们都是 `dim3` 类型变量，其中 `blockIdx` 指明线程所在 grid 中的位置，而 `threaIdx` 指明线程所在 block 中的位置。下面即是一个典型的矩阵乘法的 CUDA 程序示例，定义 block 大小为 16 x 16，也就是每个 block 有 256 个 threads。grid 的值则根据矩阵大小算出来需要多少个 block。
-为了进一步理解这里的 CUDA 编程模型概念与硬件结构，我们继续聊聊刚才没有提到的 WARP Scheduler。NVIDIA SM 采用 SIMT（Single Instruction Multiple Thread，单指令多线程）架构，线程束 warp 是最基本的执行和调度单元，一个 warp 一般包含 32 threads，这些 threads 以不同的数据资源执行相同的指令。
+
+&emsp;&emsp;为了进一步理解这里的 CUDA 编程模型概念与硬件结构，我们继续聊聊刚才没有提到的 WARP Scheduler。NVIDIA SM 采用 SIMT（Single Instruction Multiple Thread，单指令多线程）架构，线程束 warp 是最基本的执行和调度单元，一个 warp 一般包含 32 threads，这些 threads 以不同的数据资源执行相同的指令。
 
 ![三款显卡的计算能力比较](/images/H100结构与CUDA编程/三款显卡的计算能力比较.png)
 
 
 ## Cluster
+
 &emsp;&emsp;前面介绍的 CUDA 编程模型实际上都是在 Hopper 架构以前的抽象，也就是 grid/block 两级调度，block 映射到 SM 上。随着 Cooperative Groups 的引入和异步编程的支持，多个 Kernel 之间以生产者和消费者的方式通信，SM 到 SM 之间的通信带宽也在增加。在 Hopper 架构中，新增了 Distributed Shared Memory (DSMEM) 的概念，在一个 GPC 内部的 SM 有了专用的通信带宽，因此 CUDA 上新增了一层 Cluster 的调度层次。
 
 ![未加Cluster前的GPU架构](/images/H100结构与CUDA编程/未加Cluster前的GPU架构.png)

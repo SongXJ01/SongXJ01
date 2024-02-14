@@ -27,16 +27,24 @@ categories:
 5. **Pybind11**：Pybind11 是一个轻量级的开源库，可以将 C++ 代码封装成可以被 Python 直接调用的模块。它提供了简洁而直观的语法，使得将 C++ 代码封装成 Python 接口变得更加容易。
 ## 对比
 
-1. 底层实现：Ctypes 是使用 Python 自带的标准库，通过**调用动态链接库**（DLL）中的 C/C++ 函数来实现。SWIG、Boost.Python、Cython 和 Pybind11 则是通过**生成封装代码**来实现，将 C/C++ 代码封装成可以被 Python 直接调用的模块。
-2. 使用难度：Ctypes 的使用相对较简单，只需要导入函数原型并调用即可。SWIG 在配置和使用上较为复杂，需要编写接口文件和配置文件。Boost.Python 和 Pybind11 的使用相对较简单。
+* 底层实现：Ctypes 是使用 Python 自带的标准库，通过**调用动态链接库**（DLL）中的 C/C++ 函数来实现。SWIG、Boost.Python、Cython 和 Pybind11 则是通过**生成封装代码**来实现，将 C/C++ 代码封装成可以被 Python 直接调用的模块。
+* 使用难度：Ctypes 的使用相对较简单，只需要导入函数原型并调用即可。SWIG 在配置和使用上较为复杂，需要编写接口文件和配置文件。Boost.Python 和 Pybind11 的使用相对较简单。
+
+
 ## 开源库的选择参考
 
-- HiGHS，选择了 Pybind11；
+- HiGHS：选择了 Pybind11；
 - Tensorflow：已于 2019 年将 SIWG 切换为 pybind11；
 - 目前市面上大部分 AI 计算框架，如 TensorFlow、Pytorch、阿里 X-Deep Learning、百度 PaddlePaddle 等，均使用 pybind11 来提供 C++到 Python 端接口封装。
 
 
+
 <br/><br/>
+
+---
+
+<br/>
+
 
 # pybind11 使用总结
 参考：[Pybind11 文档](https://daobook.github.io/pybind11/basics.html)
@@ -111,7 +119,7 @@ add_my_library(vdotlib  # C++编译后的库名
 ```cmake
 add_subdirectory(${MY_CURR}/vdot_cpp)
 ```
-#### 编译 pybind11 的.so库
+#### 编译 pybind11 的 .so 库
 使用 start-pybind11 提供的宏进行编译C++动态库（静态库也可以）。
 ```cmake
 add_pb_library(np # 库的名字（ Python 的包名 ）
@@ -318,7 +326,13 @@ int main() {
 ```
 
 
+
 <br/><br/>
+
+---
+
+<br/>
+
 
 # 开源示例
 ## 示例 start-pybind11  运行命令记录
