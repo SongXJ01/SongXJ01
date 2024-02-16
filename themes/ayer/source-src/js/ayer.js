@@ -172,8 +172,8 @@
   });
 
   // ShowThemeInConsole
-  const ayerInfo = "主题不错？⭐star 支持一下 ->";
-  const ayerURL = "https://github.com/Shen-Yu/hexo-theme-ayer";
+  const ayerInfo = "欢迎来到SongXJ's Blog";
+  const ayerURL = "https://songxj01.gitee.io/";
   const ayerNameStr =
     "\n\n     _ __   _______ _____    \n    / \\ \\ \\ / / ____|  _  \\  \n   / _ \\ \\ V /|  _| | |_) |  \n  / ___ \\ | | | |___|  _ <   \n /_/   \\_\\ _| |_____|_| \\__\\ \n";
   const ayerInfoStyle =
