@@ -19,7 +19,7 @@ categories:
 > 链接：[https://leetcode.cn/problems/car-pooling](https://leetcode.cn/problems/car-pooling)
 
 
-## 示例
+### 示例
 
 * 示例 1：
 
@@ -38,7 +38,7 @@ categories:
 
 <br /> <br /> 
 
-# 解题思路
+## 解题思路
 
 **差分数组**：差分数组主要的适用场景是对原始数组进行频繁的区间增减操作，这个时候适用差分数组能够快速的完成，同时能够快速获得更新后的数组各个位置的值。
 
@@ -51,7 +51,8 @@ categories:
 
 
 <br /> <br /> 
-# 代码（Java）
+
+## 代码（Java）
 
 ```java
 public class LeetCode_1094_carPooling {

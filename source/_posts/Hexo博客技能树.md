@@ -15,7 +15,7 @@ top: 99
 
 <!--more-->
 
-# 绘制动态图表
+## 绘制动态图表
 
 基于插件 `hexo-tag-chart` 实现数据图表可视化。
 
@@ -78,7 +78,7 @@ npm i hexo-tag-chart -S
 
 
 
-# 支持 LaTeX 数学公式
+## 支持 LaTeX 数学公式
 
 本博客平台使用 `hexo-renderer-markdown-it-katex` 插件实现 Markdown 中 $\LaTeX$ 公式的渲染。安装方式需要先卸载之前的 Markdown 渲染器，然后替换成新的 Katex 渲染器插件。
 
@@ -128,7 +128,7 @@ $$
 
 <br/><br/>
 
-# 支持 Mermaid 流程图
+## 支持 Mermaid 流程图
 
 Mermaid 流程图是一款基于 JavaScript 的强大图表和绘图工具，它以其独特的魅力在数据可视化领域脱颖而出。这款工具允许用户通过受 Markdown 启发的简洁文本定义来动态创建和修改图表，为用户提供了极大的便利性和灵活性。
 
@@ -180,7 +180,7 @@ Class08 <--> C2: Cool label
 
 
 
-# 置顶或隐藏文章
+## 置顶或隐藏文章
 
 本博客网站中采用 `hexo-generator-index-custom` 插件进行博客文章的置顶和隐藏操作。
 
@@ -200,7 +200,7 @@ hide: true
 
 <br/><br/>
 
-# 优化提升访问效率
+## 优化提升访问效率
 
 
 本博客网站中采用 `hexo-neat` 插件优化提升访问效率。

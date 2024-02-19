@@ -19,11 +19,11 @@ categories:
 
 
 
-# MySQL的安装与部署
+## MySQL的安装与部署
 
 
 
-## 1. 在Docker中安装MySQL
+### 1. 在Docker中安装MySQL
 
 **【将Docker中MySQL数据库挂载到服务器】**
 将Docker中的数据以及配置文件映射到服务器的文件系统上，这样当删除了Docker容器后，之前的数据记录依然存在。
@@ -56,8 +56,8 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
 docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql/mysql-server
 ```
 
-### 可能会遇到的错误
-#### ※ 数据库管理工具连接错误
+#### 可能会遇到的错误
+##### ※ 数据库管理工具连接错误
 **错误提示**：`Host '172.17.0.1' is not allowed to connect to this MySQL server`
 
 说明所连接的用户帐号没有远程连接的权限，只能在本机（localhost）登录，需更改 MySQL 数据库里的 user 表里的 host 项。
@@ -79,7 +79,7 @@ use mysql;
 update user set host = '%' where user = "root";
 flush privileges;
 ```
-#### ※ 无修改权限
+##### ※ 无修改权限
 **错误提示**：`Access denied for user 'dorm'@'%to database 'xxx'`
 
 ```sql
@@ -88,7 +88,7 @@ grant all privileges on *.* to 'dorm'@'%';
 
 
 
-## 2. 在Docker中安装phpMyAdmin
+### 2. 在Docker中安装phpMyAdmin
 
 phpMyAdmin 是一种 MySQL图形化 管理工具，该工具是基于 Web 跨平台的管理程序，并且支持简体中文。在宿主机的命令行运行下面的代码即可安装。
 ```shell
@@ -101,15 +101,15 @@ docker run --name phpmyadmin -p 8080:80 --link mysql:db -d phpmyadmin/phpmyadmin
 安装完成后，通过 `公网IP:8080` 即可访问如下页面，初始账号为 root，密码为刚才设置的`MYSQL_ROOT_PASSWORD=`后面的内容（`123456`）
 ![PHPMyAdmin](/images/MySQL数据库部署与操作/PHPMyAdmin.png)
 
-### 可能会遇到的问题
-#### ※ 无法访问phpMyAdmin
+#### 可能会遇到的问题
+##### ※ 无法访问phpMyAdmin
 这种情况大多数是因为防火墙（或服务器的安全组规则）导致的。因为刚才自定义的 `8080` 端口在服务器中是默认不开放的，所以要配置服务器的安全组，将其开放。
 ![腾讯云开放安全组](/images/MySQL数据库部署与操作/腾讯云开放安全组.png)
 
 
 
 
-## 3. 创建账户与数据库
+### 3. 创建账户与数据库
 
  新建一个项目账户（dorm），如下图所示。
  ![新增项目用户](/images/MySQL数据库部署与操作/新增项目用户.png)
@@ -119,7 +119,7 @@ docker run --name phpmyadmin -p 8080:80 --link mysql:db -d phpmyadmin/phpmyadmin
 
 
 
-## 4. 本地MySQL的安装与操作
+### 4. 本地MySQL的安装与操作
 
 本人使用的是 M1 的 Mac 环境，因此对应安装了 M1 版本的 Docker 和 MySQL，具体步骤和①两步类似，所以这里就不再赘述。
 本地是数据库管理软件我使用的的是免费开源的数据库管理软件“Sequel Ace”，它具有数据库管理软件的基本功能，在AppStore中就可以搜索到，而且是完全免费的。
@@ -134,11 +134,11 @@ docker run --name phpmyadmin -p 8080:80 --link mysql:db -d phpmyadmin/phpmyadmin
 
 
 
-# SpringBoot 连接 MySQL
+## SpringBoot 连接 MySQL
 
 
 
-## 1. porm.xml 文件
+### 1. porm.xml 文件
 
 在 porm.xml 文件中的`<dependencies>`中添加 JDBC 的依赖。
 ```xml
@@ -151,7 +151,7 @@ docker run --name phpmyadmin -p 8080:80 --link mysql:db -d phpmyadmin/phpmyadmin
 
 
 
-## 2. application.yml 文件
+### 2. application.yml 文件
 
 修改SpringBoot配置文件，application.yml 文件，增加数据库相关信息。
 ```java
@@ -159,8 +159,8 @@ server:
   port: 8090
 spring:
   datasource:
-	# url: jdbc:mysql://127.0.0.1:3306/DORM  # 本地测试环境
-    url: jdbc:mysql://42.194.xxx.xx:3306/dorm	# 服务器环境
+	## url: jdbc:mysql://127.0.0.1:3306/DORM  ## 本地测试环境
+    url: jdbc:mysql://42.194.xxx.xx:3306/dorm	## 服务器环境
     username: dorm
     password: dorm
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -168,7 +168,7 @@ spring:
 
 
 
-## 3. Java类文件
+### 3. Java类文件
 
 添加Java类文件，DormInfo.java。
 ```java
@@ -201,7 +201,7 @@ public class DormInfo {
 
 
 
-## 4. 本地测试
+### 4. 本地测试
 
 本地测试结果如下：
 ![本地测试](/images/MySQL数据库部署与操作/本地测试.png)
@@ -209,13 +209,13 @@ public class DormInfo {
 
 
 
-## 5. 打包 jar 包
+### 5. 打包 jar 包
 ![打jar包](/images/MySQL数据库部署与操作/打jar包.png)
 
 
 
 
-## 6. 本地开发环境连接服务器Docker
+### 6. 本地开发环境连接服务器Docker
 
 
 连接Docker宿主机，修改Docker服务文件
@@ -253,7 +253,7 @@ systemctl restart docker.service
 
 
 
-## 7. Docker 在本地创建（build）并运行（run）镜像
+### 7. Docker 在本地创建（build）并运行（run）镜像
 
 - 创建镜像
 ```shell
@@ -273,7 +273,7 @@ docker build --platform linux/amd64 -t dorm_sys:1.0.0 .
 
 
 
-## 8. 上传本地镜像到阿里云
+### 8. 上传本地镜像到阿里云
 
 首先在阿里云免费申请容器镜像服务（[https://cr.console.aliyun.com/repository/](https://cr.console.aliyun.com/repository/)）
 
@@ -290,7 +290,7 @@ docker push registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0
 
 
 
-## 9. 在服务器拉取镜像并运行
+### 9. 在服务器拉取镜像并运行
 
 ```shell
 docker pull registry.cn-hangzhou.aliyuncs.com/songxj01/dorm_sys:1.0.0

@@ -21,8 +21,8 @@ top: 100
 
 <br/>
 
-# 基本操作
-## 编译
+## 基本操作
+### 编译
 
 ```bash
 nvcc add.cu -o add_cuda
@@ -63,7 +63,7 @@ ptxas info: Used 10 registers, 328 bytes cmem[0]
 
 从以上信息可以看出，对于同一个 GPU 而言，Block 内的 Thread 数越多，每个 Block 可占用的共享内存上限越大。
 
-## 运行
+### 运行
 
 ```bash
 ./add_cuda
@@ -75,10 +75,10 @@ nvprof ./myApp
 ```
 
 
-## 调试
+### 调试
 官方调试方案：[Debugging Solutions](https://developer.nvidia.cn/debugging-solutions)
 
-### CUDA-GDB
+#### CUDA-GDB
 官网链接：[CUDA-GDB](https://developer.nvidia.cn/cuda-gdb)
 编译成可调试版本：`-g` 表示将CPU代码编译成可调试版本，`-G` 表示将GPU代码编译成可调试版本
 
@@ -116,7 +116,7 @@ cuda thread (0,7,0)
 
 
 
-### **NVIDIA Nsight Systems**
+#### **NVIDIA Nsight Systems**
 官网链接：[NVIDIA Nsight Systems](https://developer.nvidia.cn/zh-cn/nsight-systems)
 
 &emsp;&emsp;NVIDIA Nsight Systems是一款低开销性能分析工具，旨在为开发人员提供优化软件所需的洞察力。无偏差的活动数据可在工具中可视化，可帮助用户调查瓶颈，避免推断误报，并以更高的性能提升概率实现优化。
@@ -132,16 +132,16 @@ cuda thread (0,7,0)
 <br/>
 
 
-# 内存操作
+## 内存操作
 
 
-## 内存层次结构
+### 内存层次结构
 &emsp;&emsp;在 GPU 内存层次结构中，最主要的两种内存是**全局内存**和**共享内存**。全局内存类似于CPU的系统内存，而共享内存类似于CPU的缓存，GPU 的共享内存可以由 CUDA C 的内核直接控制。
 
 ![GPU内存结构](/images/CUDA学习笔记/GPU内存结构.png)
 
 
-### 共享内存
+#### 共享内存
 
 
 &emsp;&emsp;共享内存是较小的片上内存，具有相对较低的延迟，并且共享内存可以提供比全局内存高得多的带宽。共享内存相较于全局内存而言，延迟要低大约20~30倍，而带宽高其大约10倍。共享内存可以当作一个可编程管理的缓存。共享内存通常的用途有:
@@ -168,7 +168,7 @@ kernel<<<grid, block, isize * sizeof(int)>>>(...)
 - **形式**：关键字`__shared__`添加到变量声明中。如`__shared__ float cache[10]`。
 - **目的**：对于GPU上启动的每个线程块，CUDA C编译器都将创建该共享变量的一个副本。线程块中的每个线程都共享这块内存，但线程却无法看到也不能修改其他线程块的变量副本。这样使得一个线程块中的多个线程能够在计算上通信和协作。
 
-### 常量内存
+#### 常量内存
 
 - **位置**：设备内存 
 - **形式**：关键字 `__constant__` 添加到变量声明中。如`__constant__ float s[10];`。
@@ -178,7 +178,7 @@ kernel<<<grid, block, isize * sizeof(int)>>>(...)
 - 性能提升的原因：
 &emsp;&emsp;对常量内存的单次读操作可以广播到其他的“邻近”线程。这将节约15次读取操作。（为什么是15，因为“邻近”指半个线程束，一个线程束包含32个线程的集合。）常量内存的数据将缓存起来，因此对相同地址的连续读操作将不会产生额外的内存通信量。
 
-### 纹理内存（Texture Cache）
+#### 纹理内存（Texture Cache）
 
 - **位置**：设备内存
 - **目的**：能够减少对内存的请求并提供高效的内存带宽。是专门为那些在内存访问模式中存在大量空间局部性的图形应用程序设计，意味着一个线程读取的位置可能与邻近线程读取的位置“非常接近”。
@@ -191,12 +191,12 @@ kernel<<<grid, block, isize * sizeof(int)>>>(...)
 
 
 
-## 同步
-### 障碍点
+### 同步
+#### 障碍点
 
 &emsp;&emsp;`__syncthreads()`用于协调同一 block 中线程间的通信。它要求块中的线程必须等待直到所有线程都到达该点。
 
-### 内存栅栏
+#### 内存栅栏
 &emsp;&emsp;内存栅栏确保栅栏前的任何内存写操作对栅栏后的其他线程都是可见的。memory fence 不能保证所有线程运行到同一位置，只保证执行 memory fence 函数的线程生产的数据能够安全地被其他线程消费。根据所需范围，有3种内存栅栏：Block、Grid或System。
 
 * `__threadfence()`：一个线程调用`__threadfence`后，该线程在该语句前对全局存储器或共享存储器的访问已经全部完成，执行结果对 **grid中** 的所有线程可见。
@@ -218,14 +218,14 @@ kernel<<<grid, block, isize * sizeof(int)>>>(...)
 
 
 
-# 线程管理
+## 线程管理
 
-## 硬件层面
+### 硬件层面
 
 ![CUDA软件和硬件结构](/images/CUDA学习笔记/CUDA软件和硬件结构.png)
 
 
-## 软件层面
+### 软件层面
 &emsp;&emsp;一个SM（Streaming MultiProcessor）由多个CUDA core组成，每个SM根据GPU架构不同有不同数量的CUDA core。SM还包括特殊运算单元（SFU），共享内存（shared memory），寄存器文件（Register File）和调度器（Warp Scheduler）等。register 和 shared memory 是稀缺资源，**这些有限的资源就使每个SM中active warps有非常严格的限制，也就限制了并行能力。**
 
 
@@ -234,7 +234,7 @@ kernel<<<grid, block, isize * sizeof(int)>>>(...)
 
 &emsp;&emsp;由一个内核启动所产生的所有线程统称为一个**网格（Grid）**。同一 Grid 中的所有线程共享相同的全局内存空间。一个网格由多个**线程块（Block）**构成，其包含一组**线程（Thread）**，同一个 block 中的 thread 可以同步，也可以通过 shared memory 进行通信，不同块内的线程不能协作。
 
-## Warp 线程束
+### Warp 线程束
 
 &emsp;&emsp;SM 采用的 SIMT（Single-Instruction, Multiple-Thread，单指令多线程）架构，warp 是最基本的执行单元，一个 warp 包含 32 个并行 thread，这些 thread **以不同数据资源执行相同的指令**。当一个 kernel 被执行时，grid 中的线程块被分配到 SM 上，**一个 Block 中的 thread 只能在一个SM上调度**，SM 一般可以调度多个线程块。每个thread 拥有它自己的程序计数器和状态寄存器，并且用该线程自己的数据执行指令，这就是所谓的单指令多线程。
 
@@ -252,21 +252,21 @@ kernel<<<grid, block, isize * sizeof(int)>>>(...)
 <br/>
 
 
-# CUDA 优化
+## CUDA 优化
 
-## CUDA核函数中的printf原理
+### CUDA核函数中的printf原理
 &emsp;&emsp;`printf` 就是GPU往CPU回传数据，然后显示在终端窗口里。由CUDA负责安排多个线程之间的都有哪些数据需要被准备，又是什么格式的，当前kernel运行期间因为不能暂停，临时性的又将数据放到哪里。kernel结束后，检查是否又有需要回传的东西，回传，然后调用host上的`printf`。
 
 
-## 优化 Host 和 GPU 之间的内存传输
-### 常规传输方式 cudaMemcpy
+### 优化 Host 和 GPU 之间的内存传输
+#### 常规传输方式 cudaMemcpy
 &emsp;&emsp;在很多情况下都是最慢的方式，但他近乎适用于所有情况，所以也可能是被使用最多的方式。
 
 ```cpp
 cudaMemcpy ( void* dst, const void* src, size_t count, cudaMemcpyKind kind )
 ```
 
-### 高维矩阵传输 cudaMemcpy2D / cudaMalloc3D
+#### 高维矩阵传输 cudaMemcpy2D / cudaMalloc3D
 
 &emsp;&emsp;以二维矩阵为例，可以用`cudaMalloc`来分配一维数组来存储一张图像数据，但这不是效率最快的方案，推荐的方式是使用`cudaMallocPitch`来分配一个二维数组，存取效率更快。`cudaMallocPitch`有一个非常好的特性是二维矩阵的每一行是内存对齐的，访问效率比一维数组更高。而通过`cudaMallocPitch`分配的内存必须配套使用`cudaMemcpy2D`完成数据传输。
 
@@ -278,7 +278,7 @@ cudaMemcpy2D ( void* dst, size_t dpitch, const void* src, size_t spitch, size_t 
 ```
 &emsp;&emsp;相比于普通的`cudaMemcpy`，`cudaMemcpy2D`多了两个参数`dpitch`和`spitch`，他们是每一行的实际字节数，是对齐分配`cudaMallocPitch`返回的值。
 
-### 异步传输 cudaMemcpyAsync / cudaMemcpy2DAsync / cudaMemcpy3DAsync
+#### 异步传输 cudaMemcpyAsync / cudaMemcpy2DAsync / cudaMemcpy3DAsync
 
 ![异步传输](/images/CUDA学习笔记/异步传输.png)
 
@@ -290,7 +290,7 @@ cudaMemsetAsync ( void* devPtr, int  value, size_t count, cudaStream_t stream = 
 cudaMemcpy2DAsync ( void* dst, size_t dpitch, const void* src, size_t spitch, size_t width, size_t height, cudaMemcpyKind kind, cudaStream_t stream = 0 )
 ```
 
-### 锁页内存
+#### 锁页内存
 &emsp;&emsp;**当从可分页内存传输数据到设备内存时，CUDA驱动程序首先分配临时页面锁定的主机内存，将“可分页内存”复制到“锁页内存”中 [copy 1]，然后再从“锁页内存”传输到“设备内存”[copy 2]**。为了让传输只有一次，我们可以在主机端分配**锁页内存**。锁页内存是主机端一块固定的物理内存，它不能被操作系统移动，不参与虚拟内存相关的交换操作。简而言之，分配之后，地址就固定了，被释放之前不会再变化。GPU知道锁页内存的物理地址，可以通过“**直接内存访问（Direct Memory Access，DMA）**”技术直接在主机和GPU之间复制数据，传输仅一次，效率更高。
 
 ```cpp
@@ -313,7 +313,7 @@ cudaHostRegister ( void* ptr, size_t size, unsigned int flags )
 ```
 **注意：** 锁页内存相比可分页内存可减少一次传输过程，显著提高传输效率，但过多的分配会影响操作系统性能。对于图像这类小内存应用还是比较合适的。
 
-### 零拷贝内存
+#### 零拷贝内存
 &emsp;&emsp;使用零拷贝内存时不需要`cudaMemcpy`之类的显式拷贝操作，直接通过指针取值，所以对调用者来说似乎是没有拷贝操作。但实际上是在引用内存中某个值时隐式走PCIe总线拷贝，这样的方式有几个优点：
 
 - 无需所有数据一次性显式拷贝到设备端，而是引用某个数据时即时隐式拷贝
@@ -325,9 +325,9 @@ cudaHostRegister ( void* ptr, size_t size, unsigned int flags )
 [https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/](https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/)
 [https://zhuanlan.zhihu.com/p/188246455](https://zhuanlan.zhihu.com/p/188246455)
 
-## 多卡CUDA编程
+### 多卡CUDA编程
 
-### 多卡通信框架NCCL
+#### 多卡通信框架NCCL
 [如何理解Nvidia英伟达的Multi-GPU多卡通信框架NCCL？ - 知乎](https://www.zhihu.com/question/63219175)
 
 
@@ -337,22 +337,22 @@ cudaHostRegister ( void* ptr, size_t size, unsigned int flags )
 
 <br/>
 
-# CUDA Toolkit
+## CUDA Toolkit
 
 [CUDA Toolkit Documentation-11.2](https://docs.nvidia.com/cuda/archive/11.2.0/index.html)
 
 
-## Thrust
+### Thrust
 [Thrust :: CUDA Toolkit Documentation](https://docs.nvidia.com/cuda/archive/11.2.0/thrust/index.html#abstract)
 
 &emsp;&emsp; Thrust 是基于 STL 的 CUDA C++模板库。安装 CUDA 工具包会将 Thrust 头文件复制到系统的标准 CUDA 包含目录，无需进一步安装即可使用。
 
-## cuBLAS
+### cuBLAS
 [cuBLAS :: CUDA Toolkit Documentation](https://docs.nvidia.com/cuda/archive/11.2.0/cublas/index.html)
 
 &emsp;&emsp; cuBLAS 是 CUDA 基本线性代数子程序库，它允许用户访问NVIDIA图形处理单元（GPU）的计算资源。
 
-## cuSOLVER
+### cuSOLVER
 
 [https://docs.nvidia.com/cuda/cusolver/index.html](https://docs.nvidia.com/cuda/cusolver/index.html)
 
@@ -368,7 +368,7 @@ cuSolver 将三个独立的组件组合在一起。
 * **cuSolverSP** 提供了一组基于稀疏矩阵的 QR 分解。 并非所有矩阵在因式分解中都具有良好的并行性稀疏模式，因此 cuSolverSP 库还提供了处理这些类似顺序矩阵的 CPU 路径。 对于那些具有丰富并行性的矩阵，GPU 路径将提供更高的性能。 
 * **cuSolverRF**，是一个稀疏重构包，可以提供非常好的求解矩阵序列时的性能，其中仅更改系数但稀疏模式保持不变。
 
-## cuSPARSE
+### cuSPARSE
 [https://docs.nvidia.com/cuda/cusparse/index.html](https://docs.nvidia.com/cuda/cusparse/index.html)
 
 
@@ -381,7 +381,7 @@ cuSolver 将三个独立的组件组合在一起。
 
 
 
-# CUDA 的版本敏感性
+## CUDA 的版本敏感性
 &emsp;&emsp;版本冲突记录（10.1、11.2、11.4）：`cusparseScsrmv`、`cusparseDcsrmv` 替换成 `cusparseSpMV`，参考链接：
 [CUDA Toolkit Documentation-11.2](https://docs.nvidia.com/cuda/archive/11.2.0/index.html)
 [CUDA Toolkit Documentation-10.1（POGS）](https://docs.nvidia.com/cuda/archive/10.1/index.html)
@@ -393,7 +393,7 @@ cuSolver 将三个独立的组件组合在一起。
 
 <br/><br/>
 
-# CUDA 常用参考网站
+## CUDA 常用参考网站
 
 - 不同版本的说明文档：[CUDA Toolkit Archive](https://developer.nvidia.cn/cuda-toolkit-archive)
 - [CUDA Toolkit Documentation-11.2](https://docs.nvidia.com/cuda/archive/11.2.0/index.html)

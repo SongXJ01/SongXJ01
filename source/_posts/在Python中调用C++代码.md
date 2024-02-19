@@ -18,20 +18,20 @@ categories:
 ---
 
 
-# 方案筛选
+## 方案筛选
 
 1. **Ctypes**: Ctypes 是 Python 内置的一个标准库，可以用来调用动态链接库（DLL）中的 C/C++ 函数。通过一套类型映射的方式将Python与二进制动态链接库相连接。
 2. **SWIG**（Simplified Wrapper and Interface Generator）：SWIG 是一个能够自动生成 C/C++ 程序和其他高级语言（如 Python）之间的包装器的工具。它可以将 C/C++ 代码包装成可以被 Python 直接调用的模块。但由于支持的语言众多，因此在 Python 端性能表现不是太好。
 3. **Boost.Python**: Boost.Python 是 C++ Boost 库中的一个子模块，它提供了一组 C++ 类和函数，用于将 C++ 代码包装成 Python 可以直接调用的模块。但最大的缺点是需要依赖庞大的 Boost 库，编译和依赖关系包袱重。
 4. **Cython**: Cython 是一个用于将 Python 代码转换为 C/C++ 代码的编译器，可以通过将 C/C++ 代码嵌入到 Python 中。
 5. **Pybind11**：Pybind11 是一个轻量级的开源库，可以将 C++ 代码封装成可以被 Python 直接调用的模块。它提供了简洁而直观的语法，使得将 C++ 代码封装成 Python 接口变得更加容易。
-## 对比
+### 对比
 
 * 底层实现：Ctypes 是使用 Python 自带的标准库，通过**调用动态链接库**（DLL）中的 C/C++ 函数来实现。SWIG、Boost.Python、Cython 和 Pybind11 则是通过**生成封装代码**来实现，将 C/C++ 代码封装成可以被 Python 直接调用的模块。
 * 使用难度：Ctypes 的使用相对较简单，只需要导入函数原型并调用即可。SWIG 在配置和使用上较为复杂，需要编写接口文件和配置文件。Boost.Python 和 Pybind11 的使用相对较简单。
 
 
-## 开源库的选择参考
+### 开源库的选择参考
 
 - HiGHS：选择了 Pybind11；
 - Tensorflow：已于 2019 年将 SIWG 切换为 pybind11；
@@ -46,10 +46,10 @@ categories:
 <br/>
 
 
-# pybind11 使用总结
+## pybind11 使用总结
 参考：[Pybind11 文档](https://daobook.github.io/pybind11/basics.html)
 
-## 模块引入
+### 模块引入
 &emsp;&emsp;pybind11 是一个 header-only 的库，只需要 C++ 项目里直接 include pybind11 的头文件就能使用。可以 `git submodule` 添加子模块：
 ```bash
 git submodule add https://github.com/pybind/pybind11.git pybind11
@@ -77,9 +77,9 @@ pybind11_add_module(example_pb example_pb.cpp)
 
 
 
-## 使用 pybind11 封装C++
+### 使用 pybind11 封装C++
 
-### C++ 文件
+#### C++ 文件
 
 ```cpp
 #include "vdot.h"
@@ -92,7 +92,7 @@ double dot(std::vector<double> &a, std::vector<double> &b) {
 }
 ```
 
-### pybind11 文件
+#### pybind11 文件
 
 ```cpp
 #include <pybind11/pybind11.h>
@@ -105,8 +105,8 @@ PYBIND11_MODULE(np, m) { // (Python包名为np, 实例对象)
   m.def("vdot", &dot); // m.def("Python函数名", &C函数名);
 }
 ```
-### 编写CMake
-#### 编译 C++ 的库
+#### 编写CMake
+##### 编译 C++ 的库
 使用 start-pybind11 提供的宏进行编译C++动态库（静态库也可以）。
 ```cmake
 # add_my_library(LIB_NAME [SRCS srcs] [LIBS libs] [SHARED] [THREAD])
@@ -119,7 +119,7 @@ add_my_library(vdotlib  # C++编译后的库名
 ```cmake
 add_subdirectory(${MY_CURR}/vdot_cpp)
 ```
-#### 编译 pybind11 的 .so 库
+##### 编译 pybind11 的 .so 库
 使用 start-pybind11 提供的宏进行编译C++动态库（静态库也可以）。
 ```cmake
 add_pb_library(np # 库的名字（ Python 的包名 ）
@@ -133,7 +133,7 @@ add_pb_library(np # 库的名字（ Python 的包名 ）
 add_subdirectory(${MY_CURR}/vdot)
 ```
 
-### 让 Python 的.so库可以找到C++库
+#### 让 Python 的.so库可以找到C++库
 把C++编译后的库文件导入动态连接库的搜索路径
 ```bash
 p_c="/Users/sxj/CLionProjects/start-pybind11-new/_output/lib/vdot_cpp"
@@ -142,7 +142,7 @@ echo $DYLD_LIBRARY_PATH
 ```
 或者直接移动 .dylib 库（或 .a 库）到 .so 库相同目录。
 
-### 把 .so库 加入 Python 的搜索路径
+#### 把 .so库 加入 Python 的搜索路径
 ```bash
 p_so="/Users/sxj/CLionProjects/MDecomper0922/_output/lib/pybind"
 export PYTHONPATH=$p_so${PYTHONPATH:+:${PYTHONPATH}}
@@ -152,7 +152,7 @@ echo $PYTHONPATH
 然后就可以使用 `import` 加 .so 的名字来使用了。
 
 
-## 支持的数据类型
+### 支持的数据类型
 参考：[https://daobook.github.io/pybind11/advanced/cast/index.html](https://daobook.github.io/pybind11/advanced/cast/index.html)
 &emsp;&emsp;`float`, `double`，`bool`，`char`，`const char *`，`std::string`，`std::pair<T1, T2>`，`std::tuple<...>`，`std::complex<T>`，`std::array<T, Size>`，`std::vector<T>`，`std::set<T>`，`std::function<...>`，`Eigen::Matrix<...>`，`Eigen::SparseMatrix<...>`  ……
 
@@ -174,19 +174,19 @@ m.def("return_bytes",
 [智能指针 - pybind11中文文档](https://charlottelive.github.io/pybind11-Chinese-docs/10.%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88.html)
 
 
-## 函数
-### 声明函数参数名称和默认值
+### 函数
+#### 声明函数参数名称和默认值
 ```cpp
 m.def("add", &add, "A function which adds two numbers",
       py::arg("i") = 1, py::arg("j") = 2);
 ```
-### 返回指针
+#### 返回指针
 ```cpp
 Data *get_data() { return _data; }
 m.def("get_data", &get_data, py::return_value_policy::reference);
 ```
 
-### 运算符重载
+#### 运算符重载
 ```cpp
 class Vector2 {
 public:
@@ -225,16 +225,16 @@ PYBIND11_MODULE(example, m) {
 ```
 
 
-## 面向对象
-### 公有变量
+### 面向对象
+#### 公有变量
 ```cpp
 .def_readwrite("name", &Pet::name)
 ```
-### 私有变量
+#### 私有变量
 ```cpp
 .def_property("name", &Pet::getName, &Pet::setName)
 ```
-### 继承
+#### 继承
 ```cpp
 struct Pet {
     Pet(const std::string &name) : name(name) { }
@@ -254,7 +254,7 @@ py::class_<Dog, Pet>(m, "Dog")
     .def(py::init<const std::string &>())
     .def("bark", &Dog::bark);
 ```
-### 重载
+#### 重载
 ```cpp
 struct Pet {
     void set(int age_) { age = age_; }
@@ -274,7 +274,7 @@ py::class_<Widget>(m, "Widget")
    .def("foo", py::overload_cast<int, float>(&Widget::foo))
    .def("foo",   py::overload_cast<int, float>(&Widget::foo, py::const_));
 ```
-### 内部类和内部枚举
+#### 内部类和内部枚举
 ```cpp
 struct Pet {
     struct Attributes {
@@ -295,11 +295,11 @@ py::enum_<Pet::Kind>(pet, "Kind")
     .export_values();
 ```
 
-## 手动编译
+### 手动编译
 ```bash
 c++ -O3 -Wall -shared -std=c++11 -fPIC $(python3-config --includes) -Iextern/pybind11/include example.cpp -o example$(python3-config --extension-suffix)
 ```
-## py::cast
+### py::cast
 用于在C++代码中进行Python对象类型的转换 
 ```cpp
 #include <pybind11/pybind11.h>
@@ -334,8 +334,8 @@ int main() {
 <br/>
 
 
-# 开源示例
-## 示例 start-pybind11  运行命令记录
+## 开源示例
+### 示例 start-pybind11  运行命令记录
 [GitHub - ikuokuo/start-pybind11: Start pybind11](https://github.com/ikuokuo/start-pybind11)
 **【注意】** 切换 Python 的环境为 3.9，首先需要在CLion中设置`Python Interpreter`为指定版本的 conda 环境（本地测试成功的为`py39`）。完全退出CLion，在命令行`conda activate py39` 切换环境后再次打开`open CLion.app`后即可更改运行的Python环境。
 
@@ -359,7 +359,7 @@ import first_steps_pb as pb
 pb.add(1, 2)
 ```
 
-## HiGHS 运行命令记录
+### HiGHS 运行命令记录
 **编译**
 
 ```bash
@@ -393,7 +393,7 @@ pytest -v ./highspy/tests/
 
 <br/><br/>
 
-# 参考网站
+## 参考网站
 
 * [pybind11的最佳实践](https://zhuanlan.zhihu.com/p/192974017)
 * [pybind11文档](https://charlottelive.github.io/pybind11-Chinese-docs/04.%E9%A6%96%E6%AC%A1%E5%B0%9D%E8%AF%95.html)

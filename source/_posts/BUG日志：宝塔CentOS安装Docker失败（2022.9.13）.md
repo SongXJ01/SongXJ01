@@ -26,14 +26,14 @@ AttributeError: 'NoneType' object has no attribute 'containers'
 
 ---
 
-# 解决方式
-## 1. 卸载已经安装的 Docker
+## 解决方式
+### 1. 卸载已经安装的 Docker
 
 如果已经安装了未运行成功的 Docker，错误如下图所示，那么请将这个 Docker 卸载。
 
 ![错误页面](/images/BUG日志_宝塔CentOS安装Docker失败/bug_docker_1.png)
 
-## 2. 在 `/etc/docker` 路径下创建 daemon 配置文件 
+### 2. 在 `/etc/docker` 路径下创建 daemon 配置文件 
 
 ![daemon 配置文件](/images/BUG日志_宝塔CentOS安装Docker失败/bug_docker_2.png)
 
@@ -42,13 +42,13 @@ AttributeError: 'NoneType' object has no attribute 'containers'
 {"registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"]}
 ```
 
-## 3. 重新安装 Docker
+### 3. 重新安装 Docker
 我安装的是宝塔软件商店中的 3.9.1 的版本。
 
 
 ---
 
-# BUG原因分析
+## BUG原因分析
 可能是因为宝塔提供的镜像源和CentOS的版本不匹配，因为CentOS基于Python2.7运行的，Docker 3.9.1 的运行环境好像是Python3，所以要更新一下镜像源。
 
 <br/><br/><br/><br/>

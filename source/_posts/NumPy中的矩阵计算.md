@@ -18,7 +18,7 @@ categories:
 
 <br/><br/>
 
-# 点乘（Element-wise multiplication）
+## 点乘（Element-wise multiplication）
 
 &emsp;&emsp;对于两个维度完全一样的矩阵用 multiply 做乘法，那么它们就是进行对应位置元素之间的乘法（Element-Wise Product），得到一个同样维度的矩阵输出，用符号 `.*` 表示（等价于`numpy`中的`*`符号）。
 
@@ -36,7 +36,7 @@ $\left[\begin{array}{lll}
     a_{31} b_{31} & a_{32} b_{32} & a_{33} b_{33}
 \end{array}\right]$
 
-## 标量 .* 向量 or 矩阵（Scalar .* Vector or Matrix）
+### 标量 .* 向量 or 矩阵（Scalar .* Vector or Matrix）
 &emsp;&emsp;设有行向量 $a=\left[1,2,3\right]$，将其转置得到 $a^T=\left[\begin{array}{l}
 1 \\
 2 \\
@@ -71,7 +71,7 @@ $2 \; .* \; M = 2 \; .* \; \left[\begin{array}{lll}
 14 & 16 & 18
 \end{array}\right]$
 
-## 矩阵 .* 矩阵 （Matrix .* Matrix）
+### 矩阵 .* 矩阵 （Matrix .* Matrix）
 
 &emsp;&emsp;设有矩阵 $M=\left[\begin{array}{lll}
 1 & 2 & 3 \\
@@ -93,7 +93,7 @@ $M \; .* \; M = \left[\begin{array}{lll}
 49 & 64 & 81
 \end{array}\right]$
 
-## 向量 .* 向量 （Vector .* Vector）
+### 向量 .* 向量 （Vector .* Vector）
 
 &emsp;&emsp;设有行向量 $a=\left[1,2,3\right]$，$b=\left[4,5,6\right]$，$c=\left[1,2\right]$。若两个维度相同的向量点乘，则代表对应位置的元素对应相乘，若两个向量方向不同（一个为行向量，一个为列向量）则对各自长度不做要求，分别补齐成相同形状后对应元素相乘。在这种情况下左乘和右乘是等价的。
 
@@ -131,7 +131,7 @@ $c^T \; .* \; b = \left[\begin{array}{l}
 8 & 10 & 12 
 \end{array}\right]$
 
-## 向量 .* 矩阵 （Vector .* Matrix or Matrix .* Vector）
+### 向量 .* 矩阵 （Vector .* Matrix or Matrix .* Vector）
 &emsp;&emsp;（这里的沿用数学书写习惯使用“`.*`”代表 NumPy 中的“`*`”）
 &emsp;&emsp;设有行向量 $a=\left[1,2,3\right]$, 和矩阵 $M=\left[\begin{array}{lll}
 1 & 2 & 3 \\
@@ -247,13 +247,13 @@ $M \; .* \; a^T = \left[\begin{array}{lll}
 
 <br/><br/>
 
-# 叉乘（dot）
+## 叉乘（dot）
 
 &emsp;&emsp;矩阵叉乘，$\mathrm{m} \times \mathrm{n}$矩阵乘以 $\mathrm{n} \times \mathrm{k}$矩阵会得到一个$\mathrm{m} \times \mathrm{k}$的矩阵，用符号 `*` 表示（等价于`numpy`中的`@`符号）。
 
 $A^{\mathrm{m} \times \mathrm{n}}  \quad * \quad B^{\mathrm{n} \times \mathrm{k}} \quad=\quad C^{\mathrm{m} \times \mathrm{k}}$
 
-## 标量 * 向量 or 矩阵（Scalar * Vector or Matrix）
+### 标量 * 向量 or 矩阵（Scalar * Vector or Matrix）
 
 &emsp;&emsp;标量作为一个维度为$\mathrm{1} \times \mathrm{1}$的矩阵，按照矩阵乘法仅支持右乘行向量，或左乘列向量。设有行向量 $a=\left[1,2,3\right]$，将其转置得到列向量 $a^T=\left[\begin{array}{l}
 1 \\
@@ -273,7 +273,7 @@ $a^{T(3\times1)}\; * \; 2^{(1\times1)} = \left[\begin{array}{l}
 6 
 \end{array}\right]$
 
-## 矩阵 * 矩阵 （Matrix * Matrix）
+### 矩阵 * 矩阵 （Matrix * Matrix）
 
 &emsp;&emsp;设有矩阵 $M_1=\left[\begin{array}{lll}
 1 & 2 & 3 \\
@@ -309,7 +309,7 @@ $M_1^{T(3\times2)} \; * \; M_2^{T(2\times3)} = \left[\begin{array}{ll}
 15 & 33 & 51
 \end{array}\right]$
 
-## 向量 * 向量 （Vector * Vector）
+### 向量 * 向量 （Vector * Vector）
 &emsp;&emsp;设有行向量 $a=\left[1,2,3\right]$，$b=\left[4,5,6\right]$。这种情况下按照矩阵运算法则进行计算。
 
 $a^{(1\times3)} \; * \; b^{T(3\times1)} = \left[1,2,3\right] \; * \; \left[\begin{array}{l}
@@ -328,7 +328,7 @@ $a^{T(3\times1)} \; * \; b^{(1\times3)} = \left[\begin{array}{l}
 12 & 15 & 18
 \end{array}\right]$
 
-## 向量 * 矩阵 （Vector * Matrix or Matrix * Vector）
+### 向量 * 矩阵 （Vector * Matrix or Matrix * Vector）
 &emsp;&emsp;设有行向量 $a=\left[1,2,3\right]$, 和矩阵 $M=\left[\begin{array}{lll}
 1 & 2 & 3 \\
 4 & 5 & 6 \\
