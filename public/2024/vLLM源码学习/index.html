@@ -1,0 +1,109 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="学习, 技术, 随笔, 摄影, 生活"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>vLLM 源码学习 | SongXJ&#39;s Blog</title><meta name="generator" content="hexo-theme-ayer"><link rel="shortcut icon" href="/images/songxj.ico"><link rel="stylesheet" href="/dist/main.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"><link rel="stylesheet" href="/css/custom.css"><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js"></script><style>.swal2-styled.swal2-confirm{font-size:1.6rem}</style><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiperstyle.css"><link rel="alternate" href="/atom.xml" title="SongXJ's Blog" type="application/atom+xml"><link href="https://cdn.bootcss.com/KaTeX/0.11.1/katex.min.css" rel="stylesheet" /></head></html><body><div id="app"><main class="content on"><section class="outer"><article id="post-vLLM源码学习" class="article article-type-post" itemscope itemprop="blogPost" data-scroll-reveal><div class="article-inner"><header class="article-header"><h1 class="article-title sea-center" style="border-left:0" itemprop="name">vLLM 源码学习</h1></header><div class="article-meta"><a href="/2024/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" class="article-date"><time datetime="2024-03-04T10:36:01.000Z" itemprop="datePublished">2024-03-04</time></a><div class="article-category"><a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/">技术笔记</a> / <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF%E7%AC%94%E8%AE%B0/LLM/">LLM</a></div><div class="word_count"><span class="post-time"><span class="post-meta-item-icon"><i class="ri-quill-pen-line"></i> <span class="post-meta-item-text">字数统计:</span> <span class="post-count">1.2k</span> </span></span><span class="post-time">&nbsp; | &nbsp; <span class="post-meta-item-icon"><i class="ri-book-open-line"></i> <span class="post-meta-item-text">阅读时长≈</span> <span class="post-count">4 分钟</span></span></span></div></div><div class="tocbot"></div><div class="article-entry" itemprop="articleBody"><p>  本文中将学习一个大模型推理加速的工具 VLLM。vLLM 是伯克利大学 LMSYS 组织开源的大语言模型高速推理框架，旨在极大地提升实时场景下的语言模型服务的吞吐与内存使用效率。</p><span id="more"></span><h2 id="算法基本原理">算法基本原理</h2><ul><li>论文：<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2309.06180.pdf">Efficient Memory Management for Large Language Model Serving with PagedAttention</a></li><li>官网：<a target="_blank" rel="noopener" href="https://blog.vllm.ai/2023/06/20/vllm.html">vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention</a></li></ul><h3 id="paged-attention">Paged Attention</h3><ul><li><strong>类似操作系统中的虚拟内存和分页</strong></li></ul><p>PagedAttention 是 vLLM 的一个关键技术特性，它通过使用虚拟内存和分页技术来解决大型语言模型服务中的内存瓶颈。传统的注意力机制需要在 GPU 内存中保存所有输入令牌的键值对，这在自回归解码时生成新令牌。PagedAttention 通过将键值对缓存分割成小块存储，提高了内存使用效率，几乎达到了最优化，只浪费少于 4% 的内存。<br><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/vLLM%E4%B8%AD%E7%9A%84BlockTable.png" alt="vLLM 中的 Block Table"></p><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/KV_cache.png" alt="KV cache"></p><h3 id="parallel-sampling">Parallel sampling</h3><p>由于两个输出共享相同的提示，vllm 只在提示阶段为提示状态的一个副本保留空间；两个序列的提示的逻辑块被映射到相同的物理块。总结而言，vLLM 能够共享用于跨多个输出样本存储提示的 KV 缓存的大部分空间。通过跨多个样本共享物理块，特别是对于长输入提示，可以大大减少内存使用。<br><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/%E5%B9%B6%E8%A1%8C%E9%87%87%E6%A0%B7.png" alt="并行采样"></p><h3 id="beam-search">Beam search</h3><ul><li><strong>通过使用树状搜索，避免完全局遍历 </strong>。<br><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/%E6%A0%91%E7%8A%B6%E6%90%9C%E7%B4%A2.png" alt="树状搜索"></li></ul><h3 id="shared-prefix">Shared prefix</h3><ul><li><strong>共享前缀 </strong>：对于许多用户提示语具有相同前缀的情况，在 vLLM 中可以通过提供一组预定义共享前缀保留一组物理块来方便地实现。<br><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/%E5%85%B1%E4%BA%AB%E5%89%8D%E7%BC%80.png" alt="共享前缀"></li></ul><h3 id="continuous-batching">Continuous batching</h3><p>迭代调度处理，当部分序列处理完成，插入新序列。<br><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/Continuous_batching.png" alt="Continuous batching"></p><h3 id="none"></h3><h2 id="在 -vllm- 中增加自己的新模型">在 vllm 中增加自己的新模型</h2><ul><li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/680636375">如何让 vLLM 适配一个新模型</a></li></ul><h3 id="步骤">步骤</h3><ol><li>从 vLLM 的代码仓库中把源码下载下来</li><li>对模型中各模块的 <strong>forward</strong> 代码进行一定的修改</li><li>实现张量并行及量化方法（可选步骤）</li><li>实现加载模型的方法</li><li>将新模型注册进 executor 的 init 模块</li></ol><p>可参考：<a target="_blank" rel="noopener" href="https://github.com/vllm-project/vllm/pull/2539/files">Support Orion model by dachengai · Pull Request #2539 · vllm-project/vllm</a></p><h3 id="核心修改点">核心修改点</h3><ol><li><strong>Attention 机制的改写 </strong>：attention 机制中的 QKV 矩阵及输出 O 由原来的 nn.Linear 替换成了 vLLM 自带的 QKVParallelLinear 和 RowParallel 模块，方便之后并行处理张量。（此处注意 Attetion Head 的数量需要被 GPU 数量整整除）</li><li><strong>Forward 函数的改写 </strong>：因为现在使用的 self.attn 是 PageAttention，所以之前传入的参数通通可以用 kv_cache 来替代，然后 PageAttention 底层来处理相应的分片。</li><li><strong>增加 load_weights 方法 </strong>：这里主要是使用一层循环，从 HuggingFace 的模型文件中加载权重，并将它们分配给模型中对应的层。</li></ol><h2 id="源码分析">源码分析</h2><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/643336063">LLM 推理框架 2：vLLM 源码学习</a></p><h3 id="加载模型">加载模型</h3><ul><li><p>llm 类加载模型时首先根据参数生成 llm_engine 类<br><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/%E7%94%9F%E6%88%90llm_engine%E7%B1%BB.png" alt="生成 llm_engine 类"></p></li><li><p>llm_engine 类在创建时会加载 <code>tokenizer</code>，创建 <code>worker</code>（负责加载模型，执行推理）和 <code>scheduler</code>（负责并行计算），同时预分配内存。</p></li></ul><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/llm_engine%E7%B1%BB%E4%B8%AD%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A5%E9%AA%A4.png" alt="llm_engine 类中的核心步骤"></p><h3 id="推理生成">推理生成</h3><ul><li>推理时，llm 类的 <code>generate()</code> 会调用 <code>_run_engine()</code> 函数，同时设置 sampling 策略。</li></ul><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/_run_engine.png" alt="_run_engine()"></p><ul><li>llm_engine 类中的 <code>step()</code> 控制单步迭代</li></ul><ol><li>安排下一次要执行的序列，其中的 SG 代表同一个提示生成的一组序列；</li><li>调用 worker 执行模型</li><li>根据采样参数更新模型输出</li></ol><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/step.png" alt="step()"></p><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/step%E7%9A%84%E4%BB%A3%E7%A0%81.png" alt="step() 的代码"></p><p><code>step()</code> 中的 <code>_process_model_outputs()</code> 进行后处理</p><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/_process_model_outputs.png" alt="_process_model_outputs"></p><h3 id="架构设计">架构设计</h3><ul><li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/681156634">vllm 架构设计 Top-down</a></li></ul><h4 id="llmengine">LLMEngine</h4><p>LLMEngine 是一个处理请求并生成文本的大型语言模型引擎，通过精心设计的内存和调度策略，可以在分布式环境中高效生成文本。LLMEngine 包括：分词器（<strong>tokenizer</strong>）、一个可能分布在多个 GPU 上的语言模型，分配给中间状态的 GPU 内存空间（<strong>KV cache</strong>）。这个类通过迭代级调度和高效的内存管理来最大化服务吞吐量。<br>LLM 类将此类封装用于离线批量推理，而 AsyncLLMEngine 类封装此类用于在线服务。请注意，配置参数是从 EngineArgs 类派生的。要查看参数的完整列表，请参见 EngineArgs 类。<br>参数包括：</p><ul><li>model_config：与 LLM 模型相关的配置。</li><li>cache_config：与 KV 缓存内存管理相关的配置。</li><li>parallel_config：与分布式执行相关的配置。</li><li>scheduler_config：与请求调度器相关的配置。</li><li>device_config：与设备相关的配置。</li><li>placement_group：用于分布式执行的 Ray 放置组，分布式执行时必需。</li><li>log_stats：是否记录统计数据。</li></ul><h4 id="llm">LLM</h4><p>是对 LLMEngine 类的封装，用于处理离线的批量推理。</p><h4 id="worker">Worker</h4><p>在 GPU 上执行模型（或其中部分）的类。<br>每个 Worker 与单个 GPU 相关联。Worker 负责维护 **KV cache ** 并在 GPU 上执行模型。在分布式推理的情况下，每个 Worker 被分配一个模型的分区。</p><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/%E6%8E%A8%E7%90%86%E7%9A%84%E5%9F%BA%E6%9C%AC%E8%BF%87%E7%A8%8B.png" alt="推理的基本过程"></p><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/%E6%9E%B6%E6%9E%84_1.png" alt=""></p><p><img src="/images/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/%E6%9E%B6%E6%9E%84_2.png" alt=""></p><div id="reword-out"><div id="reward-btn">打赏</div></div></div><div class="declare"><ul class="post-copyright"><li><i class="ri-copyright-line"></i> <strong>版权声明： </strong>本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！</li></ul></div><footer class="article-footer"><div class="share-btn"><span class="share-sns share-outer"><i class="ri-share-forward-line"></i> 分享</span><div class="share-wrap"><i class="arrow"></i><div class="share-icons"><a class="weibo share-sns" href="javascript:;" data-type="weibo"><i class="ri-weibo-fill"></i> </a><a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin"><i class="ri-wechat-fill"></i> </a><a class="qq share-sns" href="javascript:;" data-type="qq"><i class="ri-qq-fill"></i> </a><a class="douban share-sns" href="javascript:;" data-type="douban"><i class="ri-douban-line"></i> </a><a class="facebook share-sns" href="javascript:;" data-type="facebook"><i class="ri-facebook-circle-fill"></i> </a><a class="twitter share-sns" href="javascript:;" data-type="twitter"><i class="ri-twitter-fill"></i> </a><a class="google share-sns" href="javascript:;" data-type="google"><i class="ri-google-fill"></i></a></div></div></div><div class="wx-share-modal"><a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a><p>扫一扫，分享到微信</p><div class="wx-qrcode"><img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://songxj01.gitee.io/2024/vLLM%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" alt="微信分享二维码"></div></div><div id="share-mask"></div><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LLM/" rel="tag">LLM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vLLM/" rel="tag">vLLM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F/" rel="tag">推理加速</a></li></ul></footer></div><nav class="article-nav"><a href="/2024/%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5%E6%B1%87%E6%80%BB/" class="article-nav-link"><strong class="article-nav-caption">下一篇</strong><div class="article-nav-title">稀疏矩阵汇总</div></a></nav><div id="vcomments-box"><div id="vcomments"></div></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script>new Valine({
+    el: "#vcomments",
+    app_id: "tahglBYerISh7wrhyXMEH6UV-gzGzoHsz",
+    app_key: "G2qOYTyMGB3F79hHhg6LARHs",
+    path: window.location.pathname,
+    avatar: "mp",
+    placeholder: "欢迎交流讨论 ......",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }</script><style>#vcomments-box{padding:5px 30px}@media screen and (max-width:800px){#vcomments-box{padding:5px 0}}#vcomments-box #vcomments{background-color:#fff}.v .vlist .vcard .vh{padding-right:20px}.v .vlist .vcard{padding-left:10px}</style></article></section><footer class="footer"><div class="outer"><ul><li>Copyrights &copy; 2019-2024 <i class="ri-heart-fill heart_icon"></i> SongXJ</li></ul><ul><li></li></ul><ul><li><span><span><i class="ri-user-3-fill"></i>访问人数:<span id="busuanzi_value_site_uv"></span></span> <span class="division">|</span> <span><i class="ri-eye-fill"></i>浏览次数:<span id="busuanzi_value_page_pv"></span></span></span></li></ul><ul></ul><ul></ul><ul><li><script type="text/javascript" src="https://s9.cnzz.com/z_stat.php?id=1280220642&amp;web_id=1280220642"></script></li></ul></div></footer></main><div class="float_btns"><div class="totop" id="totop"><i class="ri-arrow-up-line"></i></div><div class="todark" id="todark"><i class="ri-moon-line"></i></div></div><aside class="sidebar on"><button class="navbar-toggle"></button><nav class="navbar"><div class="logo"><a href="/"><img src="/images/songxj.svg" alt="SongXJ&#39;s Blog"></a></div><ul class="nav nav-main"><li class="nav-item"><a class="nav-item-link" href="/">主页</a></li><li class="nav-item"><a class="nav-item-link" href="/photos">摄影</a></li><li class="nav-item"><a class="nav-item-link" href="/categories">分类</a></li><li class="nav-item"><a class="nav-item-link" href="/tags">标签</a></li><li class="nav-item"><a class="nav-item-link" href="/archives">归档</a></li><li class="nav-item"><a class="nav-item-link" href="/about">关于我</a></li></ul></nav><nav class="navbar navbar-bottom"><ul class="nav"><li class="nav-item"><a class="nav-item-link nav-item-search" title="搜索"><i class="ri-search-line"></i></a></li></ul></nav><div class="search-form-wrap"><div class="local-search local-search-plugin"><input type="search" id="local-search-input" class="local-search-input" placeholder="Search..."><div id="local-search-result" class="local-search-result"></div></div></div></aside><div id="mask"></div><div id="reward"><span class="close"><i class="ri-close-line"></i></span><p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p><div class="reward-box"><div class="reward-item"><img class="reward-img" src="/images/money_alipay.jpg"> <span class="reward-type">支付宝</span></div><div class="reward-item"><img class="reward-img" src="/images/money_wechat.png"> <span class="reward-type">微信</span></div></div></div><script src="/js/jquery-3.6.0.min.js"></script><script src="/js/lazyload.min.js"></script><script src="/js/tocbot.min.js"></script><script>tocbot.init({tocSelector:".tocbot",contentSelector:".article-entry",headingSelector:"h1, h2, h3, h4, h5, h6",hasInnerContainers:!0,scrollSmooth:!0,scrollContainer:"main",positionFixedSelector:".tocbot",positionFixedClass:"is-position-fixed",fixedSidebarOffset:"auto"})</script><script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script><script src="/dist/main.js"></script><div class="pswp" tabindex="-1" role="dialog" aria-hidden="true"><div class="pswp__bg"></div><div class="pswp__scroll-wrap"><div class="pswp__container"><div class="pswp__item"></div><div class="pswp__item"></div><div class="pswp__item"></div></div><div class="pswp__ui pswp__ui--hidden"><div class="pswp__top-bar"><div class="pswp__counter"></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button> <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button> <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button> <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class="pswp__preloader"><div class="pswp__preloader__icn"><div class="pswp__preloader__cut"><div class="pswp__preloader__donut"></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class="pswp__share-tooltip"></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button> <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class="pswp__caption"><div class="pswp__caption__center"></div></div></div></div></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"><script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script><script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script><script>function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()</script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });</script><script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script>var ayerConfig={mathjax:!0}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script><script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script><script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css"><script src="/js/busuanzi-2.3.pure.min.js"></script><link rel="stylesheet" href="/css/clipboard.css"><script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script><script>function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);</script><script>window.mermaid&&mermaid.initialize({theme:"dark"})</script></div><script data-pjax>var parent,child;document.getElementById("recent-posts")&&"/"==location.pathname&&(parent=document.getElementById("recent-posts"),child='<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms"></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>',console.log("已挂载swiper"),parent.insertAdjacentHTML("afterbegin",child))</script><script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper/swiper/swiper.min.js"></script><script data-pjax src="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-swiper@0.18/swiper/swiperindex.js"></script><style></style></body>
