@@ -112,7 +112,7 @@ p val_num
 cuda thread (0,7,0)
 ```
 
-![调试常用参数](/images/CUDA学习笔记/调试常用参数.png)
+![调试常用参数](/SongXJ01/images/CUDA学习笔记/调试常用参数.png)
 
 
 
@@ -121,7 +121,7 @@ cuda thread (0,7,0)
 
 &emsp;&emsp;NVIDIA Nsight Systems是一款低开销性能分析工具，旨在为开发人员提供优化软件所需的洞察力。无偏差的活动数据可在工具中可视化，可帮助用户调查瓶颈，避免推断误报，并以更高的性能提升概率实现优化。
 
-![NVIDIA Nsight Systems](/images/CUDA学习笔记/NVIDIANsightSystems.png)
+![NVIDIA Nsight Systems](/SongXJ01/images/CUDA学习笔记/NVIDIANsightSystems.png)
 
 
 
@@ -138,7 +138,7 @@ cuda thread (0,7,0)
 ### 内存层次结构
 &emsp;&emsp;在 GPU 内存层次结构中，最主要的两种内存是**全局内存**和**共享内存**。全局内存类似于CPU的系统内存，而共享内存类似于CPU的缓存，GPU 的共享内存可以由 CUDA C 的内核直接控制。
 
-![GPU内存结构](/images/CUDA学习笔记/GPU内存结构.png)
+![GPU内存结构](/SongXJ01/images/CUDA学习笔记/GPU内存结构.png)
 
 
 #### 共享内存
@@ -185,7 +185,7 @@ kernel<<<grid, block, isize * sizeof(int)>>>(...)
 - 纹理变量（引用）必须声明为文件作用域内的全局变量。
 - **形式**：分为一维纹理内存 和 二维纹理内存。
 
-![纹理内存](/images/CUDA学习笔记/纹理内存.png)
+![纹理内存](/SongXJ01/images/CUDA学习笔记/纹理内存.png)
 
 
 
@@ -222,14 +222,14 @@ kernel<<<grid, block, isize * sizeof(int)>>>(...)
 
 ### 硬件层面
 
-![CUDA软件和硬件结构](/images/CUDA学习笔记/CUDA软件和硬件结构.png)
+![CUDA软件和硬件结构](/SongXJ01/images/CUDA学习笔记/CUDA软件和硬件结构.png)
 
 
 ### 软件层面
 &emsp;&emsp;一个SM（Streaming MultiProcessor）由多个CUDA core组成，每个SM根据GPU架构不同有不同数量的CUDA core。SM还包括特殊运算单元（SFU），共享内存（shared memory），寄存器文件（Register File）和调度器（Warp Scheduler）等。register 和 shared memory 是稀缺资源，**这些有限的资源就使每个SM中active warps有非常严格的限制，也就限制了并行能力。**
 
 
-![CUDA软件结构](/images/CUDA学习笔记/CUDA软件结构.png)
+![CUDA软件结构](/SongXJ01/images/CUDA学习笔记/CUDA软件结构.png)
 
 
 &emsp;&emsp;由一个内核启动所产生的所有线程统称为一个**网格（Grid）**。同一 Grid 中的所有线程共享相同的全局内存空间。一个网格由多个**线程块（Block）**构成，其包含一组**线程（Thread）**，同一个 block 中的 thread 可以同步，也可以通过 shared memory 进行通信，不同块内的线程不能协作。
@@ -280,7 +280,7 @@ cudaMemcpy2D ( void* dst, size_t dpitch, const void* src, size_t spitch, size_t 
 
 #### 异步传输 cudaMemcpyAsync / cudaMemcpy2DAsync / cudaMemcpy3DAsync
 
-![异步传输](/images/CUDA学习笔记/异步传输.png)
+![异步传输](/SongXJ01/images/CUDA学习笔记/异步传输.png)
 
 
 ```cpp

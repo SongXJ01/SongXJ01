@@ -20,7 +20,7 @@ MVVM 模式是通过以下三个核心组件组成：
  - **V：** View - 定义屏幕中 View 的结构，布局和外观；
  - **VM：** ViewModel - 扮演“View”和“Model”之间的使者，帮忙处理 View 的全部业务逻辑。
 
-![vue数据双向绑定原理](/images/前端技术栈_Vue双向绑定/vue数据双向绑定原理.png)
+![vue数据双向绑定原理](/SongXJ01/images/前端技术栈_Vue双向绑定/vue数据双向绑定原理.png)
 
 
 
@@ -44,7 +44,7 @@ var vm = new Vue({
 });
 ```
 输出：
-![输出](/images/前端技术栈_Vue双向绑定/输出.png)
+![输出](/SongXJ01/images/前端技术栈_Vue双向绑定/输出.png)
 
 
 可以看到属性`a`有两个相对应的`get`和`set`方法，为什么会多出这两个方法呢？因为 Vue 是通过 `Object.defineProperty()` 来实现数据劫持的。
@@ -83,12 +83,12 @@ console.log(Book.name);  // 《vue权威指南》
 
 ### 思路分析
 &emsp;&emsp;实现 **MVVM**主要包含两个方面，数据变化更新视图，视图变化更新数据：
-![MVVM](/images/前端技术栈_Vue双向绑定/MVVM.png)
+![MVVM](/SongXJ01/images/前端技术栈_Vue双向绑定/MVVM.png)
 
 &emsp;&emsp;关键点在于 data 如何更新 view，因为 view 更新 data 其实可以通过事件监听即可，比如 input 标签监听 input 事件就可以实现了。
 
 &emsp;&emsp;数据更新视图的重点是如何知道数据变了，只要知道数据变了，那么接下去的事都好处理。如何知道数据变了，其实上文我们已经给出答案了，就是通过`Object.defineProperty( )`对属性设置一个 set 函数，当数据改变了就会来触发这个函数，所以我们只要将一些需要更新的方法放在这里面就可以实现 data 更新 view 了。
-![defineProperty](/images/前端技术栈_Vue双向绑定/defineProperty.png)
+![defineProperty](/SongXJ01/images/前端技术栈_Vue双向绑定/defineProperty.png)
 
 
 ----
@@ -105,7 +105,7 @@ console.log(Book.name);  // 《vue权威指南》
 3. 实现一个**解析器 Compile**，可以扫描和解析每个节点的相关指令，并根据初始化模板数据以及初始化相应的订阅器。
 
 **流程图如下：**
-![双向绑定流程图](/images/前端技术栈_Vue双向绑定/双向绑定流程图.png)
+![双向绑定流程图](/SongXJ01/images/前端技术栈_Vue双向绑定/双向绑定流程图.png)
 
 
 -----

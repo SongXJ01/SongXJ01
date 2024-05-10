@@ -33,14 +33,14 @@ top: 98
 
 -   mAP：越大，效果越好。（面积之和）
 
-    ![](/images/YOLO目标检测算法汇总/image_oVjRjsHkrR.png)
+    ![](/SongXJ01/images/YOLO目标检测算法汇总/image_oVjRjsHkrR.png)
 -   IoU：预测框与ground truth的交集和并集的比值。
 
-    ![](/images/YOLO目标检测算法汇总/image_tUSzCO6bWA.png)
+    ![](/SongXJ01/images/YOLO目标检测算法汇总/image_tUSzCO6bWA.png)
 -   FPS：帧率，越大，速度越快，网络结构越简单
 -   P和R：
 
-    ![](/images/YOLO目标检测算法汇总/image_4aqpOax2km.png)
+    ![](/SongXJ01/images/YOLO目标检测算法汇总/image_4aqpOax2km.png)
 
 <br/><br/>
 
@@ -50,7 +50,7 @@ top: 98
 
 ## 发展历程
 
-![发展历程](/images/YOLO目标检测算法汇总/image_-ZryUIZcpe.png)
+![发展历程](/SongXJ01/images/YOLO目标检测算法汇总/image_-ZryUIZcpe.png)
 
 <br/><br/>
 
@@ -98,13 +98,13 @@ top: 98
 
 &emsp;&emsp;该方法将28x28x512调整为14x14x2048，后续v5版本中的**Focus**操作类似该操作。将生成的14x14x2048与原始的14x14x1024进行concat操作。
 
-![](/images/YOLO目标检测算法汇总/image_36lEwKsrgk.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_36lEwKsrgk.png)
 
 ### 引入anchor
 
 &emsp;&emsp;**引入anchor，调整位置预测为偏移量预测** 借鉴了Faster-RCNN的思想，引入了anchor，将目标框的位置预测由直接预测坐标调整为偏移量预测，大大降低了预测难度，提升了预测准确性。
 
-![](/images/YOLO目标检测算法汇总/image_O18zvUQ-HJ.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_O18zvUQ-HJ.png)
 
 ### 优缺点
 
@@ -122,7 +122,7 @@ top: 98
 2.  借鉴了**特征金字塔**的思想，在三个不同的尺寸上分别进行预测（多尺度预测 ，引入FPN）。
 3.  分类器不再使用Softmax，分类损失采用binary cross-entropy loss（二分类交叉损失熵）
 
-![YOLOv3网络结构图](/images/YOLO目标检测算法汇总/image_OFLllUQUbS.png)
+![YOLOv3网络结构图](/SongXJ01/images/YOLO目标检测算法汇总/image_OFLllUQUbS.png)
 
 ### 特征金字塔
 
@@ -139,19 +139,19 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 -   CutMix数据增强和马赛克（Mosaic）数据增强
 -   DropBlock正则化
 
-![YOLOv4网络结构图](/images/YOLO目标检测算法汇总/image_eDki8sf-KG.png)
+![YOLOv4网络结构图](/SongXJ01/images/YOLO目标检测算法汇总/image_eDki8sf-KG.png)
 
 ### 输入数据采用Mosaic数据增强
 
 &emsp;&emsp;借鉴了2019年CutMix的思路，并在此基础上进行了拓展，Mosaic数据增强方式采用了4张图片，随机缩放、随机裁剪、随机排布的方式进行拼接。从而对小目标的检测起到进一步的提升的作用。
 
-![YOLOv4的效果](/images/YOLO目标检测算法汇总/image_261WFN5zom.png)
+![YOLOv4的效果](/SongXJ01/images/YOLO目标检测算法汇总/image_261WFN5zom.png)
 
 ### 修改骨干网络为 CSPDarknet53
 
 &emsp;&emsp;借鉴了2019CSPNet的经验，并结合先前的Darkent53，获得了新的骨干网络CSPDarknet53。在CSPNet中，存在如下操作，即：进入每个stage先将数据划分为两部分，如下图中的part1、part2，区别在于CSPNet中直接对通道维度进行划分，而YOLOv4应用时是利用两个1x1卷积层来实现的。两个分支的信息在交汇处进行Concat拼接。
 
-![CSPDarknet53](/images/YOLO目标检测算法汇总/image_y1XwtlmUpj.png)
+![CSPDarknet53](/SongXJ01/images/YOLO目标检测算法汇总/image_y1XwtlmUpj.png)
 
 ### 引入spp空间金字塔池化模块
 
@@ -159,25 +159,25 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;由于CNN网络后面接的全连接层需要固定的输入大小，故往往通过将输入图像resize到固定大小的方式输入卷积网络，这会造成几何失真影响精度。SPP模块就解决了这一问题，他通过三种尺度的池化，将任意大小的特征图固定为相同长度的特征向量，传输给全连接层。因为卷积层后面的全连接层的结构是固定的。但在现实中，我们的输入的图像尺寸总是不能满足输入时要求的大小，然而通常的手法就是裁剪(crop)和拉伸(warp)，但这样做总归是不好的，其扭曲了原始的特征。而SPP层通过将候选区的特征图划分为多个不同尺寸的网格，然后对每个网格内都做最大池化，这样依旧可以让后面的全连接层得到固定的输入。
 
-![](/images/YOLO目标检测算法汇总/image_HZM9ceelJG.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_HZM9ceelJG.png)
 
 ### **在Neck部分采用FPN+PAN的结构**
 
 &emsp;&emsp;借鉴2018年图像分割领域PANet, 相比于原始的PAN结构，YOLOV4实际采用的PAN结构将addition的方式改为了concatenation。如下图：
 
-![](/images/YOLO目标检测算法汇总/image_O9U0izUx4Y.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_O9U0izUx4Y.png)
 
 &emsp;&emsp;由于FPN结构是自顶向下的，将高级特征信息以上采样的方式向下传递，但是融合的信息依旧存在不足，因此YOLOv4在FPN之后又添加了PAN结构，再次将信息从底部传递到顶部，如此一来，FPN自顶向下传递强语义信息，而PAN则自底向上传递强定位信息，达到更强的特征聚合效果。
 
 &emsp;&emsp;整个NECK结构如下图所示：
 
-![](/images/YOLO目标检测算法汇总/image_FsjBe7If49.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_FsjBe7If49.png)
 
 <br/><br/>
 
 ## YOLOv5
 
-![YOLOv5网络结构图](/images/YOLO目标检测算法汇总/d2f4aa5f2f69400b8e680c55760ad5f2_4SKImTYBPa.png)
+![YOLOv5网络结构图](/SongXJ01/images/YOLO目标检测算法汇总/d2f4aa5f2f69400b8e680c55760ad5f2_4SKImTYBPa.png)
 
 &emsp;&emsp;2020年2月YOLO之父Joseph Redmon宣布退出计算机视觉研究领域，2020 年 4 月 23 日YOLOv4 发布，2020 年 6 月 10 日YOLOv5发布。
 
@@ -190,21 +190,21 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;主要区别就是MaxPool由原来的并行调整为了串行，值得注意的是：串行两个 5 x 5 大小的 MaxPool 和一个 9 x 9 大小的 MaxPool 是等价的，串行三个 5 x 5 大小的 MaxPool 层和一个 13 x 13 大小的 MaxPool 是等价的。虽然并行和串行的效果一样，但是串行的效率更高，降低了耗时。
 
-![](/images/YOLO目标检测算法汇总/image_mZbM7N3E_B.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_mZbM7N3E_B.png)
 
-![](/images/YOLO目标检测算法汇总/image__NkT1SV9e7.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image__NkT1SV9e7.png)
 
 ### Focus操作
 
-![Focus操作](/images/YOLO目标检测算法汇总/image_1bR38WssFU.png)
+![Focus操作](/SongXJ01/images/YOLO目标检测算法汇总/image_1bR38WssFU.png)
 
 <br/><br/>
 
 ## YOLOX
 
-![YOLOX网络结构图-1](/images/YOLO目标检测算法汇总/3fd25ff946474c6b8a51b47cd2c240bd_IWu_YJdvCV.png)
+![YOLOX网络结构图-1](/SongXJ01/images/YOLO目标检测算法汇总/3fd25ff946474c6b8a51b47cd2c240bd_IWu_YJdvCV.png)
 
-![YOLOX网络结构图-2](/images/YOLO目标检测算法汇总/image_W9BH6ePYx9.png)
+![YOLOX网络结构图-2](/SongXJ01/images/YOLO目标检测算法汇总/image_W9BH6ePYx9.png)
 
 -   一般情况下，可以选择**Yolox-Nano、Yolox-Tiny、Yolox-s用于移动端部署**。
 -   **Yolox-m、Yolox-l、Yolox-x用于GPU服务器部署**
@@ -220,7 +220,7 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 &emsp;&emsp;检测头耦合会影响模型性能。采用解耦头替换YOLO的检测头可以显著改善模型收敛速度。解耦头结构考虑到 **分类** 和 **定位** 所关注的内容的不同。
 同时为了避免计算量的大量增加，YOLOX的Decoupled Head结构（轻量解耦头），会先进行1x1的降维操作，然后再接上分类和定位两个并行分支（均为 3 × 3卷积）。
 
-![](/images/YOLO目标检测算法汇总/image_Liqa3kRe4J.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_Liqa3kRe4J.png)
 
 ### 2. Mosaic + Mixup 数据增强
 
@@ -228,7 +228,7 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 -   Mixup数据增强： 对图像进行混类增强的算法，它将不同类之间的图像进行混合，从而扩充训练数据集
 
-![](/images/YOLO目标检测算法汇总/image_xmL0MKtaB8.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_xmL0MKtaB8.png)
 
 ### 3. Anchor-free
 
@@ -255,13 +255,13 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;Fcous结构：将输入的图片先经过Fcos结构对图片进行每隔一个像素取出一个值，得到四个特征层，然后再进行concat。从而图片宽高的信息缩小，通道数增加。在原始信息丢失较少的情况下，减小了参数量。
 
-![](/images/YOLO目标检测算法汇总/image_C5q9dlW-Bg.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_C5q9dlW-Bg.png)
 
 ### 7. **SiLU激活函数**
 
 &emsp;&emsp;**SiLU函数**相比于**ReLU**非线性能力更强，同时继承了**ReLU**收敛更快的优点。
 
-![](/images/YOLO目标检测算法汇总/image_g1bv8gGFv9.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_g1bv8gGFv9.png)
 
 <br/><br/>
 
@@ -269,7 +269,7 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 [YOLOv6网络结构图](https://blog.csdn.net/qq_34795071/article/details/125442065)
 
-![](/images/YOLO目标检测算法汇总/a0510238a9404914a6d341c0575973ad_yNpGFYrQkO.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/a0510238a9404914a6d341c0575973ad_yNpGFYrQkO.png)
 
 &emsp;&emsp;YOLOv6是由美团推出的，所做的主要工作是为了更加适应GPU设备，将2021年的RepVGG结构引入到了YOLO。YOLOv6 主要在 Backbone、Neck、Head 以及训练策略等方面进行了诸多的改进：
 
@@ -281,13 +281,13 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;YOLOv5/YOLOX 使用的 Backbone 和 Neck 都基于 CSPNet搭建，采用了多分支的方式和残差结构。对于 GPU 等硬件来说，这种结构会一定程度上增加延时，同时减小内存带宽利用率。按照RepVGG的思路，为每一个3x3的卷积添加平行了一个1x1的卷积分支和恒等映射分支，然后在推理时融合为3x3的结构，这种方式对计算密集型的硬件设备会比较友好。
 
-![](/images/YOLO目标检测算法汇总/image_vc92ntzriY.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_vc92ntzriY.png)
 
 ### 2. 简洁高效的 Decoupled Head
 
 &emsp;&emsp;在 YOLOv6 中，采用了解耦检测头（Decoupled Head）结构，并对其进行了精简设计。原始 YOLOv5 的检测头是通过分类和回归分支融合共享的方式来实现的，而 YOLOX 的检测头则是将分类和回归分支进行解耦，同时新增了两个额外的 3x3 的卷积层，虽然提升了检测精度，但一定程度上增加了网络延时。
 
-![](/images/YOLO目标检测算法汇总/image_zoR2HNFoDr.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_zoR2HNFoDr.png)
 
 ### 3. **Anchor-free 无锚范式**
 
@@ -314,7 +314,7 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;官方版的YOLOv7相同体量下比YOLOv5精度更高，速度快120%（FPS），比 YOLOX 快180%（FPS）。YOLOv7依旧基于anchor based的方法，同时在网络架构上增加E-ELAN层，并将REP层也加入进来，方便后续部署，同时在训练时，在head时，新增Aux\_detect用于辅助检测，对预测结果的一种初筛，有种two-stage的感觉。
 
-![](/images/YOLO目标检测算法汇总/f8a6ccbd93094b548804bc64b46468df_ZsJIM3i-zZ.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/f8a6ccbd93094b548804bc64b46468df_ZsJIM3i-zZ.png)
 
 &emsp;&emsp;根据上图的架构图走一遍网络流程：先对输入的图片预处理，对齐成640\*640大小的RGB图片，输入到backbone网络中，根据backbone网络中的三层输出，在head层通过backbone网络继续输出三层不同size大小的**feature map**，经过RepVGG block 和conv，对图像检测的三类任务（分类、前后背景分类、边框）预测，输出最后的结果。
 
@@ -330,7 +330,7 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 -   为了让正样本更多
 -   正样本分配，IoU计算，通过累加和动态筛选正样本
 
-![](/images/YOLO目标检测算法汇总/image_uITEYuxEGh.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_uITEYuxEGh.png)
 
 &emsp;&emsp;YOLOv7的标签分配策略（正样本筛选），集成了YOLOv5和YOLOX两者的精华：
 
@@ -342,7 +342,7 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
     Step3：选择GT框的中心网格以及最邻近的2个邻域网格作为正样本筛选区域（辅助头则选择周围4个邻域网格）
 
-![](/images/YOLO目标检测算法汇总/image_ZtqkIEEhGJ.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_ZtqkIEEhGJ.png)
 
 -   **YOLOX** &#x20;
 
@@ -358,11 +358,11 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;总的输入会被分成三段进入不同的分支，最中间的分支其实就是金字塔池化操作，左侧分支类似于depthwise conv，但是请注意，中间的3×3卷积并未进行分组，依旧是标准卷积，右侧则为一个point conv，最后将所有分支输出的信息流进行concat。
 
-![](/images/YOLO目标检测算法汇总/image_6RGn2lC09Q.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_6RGn2lC09Q.png)
 
 ### 3. E-ELAN模块
 
-![](/images/YOLO目标检测算法汇总/image_jFVY-Qwc0g.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_jFVY-Qwc0g.png)
 
 &emsp;&emsp;E-ELAN只改变了计算模块中的结构，而过渡层的结构则完全不变。作者的策略是利用分组卷积来扩展计算模块的通道和基数，将相同的group parameter和channel multiplier用于计算每一层中的所有模块。然后，将每个模块计算出的特征图根据设置的分组数打乱成G组，最后将它们连接在一起。此时，每一组特征图中的通道数将与原始体系结构中的通道数相同。最后，作者添加了G组特征来merge cardinality。除了维护原始的ELAN设计架构外，E-ELAN还可以指导不同的分组模块来学习更多样化的特性。
 
@@ -370,19 +370,19 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;常用的方式是图（c）所示，即辅助头和引导头各自独立，分别利用ground truth和它们（辅助头、引导头）各自的预测结果实现标签分配。YOLOV7算法中提出了利用引导头的预测结果作为指导，生成从粗到细的层次标签，将这些层次标签分别用于辅助头和引导头的学习，如下图（d）和（e）所示。
 
-![](/images/YOLO目标检测算法汇总/image_dkzANMbGMQ.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_dkzANMbGMQ.png)
 
 ### 5. 复合模型缩放
 
 &emsp;&emsp;类似于YOLOv5、Scale YOLOv4、YOLOX，一般是对depth、width或者module scale进行缩放，实现扩大或缩小baseline的目的。
 
-![](/images/YOLO目标检测算法汇总/image_hGrBsf_uYx.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_hGrBsf_uYx.png)
 
 ### 6.  **卷积重参化**
 
 &emsp;&emsp;**引入了卷积重参化并进行了改进**采用梯度传播路径来分析不同的重参化模块应该和哪些网络搭配使用。同时分析出RepConv中的identity破坏了ResNet中的残差结构和DenseNet中的跨层连接，因此作者做了改进，采用没有Identity连接的RepConv结构进行卷积重参数化。下图是设计的用于PlainNet和ResNet的计划重参数卷积。
 
-![](/images/YOLO目标检测算法汇总/image_P-a1KGH305.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_P-a1KGH305.png)
 
 ### YOLOv7基础版本的区别
 
@@ -415,7 +415,7 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;如下图所示， **绿色的gt框中心点落在红色grid的第三象限里，那不仅取该grid,还要取左边的grid和下面的grid，** 这样基于三个grid和匹配的anchor就有三个中心点位于三个grid中心点，长宽为anchor长宽的正样本，同时gt不仅与一个anchor框匹配，如果跟几个anchor框都匹配上，所以可能有3-27个正样本，增大正样本数量。
 
-![](/images/YOLO目标检测算法汇总/image_o0omt9JvWT.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_o0omt9JvWT.png)
 
 ### YOLOv6的正负样本匹配策略
 
@@ -426,13 +426,13 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 ②：基于simOTA进一步筛选。
 具体步骤如下：
 
-![](/images/YOLO目标检测算法汇总/image_Y3TQa7VFVz.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_Y3TQa7VFVz.png)
 
 &emsp;&emsp;tie标签的gt如图所示，找到gt的中心点（Cx,Cy）,计算中心点到左上角的距离（l\_l,l\_t）,右下角坐标（l\_r,l\_b）,然后从两步筛选正样本：
 
 &emsp;&emsp;第一步粗略筛选第一个维度是如果grid的中心点落在gt中，则认为该grid所预测的框为正样本，如图所示的红色和橙色部分 **，第二个维度是**以gt的中心点所在grid的中心点为中心点，上下左右扩充2.5个grid步长范围内的grid，则默认该grid所预测的框为正样本，如图紫色和橙色部分。
 
-![](/images/YOLO目标检测算法汇总/image_XY1F6R5rc3.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_XY1F6R5rc3.png)
 
 第二步：通过SimOTA进一步筛选：
 
@@ -447,7 +447,7 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 &emsp;&emsp;同时YOLOv7中有aux\_head 和lead\_head 两个head ,aux\_head做为辅助，其筛选正样本的策略和lead\_head相同，但更宽松。如在第一步筛选时，lead\_head 取中心点所在grid和与之接近的两个grid对应的预测框做为正样本，如图绿色的grid，aux\_head则取中心点以及周围的4个预测框为正样本。如下图绿色＋蓝色区域的grid。
 
-![](/images/YOLO目标检测算法汇总/image_5XPTEswQNp.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_5XPTEswQNp.png)
 
 &emsp;&emsp;同时在第二步SimOTA部分，lead\_head 是计算初筛正样本与gt的IOU，并对IOU从大到小排序，取前十之和并取整，记为b。aux\_head 则取前二十之和并取整。其他步骤相同，aux\_head主要是为了增加召回率，防止漏检，lead\_head再基于aux\_head 做进一步筛选。
 
@@ -459,11 +459,11 @@ YOLOv4就是 **筛选** 了一些从YOLOv3发布至今，能够**提高检测精
 
 **YOLOv5：**
 
-![](/images/YOLO目标检测算法汇总/image_97fBqdMwff.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_97fBqdMwff.png)
 
 **YOLOX：**
 
-![](/images/YOLO目标检测算法汇总/image_JR25nDFTWY.png)
+![](/SongXJ01/images/YOLO目标检测算法汇总/image_JR25nDFTWY.png)
 
 由上面两张图的对比，及前面的内容可以看出，**Yolov5s和Yolox-s主要区别**在于：
 

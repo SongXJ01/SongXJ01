@@ -99,12 +99,12 @@ docker run --name phpmyadmin -p 8080:80 --link mysql:db -d phpmyadmin/phpmyadmin
 - `mysql`：刚才设置的MySQL的容器名称，如果刚才修改容器名称的话，一定记得要在这里修改。
 
 安装完成后，通过 `公网IP:8080` 即可访问如下页面，初始账号为 root，密码为刚才设置的`MYSQL_ROOT_PASSWORD=`后面的内容（`123456`）
-![PHPMyAdmin](/images/MySQL数据库部署与操作/PHPMyAdmin.png)
+![PHPMyAdmin](/SongXJ01/images/MySQL数据库部署与操作/PHPMyAdmin.png)
 
 #### 可能会遇到的问题
 ##### ※ 无法访问phpMyAdmin
 这种情况大多数是因为防火墙（或服务器的安全组规则）导致的。因为刚才自定义的 `8080` 端口在服务器中是默认不开放的，所以要配置服务器的安全组，将其开放。
-![腾讯云开放安全组](/images/MySQL数据库部署与操作/腾讯云开放安全组.png)
+![腾讯云开放安全组](/SongXJ01/images/MySQL数据库部署与操作/腾讯云开放安全组.png)
 
 
 
@@ -112,7 +112,7 @@ docker run --name phpmyadmin -p 8080:80 --link mysql:db -d phpmyadmin/phpmyadmin
 ### 3. 创建账户与数据库
 
  新建一个项目账户（dorm），如下图所示。
- ![新增项目用户](/images/MySQL数据库部署与操作/新增项目用户.png)
+ ![新增项目用户](/SongXJ01/images/MySQL数据库部署与操作/新增项目用户.png)
 
 
 **【注意】：在项目中尽量不要使用root用户管理项目，而是单独创建以该项目名称为命名的数据库账户，并建立同名的数据库进行管理。**
@@ -123,9 +123,9 @@ docker run --name phpmyadmin -p 8080:80 --link mysql:db -d phpmyadmin/phpmyadmin
 
 本人使用的是 M1 的 Mac 环境，因此对应安装了 M1 版本的 Docker 和 MySQL，具体步骤和①两步类似，所以这里就不再赘述。
 本地是数据库管理软件我使用的的是免费开源的数据库管理软件“Sequel Ace”，它具有数据库管理软件的基本功能，在AppStore中就可以搜索到，而且是完全免费的。
-![Sequel Ace](/images/MySQL数据库部署与操作/Sequel_Ace.png)
+![Sequel Ace](/SongXJ01/images/MySQL数据库部署与操作/Sequel_Ace.png)
 
-![设计数据库](/images/MySQL数据库部署与操作/设计数据库.png)
+![设计数据库](/SongXJ01/images/MySQL数据库部署与操作/设计数据库.png)
 
 
 ---
@@ -204,13 +204,13 @@ public class DormInfo {
 ### 4. 本地测试
 
 本地测试结果如下：
-![本地测试](/images/MySQL数据库部署与操作/本地测试.png)
+![本地测试](/SongXJ01/images/MySQL数据库部署与操作/本地测试.png)
 
 
 
 
 ### 5. 打包 jar 包
-![打jar包](/images/MySQL数据库部署与操作/打jar包.png)
+![打jar包](/SongXJ01/images/MySQL数据库部署与操作/打jar包.png)
 
 
 
@@ -239,16 +239,16 @@ systemctl restart docker.service
 ```
 
 开放宿主机安全组中的 2375 端口
-![开放宿主机安全组中的2375端口](/images/MySQL数据库部署与操作/开放宿主机安全组中的2375端口.png)
+![开放宿主机安全组中的2375端口](/SongXJ01/images/MySQL数据库部署与操作/开放宿主机安全组中的2375端口.png)
 
 
 
 在IDEA中安装Docker插件。
-![Docker插件](/images/MySQL数据库部署与操作/Docker插件.png)
+![Docker插件](/SongXJ01/images/MySQL数据库部署与操作/Docker插件.png)
 
 
 在Docker插件中连接宿主机服务器
-![配置Docker](/images/MySQL数据库部署与操作/配置Docker.png)
+![配置Docker](/SongXJ01/images/MySQL数据库部署与操作/配置Docker.png)
 
 
 
@@ -301,7 +301,7 @@ docker run -d -p 10110:8090 --name dorm_sys registry.cn-hangzhou.aliyuncs.com/so
 ```
 
 在线测试：
-![在线测试](/images/MySQL数据库部署与操作/在线测试.png)
+![在线测试](/SongXJ01/images/MySQL数据库部署与操作/在线测试.png)
 
 <br/><br/><br/><br/>
 

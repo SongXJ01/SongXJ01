@@ -31,11 +31,11 @@ AttributeError: 'NoneType' object has no attribute 'containers'
 
 如果已经安装了未运行成功的 Docker，错误如下图所示，那么请将这个 Docker 卸载。
 
-![错误页面](/images/BUG日志_宝塔CentOS安装Docker失败/bug_docker_1.png)
+![错误页面](/SongXJ01/images/BUG日志_宝塔CentOS安装Docker失败/bug_docker_1.png)
 
 ### 2. 在 `/etc/docker` 路径下创建 daemon 配置文件 
 
-![daemon 配置文件](/images/BUG日志_宝塔CentOS安装Docker失败/bug_docker_2.png)
+![daemon 配置文件](/SongXJ01/images/BUG日志_宝塔CentOS安装Docker失败/bug_docker_2.png)
 
 在 `daemon.json` 文件中提前配置好 Docker 的镜像源，即将下面这段代码粘贴到 `daemon.json` 文件中。 `daemon.conf` 文件此时保持空即可。
 ```bash
