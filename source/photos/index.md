@@ -4,7 +4,7 @@ title: 光影空间
 
 # 📷 [杭州 · 滨江樱花大道](240330_杭州滨江樱花大道) 
 ##### 🗓️ 2024.03.30
-![杭州 · 滨江樱花大道](/SongXJ01/images/photos/杭州滨江樱花大道/5.jpeg)
+![杭州 · 滨江樱花大道](/SongXJ01/images/photos/杭州滨江樱花大道/cover.png)
 
 <br/><br/>
 
@@ -14,7 +14,7 @@ title: 光影空间
 
 # 📷 [杭州 · 馒头山社区](240128_杭州馒头山) 
 ##### 🗓️ 2024.01.28
-![杭州 · 馒头山社区](/SongXJ01/images/photos/杭州馒头山/1.jpeg)
+![杭州 · 馒头山社区](/SongXJ01/images/photos/杭州馒头山/cover.png)
 
 <br/><br/>
 
@@ -26,7 +26,7 @@ title: 光影空间
 
 # 📷 [景德镇](231210_景德镇) 
 ##### 🗓️ 2023.12.10
-![景德镇](/SongXJ01/images/photos/景德镇/1.jpeg)
+![景德镇](/SongXJ01/images/photos/景德镇/cover.png)
 
 <br/><br/>
 
@@ -37,7 +37,7 @@ title: 光影空间
 
 # 📷 [余姚 · 四明湖](231202_余姚) 
 ##### 🗓️ 2023.12.02
-![余姚 · 四明湖](/SongXJ01/images/photos/余姚四明湖/1.jpeg)
+![余姚 · 四明湖](/SongXJ01/images/photos/余姚四明湖/cover.png)
 
 <br/><br/>
 
@@ -48,7 +48,7 @@ title: 光影空间
 
 # 📷 [杭州 · 三墩老街](231022_杭州三墩) 
 ##### 🗓️ 2023.10.22
-![杭州 · 三墩老街](/SongXJ01/images/photos/杭州三墩/1.jpeg)
+![杭州 · 三墩老街](/SongXJ01/images/photos/杭州三墩/cover.png)
 
 <br/><br/>
 
@@ -59,7 +59,7 @@ title: 光影空间
 
 # 📷 [杭州 · 天目里](230827_杭州天目里) 
 ##### 🗓️ 2023.08.27
-![杭州 · 天目里](/SongXJ01/images/photos/杭州天目里/1.jpeg)
+![杭州 · 天目里](/SongXJ01/images/photos/杭州天目里/cover.png)
 
 <br/><br/>
 
@@ -70,7 +70,7 @@ title: 光影空间
 
 # 📷 [杭州 · 城市阳台](230820_杭州城市阳台) 
 ##### 🗓️ 2023.08.20
-![杭州 · 城市阳台](/SongXJ01/images/photos/杭州城市阳台/1.jpeg)
+![杭州 · 城市阳台](/SongXJ01/images/photos/杭州城市阳台/cover.png)
 
 <br/><br/>
 
@@ -80,7 +80,7 @@ title: 光影空间
 
 # 📷 [杭州 · 拱宸桥](230716_杭州拱宸桥) 
 ##### 🗓️ 2023.07.16
-![杭州 · 拱宸桥](/SongXJ01/images/photos/杭州拱宸桥/1.jpeg)
+![杭州 · 拱宸桥](/SongXJ01/images/photos/杭州拱宸桥/cover.png)
 
 <br/><br/>
 
@@ -90,7 +90,7 @@ title: 光影空间
 
 # 📷 [杭州 · 良渚](230715_杭州良渚) 
 ##### 🗓️ 2023.07.15
-![杭州 · 良渚](/SongXJ01/images/photos/杭州良渚/1.jpeg)
+![杭州 · 良渚](/SongXJ01/images/photos/杭州良渚/cover.png)
 
 <br/><br/>
 
@@ -99,7 +99,7 @@ title: 光影空间
 <br/><br/>
 # 📷 [郑州 · 只有河南-戏剧幻城](230126_只有河南) 
 ##### 🗓️ 2023.01.26
-![只有河南·戏剧幻城](/SongXJ01/images/photos/只有河南/zhiyouhenan_1.webp)
+![只有河南·戏剧幻城](/SongXJ01/images/photos/只有河南/cover.png)
 
 <br/><br/>
 
@@ -110,7 +110,7 @@ title: 光影空间
 
 # 📷 [青岛](230106_青岛) 
 ##### 🗓️ 2023.01.06
-![山东·青岛](/SongXJ01/images/photos/青岛/qingdao_1.webp)
+![山东·青岛](/SongXJ01/images/photos/青岛/cover.png)
 
 <br/><br/>
 
@@ -121,7 +121,7 @@ title: 光影空间
 
 # 📷 [厦门](220702_厦门) 
 ##### 🗓️ 2022.07.02
-![福建-厦门](/SongXJ01/images/photos/厦门/xiamen_12.webp)
+![福建-厦门](/SongXJ01/images/photos/厦门/cover.png)
 
 <br/><br/>
 
@@ -132,7 +132,7 @@ title: 光影空间
 
 # 📷 [重庆 · 九曲河](210529_九曲河) 
 ##### 🗓️ 2021.05.29
-![重庆-九曲河](/SongXJ01/images/photos/九曲河/jiuquhe_7.webp)
+![重庆-九曲河](/SongXJ01/images/photos/九曲河/cover.png)
 
 <br/><br/>
 
@@ -143,7 +143,7 @@ title: 光影空间
 
 # 📷 [商丘 · 古城](210211_商丘古城) 
 ##### 🗓️ 2021.02.11
-![河南-商丘古城](/SongXJ01/images/photos/商丘古城/shangqiu_5.webp)
+![河南-商丘古城](/SongXJ01/images/photos/商丘古城/cover.png)
 
 <br/><br/>
 
@@ -154,7 +154,7 @@ title: 光影空间
 
 # 📷 [重庆 · 嘉陵江](201115_嘉陵江) 
 ##### 🗓️ 2020.11.15
-![重庆-嘉陵江](/SongXJ01/images/photos/嘉陵江/jialingjiang_4.webp)
+![重庆-嘉陵江](/SongXJ01/images/photos/嘉陵江/cover.png)
 
 <br/><br/>
 
@@ -165,7 +165,7 @@ title: 光影空间
 
 # 📷 [重庆 · 弹子石](201006_弹子石龙门浩) 
 ##### 🗓️ 2020.10.06
-![重庆-弹子石](/SongXJ01/images/photos/弹子石龙门浩/danzishi_12.webp)
+![重庆-弹子石](/SongXJ01/images/photos/弹子石龙门浩/cover.png)
 
 <br/><br/>
 
@@ -174,7 +174,7 @@ title: 光影空间
 <br/><br/>
 
 # 📷 [随记](随记) 
-![](/SongXJ01/images/photos/sxj/1.jpeg)
+![](/SongXJ01/images/photos/sxj/cover.png)
 
 <br/><br/>
 

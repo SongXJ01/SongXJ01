@@ -13,8 +13,8 @@ no_copyright: true
   <i class="fas fa-envelope"></i> &ensp;  **Email**: songxj01@126.com 
   <i class="fab fa-github"></i>  &ensp;  **GitHub**: [https://github.com/SongXJ01](https://github.com/SongXJ01)
   <i class="fab fa-git-alt"></i>  &ensp; **Gitee**: [https://gitee.com/songxj01](https://gitee.com/songxj01)
+  <i class="fas fa-book"></i>  &ensp; **小红书**: [SongXJ的日常分享](https://www.xiaohongshu.com/user/profile/5f0c831f000000000101f303?xhsshare=CopyLink&appuid=5f0c831f000000000101f303&apptime=1715354621)
   <i class="fab fa-blogger-b"></i>  &ensp; **CSDN**: [https://blog.csdn.net/SongXJ_01](https://blog.csdn.net/SongXJ_01)
-  <i class="fas fa-book"></i>  &ensp; **简书**：[https://www.jianshu.com/u/24bdf762e212](https://www.jianshu.com/u/24bdf762e212)
   <i class="fab fa-gratipay"></i>  &ensp; **兴趣爱好**：📷 🏸 🎶 🎸 🏐 🎿
 
 
