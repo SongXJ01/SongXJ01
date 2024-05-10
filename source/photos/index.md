@@ -174,7 +174,7 @@ title: 光影空间
 <br/><br/>
 
 # 📷 [随记](随记) 
-![](/SongXJ01/images/photos/sxj/cover.png)
+![](/SongXJ01/images/photos/随心/cover.png)
 
 <br/><br/>
 
