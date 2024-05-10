@@ -13,5 +13,5 @@ Disallow: /fonts/
 Disallow: /vendors/
 Disallow: /fancybox/
 
-Sitemap: http://songxj01.gitee.io/sitemap.xml
-Sitemap: http://songxj01.gitee.io/baidusitemap.xml
+Sitemap: https://songxj01.github.io/SongXJ01/sitemap.xml
+Sitemap: https://songxj01.github.io/SongXJ01/baidusitemap.xml

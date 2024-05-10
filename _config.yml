@@ -14,7 +14,8 @@ timezone: Asia/Shanghai
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: https://songxj01.gitee.io
+# url: https://songxj01.gitee.io
+url: https://songxj01.github.io/SongXJ01/
 permalink: :year/:title/
 permalink_defaults:
 pretty_urls:
@@ -109,7 +110,8 @@ theme: ayer
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: https://gitee.com/songxj01/songxj01
+  # repo: https://gitee.com/songxj01/songxj01
+  repo: https://github.com/SongXJ01/SongXJ01.git
   branch: master
 
 # 支持本地搜索 hexo-generator-searchdb
@@ -143,7 +145,7 @@ darkmode:
 # lazyload:
 #   enable: false
 #   onlypost: true
-#   loadingImg: /images/loading.gif
+#   loadingImg: /SongXJ01/images/loading.gif
 #   preloadRatio: 5
 #   isSPA: true
 

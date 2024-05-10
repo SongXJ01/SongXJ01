@@ -173,7 +173,7 @@
 
   // ShowThemeInConsole
   const ayerInfo = "欢迎来到SongXJ's Blog";
-  const ayerURL = "https://songxj01.gitee.io/";
+  const ayerURL = "https://songxj01.github.io/SongXJ01";
   const ayerNameStr =
     "\n\n     _ __   _______ _____    \n    / \\ \\ \\ / / ____|  _  \\  \n   / _ \\ \\ V /|  _| | |_) |  \n  / ___ \\ | | | |___|  _ <   \n /_/   \\_\\ _| |_____|_| \\__\\ \n";
   const ayerInfoStyle =

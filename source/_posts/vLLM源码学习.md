@@ -21,31 +21,31 @@ categories:
 - **类似操作系统中的虚拟内存和分页**
 
 PagedAttention是vLLM的一个关键技术特性，它通过使用虚拟内存和分页技术来解决大型语言模型服务中的内存瓶颈。传统的注意力机制需要在GPU内存中保存所有输入令牌的键值对，这在自回归解码时生成新令牌。PagedAttention通过将键值对缓存分割成小块存储，提高了内存使用效率，几乎达到了最优化，只浪费少于4%的内存。
-![vLLM中的Block Table](/images/vLLM源码学习/vLLM中的BlockTable.png)
+![vLLM中的Block Table](/SongXJ01/images/vLLM源码学习/vLLM中的BlockTable.png)
 
-![KV cache](/images/vLLM源码学习/KV_cache.png)
+![KV cache](/SongXJ01/images/vLLM源码学习/KV_cache.png)
 
 
 ### Parallel sampling
 由于两个输出共享相同的提示，vllm 只在提示阶段为提示状态的一个副本保留空间；两个序列的提示的逻辑块被映射到相同的物理块。总结而言，vLLM 能够共享用于跨多个输出样本存储提示的 KV 缓存的大部分空间。通过跨多个样本共享物理块，特别是对于长输入提示，可以大大减少内存使用。
-![并行采样](/images/vLLM源码学习/并行采样.png)
+![并行采样](/SongXJ01/images/vLLM源码学习/并行采样.png)
 
 
 ### Beam search 
 
 - **通过使用树状搜索，避免完全局遍历**。
-![树状搜索](/images/vLLM源码学习/树状搜索.png)
+![树状搜索](/SongXJ01/images/vLLM源码学习/树状搜索.png)
 
 
 ### Shared prefix
 
 - **共享前缀**：对于许多用户提示语具有相同前缀的情况，在 vLLM 中可以通过提供一组预定义共享前缀保留一组物理块来方便地实现。
-![共享前缀](/images/vLLM源码学习/共享前缀.png)
+![共享前缀](/SongXJ01/images/vLLM源码学习/共享前缀.png)
 
 
 ### Continuous batching
 迭代调度处理，当部分序列处理完成，插入新序列。
-![Continuous batching](/images/vLLM源码学习/Continuous_batching.png)
+![Continuous batching](/SongXJ01/images/vLLM源码学习/Continuous_batching.png)
 
 
 
@@ -76,12 +76,12 @@ PagedAttention是vLLM的一个关键技术特性，它通过使用虚拟内存�
 ### 加载模型
 
 - llm 类加载模型时首先根据参数生成 llm_engine 类
-![生成 llm_engine 类](/images/vLLM源码学习/生成llm_engine类.png)
+![生成 llm_engine 类](/SongXJ01/images/vLLM源码学习/生成llm_engine类.png)
 
 
 - llm_engine 类在创建时会加载 `tokenizer`，创建 `worker`（负责加载模型，执行推理）和 `scheduler`（负责并行计算），同时预分配内存。
 
-![llm_engine 类中的核心步骤](/images/vLLM源码学习/llm_engine类中的核心步骤.png)
+![llm_engine 类中的核心步骤](/SongXJ01/images/vLLM源码学习/llm_engine类中的核心步骤.png)
 
 
 
@@ -89,7 +89,7 @@ PagedAttention是vLLM的一个关键技术特性，它通过使用虚拟内存�
 
 - 推理时，llm 类的 `generate()` 会调用 `_run_engine()` 函数，同时设置 sampling 策略。
 
-![run_engine()](/images/vLLM源码学习/run_engine.png)
+![run_engine()](/SongXJ01/images/vLLM源码学习/run_engine.png)
 
 
 - llm_engine 类中的 `step()`控制单步迭代
@@ -97,13 +97,13 @@ PagedAttention是vLLM的一个关键技术特性，它通过使用虚拟内存�
 2. 调用 worker 执行模型
 3. 根据采样参数更新模型输出
 
-![step()](/images/vLLM源码学习/step.png)
+![step()](/SongXJ01/images/vLLM源码学习/step.png)
 
-![step()的代码](/images/vLLM源码学习/step的代码.png)
+![step()的代码](/SongXJ01/images/vLLM源码学习/step的代码.png)
 
 `step()` 中的 `_process_model_outputs()` 进行后处理
 
-![_process_model_outputs](/images/vLLM源码学习/process_model_outputs.png)
+![_process_model_outputs](/SongXJ01/images/vLLM源码学习/process_model_outputs.png)
 
 
 ### 架构设计
@@ -129,11 +129,11 @@ LLM 类将此类封装用于离线批量推理，而 AsyncLLMEngine 类封装此
 在GPU上执行模型（或其中部分）的类。
 每个 Worker 与单个 GPU 相关联。Worker 负责维护 **KV cache ** 并在GPU上执行模型。在分布式推理的情况下，每个 Worker 被分配一个模型的分区。
 
-![推理的基本过程](/images/vLLM源码学习/推理的基本过程.png)
+![推理的基本过程](/SongXJ01/images/vLLM源码学习/推理的基本过程.png)
 
-![](/images/vLLM源码学习/架构_1.png)
+![](/SongXJ01/images/vLLM源码学习/架构_1.png)
 
-![](/images/vLLM源码学习/架构_2.png)
+![](/SongXJ01/images/vLLM源码学习/架构_2.png)
 
 
 <br/><br/><br/><br/>

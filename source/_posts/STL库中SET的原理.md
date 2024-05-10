@@ -65,7 +65,7 @@ int main() {
 }
 ```
  
-![运行结果](/images/STL库中SET的原理/运行结果.png)
+![运行结果](/SongXJ01/images/STL库中SET的原理/运行结果.png)
 
 &emsp;&emsp;明明不在 `set` 中的 **ID-2000** 的 `Person` 也可以被找到。造成这个结果的原因是我们所提供的 `operator<() `，当`Person` `p1`、`p2`，在 `p1<p2` 与 `p2<p2` 都不成立时，`find` 就会判断 `p1` 和 `p2` 是同一个 `Person` ，因此会造成这样的错误结果。
 

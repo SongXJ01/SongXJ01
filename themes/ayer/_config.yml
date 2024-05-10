@@ -20,15 +20,15 @@ subtitle:
   showCursor: true # 是否显示光标
 
 # 网站图标和侧边栏logo
-favicon: /images/songxj.ico
-logo: /images/songxj.svg
+favicon: /SongXJ01/images/songxj.ico
+logo: /SongXJ01/images/songxj.svg
 
 # 封面配置
 # enable-是否启用封面；path-封面背景图；logo-封面logo
 cover:
   enable: true
-  path: /images/cover4.jpg # /source/images目录下附送多张美图，可更换
-  logo: /images/songxj.svg # 如果不要直接设置成false
+  path: /SongXJ01/images/cover4.jpg # /source/images目录下附送多张美图，可更换
+  logo: /SongXJ01/images/songxj.svg # 如果不要直接设置成false
 
 # 页面顶部进度条
 progressBar: true
@@ -80,8 +80,8 @@ word_count:
 reward_type: 2
 # 打赏wording
 reward_wording: "请我喝杯咖啡吧~"
-alipay: /images/money_alipay.jpg
-weixin: /images/money_wechat.png
+alipay: /SongXJ01/images/money_alipay.jpg
+weixin: /SongXJ01/images/money_wechat.png
 
 # 版权声明
 # 版权声明type设定：0-关闭版权声明； 1-文章对应的md文件里有copyright: true属性，才有版权声明； 2-所有文章均有版权声明
@@ -101,10 +101,10 @@ darkmode: true
 # 动态背景效果: 0-关闭，1-动态线条(跟随鼠标)
 canvas_bg: 0
 
-# 自定义鼠标样式，直接替换/images/mouse.cur文件
+# 自定义鼠标样式，直接替换/SongXJ01/images/mouse.cur文件
 mouse:
   enable: false
-  path: /images/mouse.cur
+  path: /SongXJ01/images/mouse.cur
 
 # 鼠标点击效果：0-关闭，1-爱心，2-爆炸烟花，3-粒子烟花
 click_effect: 0
@@ -118,7 +118,7 @@ layout:
 github:
   # (关闭请设置为false)
   enable: false
-  url: https://gitee.com/songxj01/songxj01
+  url: https://songxj01.github.io/SongXJ01
 
 # 网易云音乐插件
 music:
@@ -169,7 +169,7 @@ icp:
 # 公安备案信息尾部显示
 gongan:
   enable: false
-  img: /images/beian.png #公安备案图片
+  img: /SongXJ01/images/beian.png #公安备案图片
   url: "http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=01234567890123" #公安备案链接
   text: "浙公网安备01234567890123号" #公安备案信息
 
@@ -177,22 +177,22 @@ gongan:
 # friends_link:
 #   GitHub:
 #     url: https://github.com/SongXJ01
-#     img: /images/github.png
+#     img: /SongXJ01/images/github.png
 #   码云:
 #     url: https://gitee.com/songxj01
-#     img: /images/gitee.png
+#     img: /SongXJ01/images/gitee.png
 #   CSDN:
 #     url: https://blog.csdn.net/SongXJ_01
-#     img: /images/csdn.png
+#     img: /SongXJ01/images/csdn.png
 #   LeFlacon's Blog:
 #     url: https://leflacon.top/
-#     img: /images/LeFlacon.png
+#     img: /SongXJ01/images/LeFlacon.png
 #   Michael_Wang's Blog:
 #     url: https://djwangweijie.github.io/
-#     img: /images/Michael_Wang.png
+#     img: /SongXJ01/images/Michael_Wang.png
 #   Hexo图表插件:
 #     url: https://github.com/Shen-Yu/hexo-tag-chart
-#     img: /images/hexo.png
+#     img: /SongXJ01/images/hexo.png
 
 # 评论：1、Valine(推荐)；2、Gitalk；3、Twikoo; 4.MiniValine
 
