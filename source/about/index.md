@@ -20,7 +20,7 @@ no_copyright: true
 
 <br/><br/><br/><br/>
 
-![](/images/photos/sxj/2.png)
+![](/SongXJ01/images/photos/sxj/2.png)
 
 <br/><br/><br/><br/>
 
