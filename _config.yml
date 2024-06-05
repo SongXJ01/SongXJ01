@@ -116,7 +116,7 @@ deploy:
 
 # 支持本地搜索 hexo-generator-searchdb
 search:
-  path: search.xml
+  path: /search.xml
   field: post
   format: html  
   

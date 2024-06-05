@@ -33,8 +33,8 @@
 
   // Not recommended in mobile, /search.xml is actually large.
   if ($(".local-search").length) {
-    $.getScript("/js/search.js", function () {
-      searchFunc("/search.xml", "local-search-input", "local-search-result");
+    $.getScript("/SongXJ01/js/search.js", function () {
+      searchFunc("/SongXJ01/search.xml", "local-search-input", "local-search-result");
     });
   }
 
