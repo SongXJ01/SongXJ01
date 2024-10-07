@@ -5,7 +5,7 @@ hexo clean && hexo generate && hexo s
 
 一键部署：
 ```shell
-hexo clean && hexo generate --deploy
+hexo clean && hexo generate && hexo d
 ```
 
 新建文章：
