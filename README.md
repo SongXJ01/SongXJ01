@@ -7,3 +7,8 @@ hexo clean && hexo generate && hexo s
 ```shell
 hexo clean && hexo generate --deploy
 ```
+
+新建文章：
+```shell
+hexo new {$name}
+```
